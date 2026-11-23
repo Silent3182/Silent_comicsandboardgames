@@ -80,15 +80,15 @@
     const s = await (await fetch(`${W}&action=wbsearchentities&type=item&limit=25&language=pl&uselang=pl&search=${encodeURIComponent(q)}`)).json();
     const ids = (s.search || []).map(x => x.id);
     if (!ids.length) return [];
-    const e = await (await fetch(`${W}&action=wbgetentities&props=claims|labels&languages=pl|en&ids=${ids.join('|')}`)).json();
+    const e = await (await fetch(`${W}&action=wbgetentities&props=claims|labels&languages=pl|en|mul|de|fr&ids=${ids.join('|')}`)).json();
     const val = (x, p) => x.claims[p] && x.claims[p][0].mainsnak.datavalue ? x.claims[p][0].mainsnak.datavalue.value : null;
     return ids.map(id => e.entities[id]).filter(x => x && x.claims && x.claims.P2339).map(x => {
       const t = val(x, 'P577'), img = val(x, 'P18'), mn = val(x, 'P1872'), mx = val(x, 'P1873');
-      return { bggId: Number(val(x, 'P2339')), title: (x.labels.pl || x.labels.en || {}).value || '?',
+      return { bggId: Number(val(x, 'P2339')), title: (x.labels.pl || x.labels.en || x.labels.mul || x.labels.de || x.labels.fr || {}).value || '',
         year: t && t.time ? Number(t.time.slice(1, 5)) : null,
         image: img ? 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(img) + '?width=300' : null,
         minPlayers: mn ? Number(mn.amount) : null, maxPlayers: mx ? Number(mx.amount) : null };
-    }).filter(g => g.bggId);
+    }).filter(g => g.bggId && g.title);
   }
 
   /* ---------- formularz rozgrywki ---------- */
