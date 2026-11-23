@@ -1,12 +1,12 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js',
   'moduly/planszowki/dane-bgg.js', 'moduly/planszowki/planszowki.js'
   , 'moduly/sprzedaz/sprzedaz.js', 'moduly/sprzedaz/sprzedaz-ui.js'
   ,'moduly/komiksy/komiksy.js', 'moduly/komiksy/dane-komiksy.js', 'moduly/komiksy/dane-mro.js'
-  ,'moduly/wieczor/dane-gracze.js', 'moduly/wieczor/wieczor.js', 'moduly/postep/postep.js', 'moduly/kopia/kopia.js'
+  ,'moduly/wieczor/dane-gracze.js', 'moduly/wieczor/wieczor.js', 'moduly/wieczor/kto-zaczyna.js', 'moduly/postep/postep.js', 'moduly/kopia/kopia.js'
   // moduły dopisują tu swoje pliki
 ];
 self.addEventListener('install', e => {
