@@ -12,15 +12,16 @@
  */
 (function () {
   const NAME = 'moje-kolekcje';
-  const VERSION = 1;
-  // Wszystkie kolekcje w jednej bazie. Nowy moduł = nowa nazwa tutaj (i podbicie VERSION).
-  const STORES = ['games', 'plays', 'players', 'comics', 'readingOrder', 'shoppingList', 'listings', 'settings'];
+  // Wszystkie kolekcje w jednej bazie. Nowy moduł = nowa nazwa tutaj.
+  // Wersji bazy nie trzeba już podbijać ręcznie: brakujące kolekcje dokładamy same (open() niżej).
+  const STORES = ['games', 'plays', 'players', 'comics', 'readingOrder', 'shoppingList', 'listings', 'settings', 'loans'];
 
   let dbp = null;
   function open() {
     if (dbp) return dbp;
-    dbp = new Promise((res, rej) => {
-      const r = indexedDB.open(NAME, VERSION);
+    // Otwieramy bazę w obecnej wersji; jeśli brakuje którejś kolekcji, podnosimy wersję o 1 i ją tworzymy.
+    const openV = v => new Promise((res, rej) => {
+      const r = v ? indexedDB.open(NAME, v) : indexedDB.open(NAME);
       r.onupgradeneeded = () => {
         const db = r.result;
         STORES.forEach(s => { if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' }); });
@@ -28,6 +29,10 @@
       r.onsuccess = () => res(r.result);
       r.onerror = () => rej(r.error);
     });
+    dbp = openV().then(db => {
+      if (STORES.every(s => db.objectStoreNames.contains(s))) return db;
+      const v = db.version + 1; db.close(); return openV(v);
+    }).then(db => { db.onversionchange = () => { db.close(); dbp = null; }; return db; });
     return dbp;
   }
   function tx(store, mode, fn) {

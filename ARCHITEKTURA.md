@@ -32,7 +32,7 @@ App.ui: esc, h, toast, form(title, fields) -> Promise<obj|null>, fmtDate, today
 await DB.all(store) / DB.get(store,id) / DB.put(store,obj) / DB.putMany(store,arr) / DB.remove(store,id)
 DB.on(store|'*', cb);  DB.setting(key[, value]);  DB.uid()
 ```
-Nowa kolekcja w bazie = dopisz nazwę do `STORES` w `core/db.js` i podbij `VERSION`.
+Nowa kolekcja w bazie = dopisz nazwę do `STORES` w `core/db.js` (wersję bazy `db.js` podnosi sam, gdy brakuje kolekcji – nie trzeba nic podbijać).
 
 ## Kolekcje (store'y) i pola
 Każdy rekord ma: `id` (string), `createdAt`, `updatedAt` (ISO), `deleted` (bool).
@@ -54,6 +54,13 @@ Każdy rekord ma: `id` (string), `createdAt`, `updatedAt` (ISO), `deleted` (bool
 
 **shoppingList** – lista zakupów
 `title, itemType ('comic'|'game'|'other'), publisher, releaseDate, price, url, bought (bool), notes`
+
+**loans** – wypożyczenia (moduł `moduly/wypozyczenia`)
+`itemType ('game'|'comic'|'other'), itemId, title, person, direction ('out' = pożyczyłem komuś | 'in' = od kogoś), lentAt, dueAt, returnedAt, notes`
+
+Pola dodatkowe (moduły `sklep`, `wartosc`): w **games**, **comics** i **shoppingList** `barcode` (EAN/ISBN, dla kodów czasopism 977… z numerem: `977…+05`); w **games** i **comics** `pricePaid`, `estValue` (moja wycena), `acquiredAt`. Ustawienie `wartoscSerii` = `{seria: {paid, value}}` – cena za tom dla serii komiksów.
+
+Usługi: `App.call('sklep.skanuj')` (skaner → „czy mam?”), `App.call('wypozyczenia.pozycz', {itemType,itemId})`, `App.call('wypozyczenia.przycisk', button, itemType, itemId)`, `App.call('komiksy.seed')` (wczytuje startowe komiksy).
 
 **listings** – ogłoszenia sprzedaży (wątek sprzedaży)
 `itemType ('game'|'comic'), itemId, platform ('olx'|'facebook'|'vinted'|'allegro'), condition, price, shipping, title, text, status ('draft'|'active'|'sold'), soldAt, soldPrice`
