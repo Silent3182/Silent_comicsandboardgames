@@ -1,19 +1,52 @@
 /* Zapowiedzi Egmontu (część modułu komiksów).
- * Plik zapowiedzi.json w repozytorium aplikacji odświeża co tydzień GitHub Actions
- * (.github/workflows/zapowiedzi.yml, skrypt .github/scripts/zapowiedzi.py, źródło egmont.pl/zapowiedzi).
- * Aplikacja sprawdza go przy starcie (najwyżej raz na dobę), pamięta ostatnią wersję offline
- * i proponuje dodanie do listy zakupów pozycji z serii, które użytkownik zbiera.
+ * Źródło: egmont.pl/zapowiedzi.
+ * - Android (APK): aplikacja sama czyta stronę Egmontu przez natywne zapytanie (CapacitorHttp – bez blokady CORS),
+ *   najwyżej raz w tygodniu, i zapisuje wynik w ustawieniach (synchronizują się na komputer).
+ * - Przeglądarka/Windows: strona Egmontu jest niedostępna z przeglądarki (CORS), więc bierzemy nowszą z dwóch wersji:
+ *   zsynchronizowaną z telefonu albo plik zapowiedzi.json z repozytorium aplikacji.
+ * Pozycje z serii, które użytkownik zbiera, są proponowane do listy zakupów.
  */
 (function () {
   const PAGES = 'https://silent3182.github.io/Silent_comicsandboardgames/';
   const URL_ZAP = /github\.io$/.test(location.hostname) ? 'zapowiedzi.json' : PAGES + 'zapowiedzi.json';
-  const DZIEN = 24 * 3600 * 1000;
+  const EGMONT = 'https://egmont.pl';
+  const DZIEN = 24 * 3600 * 1000, TYDZIEN = 7 * DZIEN;
   // serie-kolekcje z kiosku/prenumeraty – nie wydaje ich Egmont, nie szukamy po nich
   const NIE_EGMONT = /^(WKKM|Superbohaterowie Marvela|Marvel Origins|Bohaterowie i Złoczyńcy DC|Wielkie Pojedynki|Marvel Must-Have.*|Marvel Limited)$/i;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const nz = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l').replace(/[^a-z0-9]+/g, ' ').trim();
+  const nz = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l').replace(/[^a-z0-9]+/g, ' ').trim();
   // „Amazing Spider-Man. Pierwsze łowy. Tom 8” -> „amazing spider man”
   const glowa = t => nz(String(t || '').split(/\.\s|:\s|\s[–-]\s/)[0].replace(/\s*(tom|część|cz\.)\s*\d+.*$/i, ''));
+
+  /* ---- czytanie egmont.pl (tylko w APK) ---- */
+  const http = () => { const C = window.Capacitor; return C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.CapacitorHttp; };
+  async function get(url) { const r = await http().get({ url, responseType: 'text' }); if (r.status >= 400) throw new Error(r.status); return String(r.data || ''); }
+  const un = s => { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; };
+  const txt = s => un(String(s || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  const MIES = { sty: 1, lut: 2, mar: 3, kwi: 4, maj: 5, cze: 6, lip: 7, sie: 8, wrz: 9, 'paź': 10, paz: 10, lis: 11, gru: 12 };
+  const dataPl = s => { const m = String(s || '').match(/(\d{1,2})\s+([a-ząćęłńóśźż]{3})\S*\s+(\d{4})/i); const mm = m && MIES[m[2].toLowerCase()]; return mm ? `${m[3]}-${String(mm).padStart(2, '0')}-${m[1].padStart(2, '0')}` : ''; };
+  const detal = (h, n) => { const m = h.match(new RegExp(n.replace('/', '\\/') + '\\s*</dt>\\s*<dd[^>]*>([\\s\\S]*?)</dd>')); return m ? txt(m[1]) : ''; };
+  async function zEgmontu(stare) {
+    const znane = new Map((stare || []).map(p => [p.id, p])), poz = [], seen = new Set(), dzis = App.ui.today();
+    for (let p = 1; p < 15; p++) {
+      const h = await get(EGMONT + '/zapowiedzi' + (p > 1 ? '?p=' + p : '')); let n = 0;
+      for (const m of h.matchAll(/class="product-item-link"\s+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)) {
+        const s = m[1].match(/-(\d+)\.html/); if (!s || seen.has(s[1])) continue;
+        seen.add(s[1]); n++; poz.push({ id: s[1], title: txt(m[2]), url: m[1] });
+      }
+      if (!n) break;
+    }
+    for (const x of poz) {
+      const z = znane.get(x.id);
+      if (z && z.release) { Object.assign(x, { series: z.series, release: z.release, price: z.price, img: z.img, dodano: z.dodano }); continue; }
+      try {
+        const h = await get(x.url); const img = h.match(/property="og:image"\s+content="([^"]+)"/); const c = h.match(/product:price:amount"\s+content="([\d.]+)"/);
+        Object.assign(x, { series: detal(h, 'Seria/Cykl'), release: dataPl(detal(h, 'Data wydania')), price: c ? +c[1] : null, img: img ? img[1] : '', dodano: dzis });
+      } catch (e) { x.dodano = dzis; }
+      await new Promise(r => setTimeout(r, 400));
+    }
+    return poz.sort((a, b) => ((a.release || '9999') + a.title).localeCompare((b.release || '9999') + b.title));
+  }
 
   let pamiec = null;
   async function wczytaj(wymus) {
@@ -21,13 +54,24 @@
     try { st = await DB.local('zapowiedzi'); } catch (e) { }
     const swieze = st && st.sprawdzono && Date.now() - new Date(st.sprawdzono).getTime() < DZIEN;
     if (!wymus && swieze) return (pamiec = st);
+    const kandydaci = [];
+    const syn = await DB.setting('zapowiedziDane');           // z telefonu (synchronizowane)
+    if (syn && syn.pozycje) kandydaci.push(syn);
+    if (http() && (wymus || !syn || Date.now() - new Date(syn.pobrano || 0).getTime() > TYDZIEN)) {
+      try {
+        const pozycje = await zEgmontu(syn && syn.pozycje);
+        if (pozycje.length) { const d = { data: App.ui.today(), pobrano: new Date().toISOString(), pozycje }; await DB.setting('zapowiedziDane', d); kandydaci.push(d); }
+      } catch (e) { if (wymus) App.ui.toast('Nie udało się odczytać egmont.pl'); }
+    }
     try {
       const r = await fetch(URL_ZAP + '?t=' + Date.now(), { cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status);
-      const j = await r.json();
-      st = { sprawdzono: new Date().toISOString(), data: j.data, pozycje: j.pozycje || [] };
+      if (r.ok) kandydaci.push(await r.json());
+    } catch (e) { }
+    if (kandydaci.length) {
+      const best = kandydaci.sort((a, b) => String(b.data || '').localeCompare(String(a.data || '')))[0];
+      st = { sprawdzono: new Date().toISOString(), data: best.data, pozycje: best.pozycje || [] };
       try { await DB.local('zapowiedzi', st); } catch (e) { }
-    } catch (e) { if (wymus) App.ui.toast('Nie udało się pobrać zapowiedzi (brak internetu?)'); }
+    } else if (wymus) App.ui.toast('Nie udało się pobrać zapowiedzi (brak internetu?)');
     return (pamiec = st || { pozycje: [] });
   }
 
@@ -89,7 +133,7 @@
       <button class="ghost" data-zu="${esc(p.id)}" title="${p.ukryta ? 'Przywróć' : 'Ukryj'}">${p.ukryta ? '↩' : '✕'}</button></div>`;
     if (otwarte === null) otwarte = nowe > 0;
     el.innerHTML = `<details ${otwarte ? 'open' : ''}><summary><b>🆕 Zapowiedzi Egmontu</b> ${nowe ? `<span class="kx-b must">${nowe} nowe z Twoich serii</span>` : ''}</summary>
-      <p class="kx-muted">${st.data ? 'Stan z ' + App.ui.fmtDate(st.data) + ' (odświeżane co tydzień)' : 'Brak danych – połącz się z internetem'}.
+      <p class="kx-muted">${st.data ? 'Stan z ' + App.ui.fmtDate(st.data) + (window.Capacitor ? ' (telefon sprawdza egmont.pl co tydzień)' : ' (aktualizuje telefon raz w tygodniu)') : 'Brak danych – połącz się z internetem'}.
         ⭐ = pasuje do serii, które zbierasz. ➕ dodaje do listy zakupów z datą premiery i ceną.</p>
       <div class="kx-chips">
         <button class="kx-chip ${filtr === 'moje' ? 'on' : ''}" data-zf="moje">Z moich serii (${moje.length})</button>
