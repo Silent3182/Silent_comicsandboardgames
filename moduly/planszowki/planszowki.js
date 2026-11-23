@@ -405,4 +405,6 @@
   });
 
   window.Planszowki = { importBgg, editPlay, editGame };
+  // Import przy starcie, niezależnie od otwartej zakładki (identyfikatory są stałe, więc synchronizacja ich nie zdubluje).
+  window.addEventListener('load', () => importBgg(false).catch(() => {}));
 })();
