@@ -145,10 +145,12 @@
           const my = ++seq;
           tmr = setTimeout(async () => {
             try {
-              const have = new Set(d.games.map(g => g.bggId).filter(Boolean));
-              const r = (await searchOnline(gi.value.trim())).filter(g => !have.has(g.bggId));
+              const byBgg = new Map(d.games.filter(g => g.bggId).map(g => [g.bggId, g]));
+              const all = await searchOnline(gi.value.trim());
               if (my !== seq) return;
-              online = r.slice(0, 10);
+              // polska nazwa gry, którą mam pod angielskim tytułem (np. „Wsiąść do pociągu” → Ticket to Ride)
+              all.filter(g => byBgg.has(g.bggId)).forEach(g => { const mine = byBgg.get(g.bggId); if (!local.includes(mine)) local.push(mine); });
+              online = all.filter(g => !byBgg.has(g.bggId)).slice(0, 10);
               draw(online.length ? 'Spoza kolekcji (z BGG):' : (local.length ? '' : 'Nic nie znaleziono. Możesz zapisać grę pod wpisaną nazwą.'));
             } catch (err) { if (my === seq) draw('Nie udało się wyszukać w internecie.'); }
           }, 450);
