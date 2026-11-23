@@ -1,7 +1,7 @@
 /* Moduł „Planszówki”: kolekcja gier (BGG), rozgrywki, gracze i statystyki w stylu BG Stats. */
 (function () {
   const { esc } = App.ui;
-  const STATUS = { owned: 'w kolekcji', forSale: 'na sprzedaż', sold: 'sprzedana', wishlist: 'chcę kupić' };
+  const STATUS = { owned: 'w kolekcji', forSale: 'na sprzedaż', sold: 'sprzedana', wishlist: 'chcę kupić', played: 'nie moja (grana u innych)' };
   const pl = (n, one, few, many) => n === 1 ? one : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? few : many;
   const num = v => (v == null || v === '' ? '' : String(v).replace('.', ','));
   const prefs = { get(k, d) { try { return localStorage.getItem('pl.' + k) || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('pl.' + k, v); } catch (e) {} } };
@@ -72,6 +72,25 @@
     return saved;
   }
 
+  /* ---------- wyszukiwanie gier spoza kolekcji ----------
+     API BGG wymaga klucza i nie działa z przeglądarki, więc szukamy w Wikidanych (wolne, bez klucza),
+     biorąc tylko pozycje z numerem BGG (P2339). Polskie tytuły też działają (np. „Wsiąść do pociągu”). */
+  async function searchOnline(q) {
+    const W = 'https://www.wikidata.org/w/api.php?format=json&origin=*';
+    const s = await (await fetch(`${W}&action=wbsearchentities&type=item&limit=25&language=pl&uselang=pl&search=${encodeURIComponent(q)}`)).json();
+    const ids = (s.search || []).map(x => x.id);
+    if (!ids.length) return [];
+    const e = await (await fetch(`${W}&action=wbgetentities&props=claims|labels&languages=pl|en&ids=${ids.join('|')}`)).json();
+    const val = (x, p) => x.claims[p] && x.claims[p][0].mainsnak.datavalue ? x.claims[p][0].mainsnak.datavalue.value : null;
+    return ids.map(id => e.entities[id]).filter(x => x && x.claims && x.claims.P2339).map(x => {
+      const t = val(x, 'P577'), img = val(x, 'P18'), mn = val(x, 'P1872'), mx = val(x, 'P1873');
+      return { bggId: Number(val(x, 'P2339')), title: (x.labels.pl || x.labels.en || {}).value || '?',
+        year: t && t.time ? Number(t.time.slice(1, 5)) : null,
+        image: img ? 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(img) + '?width=300' : null,
+        minPlayers: mn ? Number(mn.amount) : null, maxPlayers: mx ? Number(mx.amount) : null };
+    }).filter(g => g.bggId);
+  }
+
   /* ---------- formularz rozgrywki ---------- */
   async function editPlay(play, presetGameId) {
     const d = await load();
@@ -85,14 +104,15 @@
       <label title="Wygrana" class="chk" style="flex-direction:row;gap:4px"><input type="checkbox" class="pw" ${r.win ? 'checked' : ''}>🏆</label>
       <button type="button" class="ghost small prm" title="Usuń">✕</button></div>`;
     const html = `<datalist id="pl-names">${plist.map(p => `<option value="${esc(p.name)}">`).join('')}</datalist>
-      <datalist id="pl-games">${gamesSorted.map(g => `<option value="${esc(g.title)}">`).join('')}</datalist>
       <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Gracze (zaznacz 🏆 zwycięzcę; jeśli nikogo nie zaznaczysz, wygrywa najwyższy wynik)</div>
       <div id="pl-rows">${rows.map(rowHtml).join('')}</div>
       <button type="button" id="pl-add" class="small">+ gracz</button>`;
     const g0 = d.gameById.get(play.gameId);
-    let rowsData = null;
+    let rowsData = null, picked = g0 || null, typed = g0 ? g0.title : '';
     const out = await App.ui.form(play.id ? 'Edytuj rozgrywkę' : 'Nowa rozgrywka', [
-      { name: 'game', label: 'Gra', value: g0 ? g0.title : '', list: 'pl-games', placeholder: 'Zacznij pisać tytuł…' },
+      { type: 'html', html: `<label style="margin:0"><span>Gra</span></label>
+        <input id="pl-game" type="search" autocomplete="off" placeholder="Zacznij pisać tytuł…" value="${esc(g0 ? g0.title : '')}">
+        <div id="pl-gres" class="pl-gres"></div>` },
       { name: 'date', label: 'Data', type: 'date', value: play.date },
       { name: 'durationMin', label: 'Czas (min)', type: 'number', value: play.durationMin },
       { name: 'location', label: 'Miejsce', value: play.location, placeholder: 'np. dom, u Kuby' },
@@ -102,21 +122,61 @@
     ], {
       ok: 'Zapisz rozgrywkę',
       onMount(dlg) {
+        // wybór gry: najpierw kolekcja, potem (z internetem) gry spoza kolekcji z BGG
+        const gi = dlg.querySelector('#pl-game'), gres = dlg.querySelector('#pl-gres');
+        let tmr = null, seq = 0;
+        const pick = g => { picked = g; gi.value = g.title; gres.innerHTML = ''; };
+        const row = (g, i, src) => `<button type="button" class="pl-gopt" data-src="${src}" data-i="${i}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="ph">🎲</span>'}<span><b>${esc(g.title)}</b><small>${[g.year, src === 'bgg' ? 'spoza kolekcji · BGG' : (g.status !== 'owned' ? STATUS[g.status] : '')].filter(Boolean).join(' · ')}</small></span></button>`;
+        let local = [], online = [];
+        const draw = (note) => {
+          gres.innerHTML = local.map((g, i) => row(g, i, 'col')).join('') + (note ? `<div class="pl-gnote">${note}</div>` : '') + online.map((g, i) => row(g, i, 'bgg')).join('');
+        };
+        gres.addEventListener('click', e => {
+          const b = e.target.closest('.pl-gopt'); if (!b) return;
+          const arr = b.dataset.src === 'col' ? local : online; pick(arr[+b.dataset.i]);
+        });
+        gi.addEventListener('input', () => {
+          picked = null; const q = gi.value.trim().toLowerCase(); clearTimeout(tmr); online = [];
+          if (!q) { local = []; gres.innerHTML = ''; return; }
+          local = gamesSorted.filter(g => g.title.toLowerCase().includes(q)).slice(0, 8);
+          if (q.length < 3) { draw(); return; }
+          if (!navigator.onLine) { draw('Bez internetu szukam tylko w kolekcji.'); return; }
+          draw('Szukam też poza kolekcją…');
+          const my = ++seq;
+          tmr = setTimeout(async () => {
+            try {
+              const have = new Set(d.games.map(g => g.bggId).filter(Boolean));
+              const r = (await searchOnline(gi.value.trim())).filter(g => !have.has(g.bggId));
+              if (my !== seq) return;
+              online = r.slice(0, 10);
+              draw(online.length ? 'Spoza kolekcji (z BGG):' : (local.length ? '' : 'Nic nie znaleziono. Możesz zapisać grę pod wpisaną nazwą.'));
+            } catch (err) { if (my === seq) draw('Nie udało się wyszukać w internecie.'); }
+          }, 450);
+        });
         const box = dlg.querySelector('#pl-rows');
         dlg.querySelector('#pl-add').onclick = () => { box.insertAdjacentHTML('beforeend', rowHtml({})); };
         box.addEventListener('click', e => { if (e.target.classList.contains('prm')) e.target.closest('.pl-row').remove(); });
         dlg.addEventListener('close', () => {
+          typed = gi.value.trim();
           rowsData = [...box.querySelectorAll('.pl-row')].map(r => ({ name: r.querySelector('.pn').value.trim(), score: r.querySelector('.ps').value, win: r.querySelector('.pw').checked })).filter(r => r.name);
         }, { once: true });
       }
     });
     if (!out) return null;
-    const game = d.games.find(g => g.title.toLowerCase() === out.game.toLowerCase()) || (presetGameId && g0 && g0.title === out.game ? g0 : null);
-    let gameId = game && game.id;
-    if (!gameId) {
-      if (!out.game) { App.ui.toast('Wybierz grę'); return null; }
-      if (!await App.ui.confirm(`Gry „${out.game}” nie ma w kolekcji. Dodać ją?`)) return null;
-      gameId = (await DB.put('games', { title: out.game, status: 'owned' })).id;
+    let gameId = null;
+    if (picked && picked.id) gameId = picked.id;
+    else if (picked && picked.bggId) {
+      // gra spoza kolekcji wybrana z BGG – zapisz jako „nie moja”, żeby statystyki miały tytuł i okładkę
+      const ex = d.games.find(g => g.bggId === picked.bggId);
+      gameId = ex ? ex.id : (await DB.put('games', Object.assign({ id: 'bgg-' + picked.bggId, status: 'played', source: 'wikidata' }, picked, { thumb: picked.image }))).id;
+    } else {
+      const game = typed && d.games.find(g => g.title.toLowerCase() === typed.toLowerCase());
+      if (game) gameId = game.id;
+      else {
+        if (!typed) { App.ui.toast('Wybierz grę'); return null; }
+        const mine = await App.ui.confirm(`Gry „${typed}” nie ma w kolekcji.\n\nOK – dodaj ją do mojej kolekcji\nAnuluj – zapisz jako grę spoza kolekcji`);
+        gameId = (await DB.put('games', { title: typed, status: mine ? 'owned' : 'played' })).id;
+      }
     }
     const ps = [];
     for (const r of rowsData || []) {
@@ -144,7 +204,7 @@
     last: ['Ostatnio grane', (a, b) => (b._last || '').localeCompare(a._last || '')],
     added: ['Ostatnio dodane', (a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')]
   };
-  const FILTERS = { all: 'Wszystkie', base: 'Bez dodatków', exp: 'Dodatki', unplayed: 'Nigdy nie grane', forSale: 'Na sprzedaż', sold: 'Sprzedane', wishlist: 'Chcę kupić' };
+  const FILTERS = { all: 'Wszystkie', base: 'Bez dodatków', exp: 'Dodatki', unplayed: 'Nigdy nie grane', forSale: 'Na sprzedaż', sold: 'Sprzedane', wishlist: 'Chcę kupić', played: 'Grane, nie moje' };
 
   // Przycisk „BGG ↗” na kafelku/wierszu: od razu strona gry na BoardGameGeek (kliknięcie w resztę kafelka = karta gry).
   function bindBgg(root) {
@@ -184,6 +244,7 @@
           case 'forSale': return g.status === 'forSale';
           case 'sold': return g.status === 'sold';
           case 'wishlist': return g.status === 'wishlist';
+          case 'played': return g.status === 'played';
           default: return inCol;
         }
       });
