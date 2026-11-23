@@ -58,6 +58,15 @@
     async fileName() { const h = await getHandle(); return h ? h.name : null; },
     async exportFile() {
       const dump = await DB.exportAll();
+      const native = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+      if (native) {
+        // Aplikacja z APK: zapis do pamięci podręcznej i okno „Udostępnij” (np. do OneDrive).
+        const { Filesystem, Share } = window.Capacitor.Plugins;
+        await Filesystem.writeFile({ path: 'kolekcja.json', data: JSON.stringify(dump), directory: 'CACHE', encoding: 'utf8' });
+        const { uri } = await Filesystem.getUri({ path: 'kolekcja.json', directory: 'CACHE' });
+        try { await Share.share({ title: 'Kopia kolekcji', files: [uri], dialogTitle: 'Zapisz kopię kolekcji' }); } catch (e) { /* anulowano */ }
+        return;
+      }
       const blob = new Blob([JSON.stringify(dump)], { type: 'application/json' });
       const file = new File([blob], 'kolekcja.json', { type: 'application/json' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
