@@ -41,6 +41,13 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Uprawnienie do aparatu (skaner kodów)
+        run: |
+          cd build/android/app/src/main
+          grep -q 'android.permission.CAMERA' AndroidManifest.xml || sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#&\n    <uses-permission android:name="android.permission.CAMERA" />#' AndroidManifest.xml
+          grep -q 'android.permission.CAMERA' AndroidManifest.xml || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n</manifest>#' AndroidManifest.xml
+          grep -n 'permission' AndroidManifest.xml
+
       - name: Ikona aplikacji
         run: |
           cd build/android/app/src/main/res
