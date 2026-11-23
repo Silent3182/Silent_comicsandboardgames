@@ -307,3 +307,67 @@ dialog.dlg label input[type=checkbox] { width: 20px; height: 20px; }
 .pl-gopt span { display: flex; flex-direction: column; min-width: 0; }
 .pl-gopt small { color: var(--muted); font-size: 12px; }
 .pl-gnote { font-size: 12px; color: var(--muted); padding: 6px 2px 2px; }
+
+/* ---------- Ikony zakładek (core/ikony.js) ---------- */
+#nav .ico svg.ic { width: 22px; height: 22px; display: block; margin: 0 auto; }
+#nav .ico svg.ic .f { fill: currentColor; fill-opacity: .14; }
+#nav button.active .ico svg.ic .f { fill-opacity: .32; }
+#nav button:not(.active) .ico { color: var(--muted); }
+#nav button:not(.active):hover .ico { color: var(--text); }
+html[data-ikony="kontur"] #nav .ico svg.ic .f { fill-opacity: 0; }
+html[data-ikony="kontur"] #nav button.active .ico svg.ic .f { fill-opacity: .22; }
+/* wariant „kolor”: biały znak na kolorowym kafelku */
+html[data-ikony="kolor"] #nav .ico svg.ic { width: 30px; height: 30px; padding: 5px; border-radius: 9px; background: var(--ik); color: #fff; box-shadow: 0 2px 6px color-mix(in srgb, var(--ik) 40%, transparent); }
+html[data-ikony="kolor"] #nav .ico svg.ic .f { fill: #fff; fill-opacity: .28; }
+html[data-ikony="kolor"] #nav button:not(.active) .ico { color: #fff; }
+html[data-ikony="kolor"] #nav button:not(.active) .ico svg.ic { opacity: .82; }
+@media (max-width: 760px) {
+  #nav > button .ico { padding: 4px 16px; }
+  html[data-ikony="kolor"] #nav > button .ico { padding: 2px 14px; }
+  html[data-ikony="kolor"] #nav > button .ico svg.ic { width: 30px; height: 30px; }
+  html[data-ikony="kolor"] #nav .more-sheet .ico svg.ic { width: 40px; height: 40px; padding: 7px; border-radius: 12px; }
+  #nav > button .ico svg.ic { width: 24px; height: 24px; }
+  #nav .more-sheet .ico svg.ic { width: 28px; height: 28px; }
+}
+
+/* ---------- Ekran startowy (core/splash.js) ---------- */
+#splash { position: fixed; inset: 0; z-index: 1000; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0d1117; color: #fff; transition: opacity .55s ease, transform .55s ease; cursor: pointer; }
+#splash.out { opacity: 0; transform: scale(1.06); pointer-events: none; }
+#splash .sp-art, #splash .sp-it { display: none; }
+/* Wariant A: ściana okładek z kolekcji */
+#splash .sp-wall { position: absolute; inset: -35% -40%; display: flex; justify-content: center; gap: 10px; transform: rotate(-12deg); }
+#splash .sp-col { flex: 0 0 var(--colw, 92px); display: flex; flex-direction: column; gap: 10px; animation: spUp 26s linear infinite; }
+#splash .sp-col:nth-child(even) { animation-name: spDown; margin-top: -60px; }
+@keyframes spUp { to { transform: translateY(-50%); } }
+@keyframes spDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+#splash .sp-t { position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+#splash .sp-c { background: radial-gradient(circle, rgba(255,255,255,.14) 1.2px, transparent 1.6px) 0 0 / 7px 7px, linear-gradient(160deg, var(--b), var(--a)); padding: 7px; display: flex; flex-direction: column; font-family: system-ui, sans-serif; }
+#splash .sp-c i { font-style: normal; font-size: 8px; font-weight: 800; letter-spacing: .08em; background: rgba(0,0,0,.35); align-self: flex-start; padding: 1px 4px; border-radius: 3px; }
+#splash .sp-c b { font-size: 22px; font-weight: 900; line-height: 1; margin-top: 4px; text-shadow: 0 2px 0 rgba(0,0,0,.3); }
+#splash .sp-c span { margin-top: auto; font-size: 9.5px; font-weight: 700; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+#splash .sp-g { background: linear-gradient(150deg, hsl(var(--h) 35% 88%), hsl(var(--h) 30% 72%)); color: #1a1f26; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font: 700 11px/1.2 system-ui, sans-serif; }
+#splash .sp-g img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #fff; }
+#splash .sp-shade { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 45% at 50% 50%, rgba(13,17,23,.92) 0%, rgba(13,17,23,.7) 45%, rgba(13,17,23,.25) 100%); }
+#splash .sp-title { position: relative; text-align: center; padding: 24px; animation: spIn .7s cubic-bezier(.2,.8,.2,1) both; }
+#splash .sp-title small { display: block; font: 800 12px/1 system-ui, sans-serif; letter-spacing: .32em; text-transform: uppercase; color: #f0b45a; margin-bottom: 12px; }
+#splash .sp-title h1 { margin: 0; font: 900 clamp(40px, 11vw, 76px)/.95 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing: -.03em; text-shadow: 0 4px 30px rgba(0,0,0,.6); }
+#splash .sp-title h1 span { display: block; font-weight: 300; font-size: .62em; letter-spacing: .01em; opacity: .92; }
+#splash .sp-title h1 b { background: linear-gradient(90deg, #ff5a4e, #f0b45a 55%, #6fb3ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#splash .sp-title p { margin: 14px 0 0; font: 600 14px/1.3 system-ui, sans-serif; color: rgba(255,255,255,.75); letter-spacing: .02em; }
+@keyframes spIn { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+/* Wariant B: pop-art (własna ilustracja, bez okładek) */
+#splash.sp-b { background: #ffd23f; color: #141414; }
+#splash.sp-b .sp-wall, #splash.sp-b .sp-shade { display: none; }
+#splash.sp-b .sp-art { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+#splash.sp-b .sp-it { display: block; position: absolute; width: clamp(120px, 30vmin, 260px); height: auto; overflow: visible; transform: rotate(var(--r)); animation: spPop .5s cubic-bezier(.2,1.6,.4,1) both; }
+#splash.sp-b .sp-it.tl { top: 6%; left: 7%; } #splash.sp-b .sp-it.tr { top: 5%; right: 6%; animation-delay: .08s; }
+#splash.sp-b .sp-it.bl { bottom: 7%; left: 5%; animation-delay: .16s; } #splash.sp-b .sp-it.br { bottom: 6%; right: 7%; animation-delay: .24s; }
+@keyframes spPop { from { opacity: 0; transform: rotate(var(--r)) scale(.4); } }
+#splash.sp-b .sp-title { background: #fff; border: 5px solid #141414; border-radius: 50% / 46%; padding: 46px 40px 40px; transform: rotate(-4deg); box-shadow: 10px 10px 0 #141414; min-width: min(330px, 84vw); }
+#splash.sp-b .sp-title::after { content: ""; position: absolute; left: 22%; bottom: -34px; border: 20px solid transparent; border-top: 34px solid #141414; border-left-width: 6px; }
+#splash.sp-b .sp-title small { color: #1f6fd1; }
+#splash.sp-b .sp-title h1 { font-family: Impact, "Arial Black", "Roboto Condensed", sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: .01em; text-shadow: none; font-size: clamp(44px, 13vw, 80px); }
+#splash.sp-b .sp-title h1 span { font-weight: 900; font-size: .5em; letter-spacing: .12em; color: #141414; }
+#splash.sp-b .sp-title h1 b { background: none; color: #e0242f; -webkit-text-stroke: 2px #141414; text-shadow: 4px 4px 0 #ffd23f, 6px 6px 0 #141414; }
+#splash.sp-b .sp-title p { color: #444; }
+@media (prefers-reduced-motion: reduce) { #splash .sp-col { animation: none; } }

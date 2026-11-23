@@ -73,12 +73,12 @@
       const group = Math.floor((m.order || 100) / 100);
       const sep = !inSheet && lastGroup !== null && group !== lastGroup ? '<div class="sep bottom"></div>' : '';
       if (!inSheet) lastGroup = group;
-      return `${sep}<button data-id="${m.id}" class="${current && current.id === m.id ? 'active' : ''} ${isMain(m) ? 'pri' : 'sec'}"><span class="ico">${m.icon || '•'}</span><span class="lab">${esc(m.title)}</span><span class="lab-s">${esc(NAV_SHORT[m.id] || m.title)}</span></button>`;
+      return `${sep}<button data-id="${m.id}" class="${current && current.id === m.id ? 'active' : ''} ${isMain(m) ? 'pri' : 'sec'}"><span class="ico">${window.ikona ? window.ikona(m.id, m.icon) : (m.icon || '•')}</span><span class="lab">${esc(m.title)}</span><span class="lab-s">${esc(NAV_SHORT[m.id] || m.title)}</span></button>`;
     };
     const rest = modules.filter(m => !isMain(m));
     nav.innerHTML = `<div class="brand"><img src="icons/icon-192.png" alt="">Moje kolekcje</div>`
       + modules.map(m => btn(m)).join('')
-      + (rest.length ? `<button class="more ${current && !isMain(current) ? 'active' : ''}" aria-label="Więcej"><span class="ico">☰</span><span class="lab-s">Więcej</span></button><div class="more-sheet">${rest.map(m => btn(m, true)).join('')}</div>` : '');
+      + (rest.length ? `<button class="more ${current && !isMain(current) ? 'active' : ''}" aria-label="Więcej"><span class="ico">${window.ikona ? window.ikona('wiecej', '☰') : '☰'}</span><span class="lab-s">Więcej</span></button><div class="more-sheet">${rest.map(m => btn(m, true)).join('')}</div>` : '');
     nav.classList.remove('open');
     nav.querySelectorAll('button[data-id]').forEach(b => b.onclick = () => { nav.classList.remove('open'); App.go(b.dataset.id); });
     const more = nav.querySelector('.more');
