@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wystaw na sprzedaż</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1d1b;--muted:#6b6a66;--line:#e2e0da;--accent:#1f6f5c;--accent-ink:#fff;--warn:#9a5b00;--warn-bg:#fff4e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#222220;--ink:#ecebe7;--muted:#a3a19b;--line:#3a3935;--accent:#5cc3a6;--accent-ink:#0f1f1a;--warn:#f0b35a;--warn-bg:#3a2c14}}
+:root[data-theme="dark"]{--bg:#161615;--card:#222220;--ink:#ecebe7;--muted:#a3a19b;--line:#3a3935;--accent:#5cc3a6;--accent-ink:#0f1f1a;--warn:#f0b35a;--warn-bg:#3a2c14}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+h2{font-size:15px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:60px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;cursor:pointer}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:13px;padding:5px 10px}
+.links{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.links a{font-size:13px;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.prices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.price{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:var(--bg);color:var(--ink);font:inherit}
+.price b{display:block;font-size:20px}
+.price span{font-size:12px;color:var(--muted)}
+.price[aria-pressed="true"]{outline:2px solid var(--accent)}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.out-title{font-weight:600;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+pre{white-space:pre-wrap;word-break:break-word;font:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;margin:0}
+.meta{font-size:13px;color:var(--muted);margin:8px 0}
+.warn{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:13px;margin-top:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.only-gra,.only-komiks{display:none}
+body[data-typ="gra"] .only-gra{display:block}
+body[data-typ="komiks"] .only-komiks{display:block}
+</style>
+</head>
+<body data-typ="gra">
+<main>
+  <h1>Wystaw na sprzedaż</h1>
+  <p class="sub">Generator ogłoszeń dla gier i komiksów – działa bez internetu. Internet jest potrzebny tylko do sprawdzenia cen i wystawienia.</p>
+
+  <div class="grid">
+    <section>
+      <h2>1. Pozycja</h2>
+      <div class="seg" id="typ">
+        <button data-v="gra" aria-pressed="true">Gra planszowa</button>
+        <button data-v="komiks" aria-pressed="false">Komiks</button>
+      </div>
+      <label>Tytuł</label><input id="tytul" value="Wsiąść do Pociągu: Europa">
+      <div class="only-gra">
+        <div class="row3">
+          <div><label>Gracze</label><input id="gracze" value="2-5"></div>
+          <div><label>Czas (min)</label><input id="czas" value="30-60"></div>
+          <div><label>Wiek od</label><input id="wiek" value="8"></div>
+        </div>
+        <div class="row">
+          <div><label>Autor</label><input id="autor" value="Alan R. Moon"></div>
+          <div><label>Wydawca, rok</label><input id="wydawcaG" value="Rebel, 2015"></div>
+        </div>
+      </div>
+      <div class="only-komiks">
+        <div class="row">
+          <div><label>Seria / kolekcja</label><input id="seria" placeholder="np. WKKM, Marvel Now, Thorgal"></div>
+          <div><label>Tom / numer</label><input id="numer"></div>
+        </div>
+        <div class="row">
+          <div><label>Scenariusz</label><input id="scen"></div>
+          <div><label>Rysunki</label><input id="rys"></div>
+        </div>
+        <div class="row">
+          <div><label>Wydawca, rok</label><input id="wydawcaK" placeholder="np. Egmont, 2023"></div>
+          <div><label>Oprawa</label><select id="oprawa"><option value="">—</option><option>twarda</option><option>miękka</option></select></div>
+        </div>
+      </div>
+      <label>Kilka słów od siebie (opcjonalnie – zastępuje opis z danych)</label>
+      <textarea id="opisKrotki" placeholder="np. Świetna gra rodzinna, prosta do wytłumaczenia…"></textarea>
+
+      <h2 style="margin-top:18px">2. Stan</h2>
+      <div class="seg" id="stan"></div>
+      <label>Szczegóły stanu</label>
+      <div class="chips" id="cechy"></div>
+      <label>Uwagi (np. brakujący element, dodatki)</label>
+      <input id="uwagi">
+    </section>
+
+    <section>
+      <h2>3. Cena</h2>
+      <div class="hint">Otwórz wyszukiwania, wpisz kilka znalezionych cen (oddzielone spacją), a dostaniesz trzy propozycje.</div>
+      <div class="links" id="linki"></div>
+      <div class="row">
+        <div><label>Ceny nowych (zł)</label><input id="noweC" value="169 179" inputmode="decimal"></div>
+        <div><label>Ceny używanych (zł)</label><input id="uzywC" value="110 120 95 130" inputmode="decimal"></div>
+      </div>
+      <div class="prices" id="propozycje"></div>
+      <div class="hint" id="podstawa"></div>
+      <div class="row">
+        <div><label>Twoja cena (zł)</label><input id="cena" inputmode="decimal"></div>
+        <div><label>&nbsp;</label><label style="margin:8px 0;color:var(--ink)"><input type="checkbox" id="neg" style="width:auto"> do negocjacji</label></div>
+      </div>
+
+      <h2 style="margin-top:18px">4. Gdzie wystawić</h2>
+      <div class="seg" id="platforma"></div>
+      <div class="row">
+        <div><label>Gabaryt paczkomatu</label><select id="gab"><option>A</option><option selected>B</option><option>C</option></select></div>
+        <div><label>Odbiór osobisty – miasto</label><input id="miasto" placeholder="puste = bez odbioru"></div>
+      </div>
+    </section>
+  </div>
+
+  <section style="margin-top:16px">
+    <h2>Ogłoszenie</h2>
+    <label>Tytuł</label>
+    <div class="out-title" id="outTytul"></div>
+    <div class="meta" id="outMeta"></div>
+    <label>Opis</label>
+    <pre id="outOpis"></pre>
+    <div id="outWarn"></div>
+    <div class="actions">
+      <button class="btn" id="kopiujT">Kopiuj tytuł</button>
+      <button class="btn" id="kopiujO">Kopiuj opis</button>
+      <a class="btn ghost" id="wystaw" target="_blank" rel="noopener">Otwórz formularz serwisu</a>
+    </div>
+  </section>
+</main>
+
+<script src="sprzedaz.js"></script>
+<script>
+(function(){
+  var S = window.Sprzedaz, $ = function(id){return document.getElementById(id)};
+  var stanSel = "jakNowy", plat = "olx", typ = "gra", cechySel = {kompletna:true, koszulki:true}, cenaSel = "rynkowa";
+
+  function seg(el, items, cur, onPick){
+    el.innerHTML = "";
+    items.forEach(function(it){
+      var b = document.createElement("button");
+      b.textContent = it[1]; b.dataset.v = it[0];
+      b.setAttribute("aria-pressed", String(it[0] === cur));
+      b.onclick = function(){ onPick(it[0]); };
+      el.appendChild(b);
+    });
+  }
+  function liczby(s){ return (s||"").replace(/,/g,".").split(/[\s;]+/).map(Number).filter(function(x){return x>0}); }
+  function zakres(s){ var m=(s||"").split(/[-–]/).map(function(x){return parseInt(x,10)}); return [m[0]||null, m[1]||m[0]||null]; }
+  function wydRok(s){ var m=(s||"").split(","); return [ (m[0]||"").trim(), parseInt(m[1],10)||null ]; }
+
+  function pozycja(){
+    var p = { typ: typ, tytul: $("tytul").value.trim() || "Bez tytułu", opisKrotki: $("opisKrotki").value };
+    if (typ === "gra"){
+      var g = zakres($("gracze").value), c = zakres($("czas").value), w = wydRok($("wydawcaG").value);
+      Object.assign(p, {graczeMin:g[0], graczeMax:g[1], czasMin:c[0], czasMax:c[1], wiekOd:parseInt($("wiek").value,10)||null,
+        autorzy: $("autor").value ? [$("autor").value] : [], wydawca:w[0], rok:w[1], jezyk:"polska"});
+    } else {
+      var k = wydRok($("wydawcaK").value);
+      Object.assign(p, {seria:$("seria").value.trim(), numer:$("numer").value.trim(), scenariusz:$("scen").value.trim(),
+        rysunki:$("rys").value.trim(), wydawca:k[0], rok:k[1], oprawa:$("oprawa").value});
+    }
+    return p;
+  }
+
+  function render(){
+    document.body.dataset.typ = typ;
+    seg($("typ"), [["gra","Gra planszowa"],["komiks","Komiks"]], typ, function(v){ typ=v; cechySel = v==="gra"?{kompletna:true}:{czytany1:true}; if(v==="komiks"&&$("tytul").value==="Wsiąść do Pociągu: Europa"){ $("tytul").value="Spider-Man: Ostatnie łowy Kravena"; $("seria").value="WKKM"; $("numer").value="7"; $("noweC").value=""; $("uzywC").value="30 35 40 29";} render(); });
+    seg($("stan"), Object.keys(S.STANY).map(function(k){return [k, S.STANY[k].etykieta]}), stanSel, function(v){ stanSel=v; render(); });
+    seg($("platforma"), Object.keys(S.PLATFORMY).map(function(k){return [k, S.PLATFORMY[k].nazwa.replace(/ \(.*\)/,"")]}), plat, function(v){ plat=v; render(); });
+
+    var cs = S.CECHY_STANU[typ], ch = $("cechy"); ch.innerHTML="";
+    Object.keys(cs).forEach(function(k){
+      var b=document.createElement("button"); b.className="chip"; b.textContent=cs[k];
+      b.setAttribute("aria-pressed", String(!!cechySel[k]));
+      b.onclick=function(){ cechySel[k]=!cechySel[k]; render(); };
+      ch.appendChild(b);
+    });
+
+    var p = pozycja();
+    $("linki").innerHTML = S.linkiCen(p).map(function(l){ return '<a href="'+l.url+'" target="_blank" rel="noopener">'+l.zrodlo+'</a>'; }).join("");
+
+    var pr = S.proponujCeny({nowe: liczby($("noweC").value), uzywane: liczby($("uzywC").value), stan: stanSel});
+    var box = $("propozycje"); box.innerHTML = "";
+    if (pr){
+      [["szybka","Szybka sprzedaż"],["rynkowa","Rynkowa"],["maks","Maksymalna"]].forEach(function(o){
+        var b=document.createElement("button"); b.className="price"; b.setAttribute("aria-pressed", String(cenaSel===o[0]));
+        b.innerHTML="<b>"+pr[o[0]]+" zł</b><span>"+o[1]+"</span>";
+        b.onclick=function(){ cenaSel=o[0]; $("cena").value=pr[o[0]]; render(); };
+        box.appendChild(b);
+      });
+      $("podstawa").textContent = "Podstawa: " + pr.podstawa + ".";
+      if (!$("cena").dataset.touched) $("cena").value = pr[cenaSel];
+    } else { $("podstawa").textContent = "Wpisz przynajmniej jedną cenę, by dostać propozycje."; }
+
+    var cena = parseFloat(($("cena").value||"").replace(",", ".")) || null;
+    var r = S.generujOgloszenie(p, { platforma: plat, stan: stanSel, cena: cena, negocjacja: $("neg").checked,
+      cechy: Object.keys(cechySel).filter(function(k){return cechySel[k]}), uwagi: $("uwagi").value,
+      ustawienia: { paczkomatGabaryt: $("gab").value, miasto: $("miasto").value.trim(), odbiorOsobisty: !!$("miasto").value.trim() } });
+    $("outTytul").textContent = r.tytul;
+    $("outMeta").textContent = r.platformaNazwa + " · " + r.tytul.length + "/" + S.PLATFORMY[plat].maxTytul + " znaków · Stan w formularzu: " + r.parametry.stan + " · Kategoria: " + r.parametry.kategoria + (r.cena ? " · Cena: " + r.cena + " zł" : "");
+    $("outOpis").textContent = r.opis;
+    $("outWarn").innerHTML = r.ostrzezenia.map(function(w){return '<div class="warn">'+w+'</div>'}).join("");
+    $("wystaw").href = r.linkWystaw; $("wystaw").textContent = "Otwórz formularz " + r.platformaNazwa.replace(/ \(.*\)/,"");
+  }
+
+  function kopiuj(txt, btn){
+    var done=function(){ var t=btn.textContent; btn.textContent="Skopiowano ✓"; setTimeout(function(){btn.textContent=t},1200); };
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, done); else done();
+  }
+  $("kopiujT").onclick=function(){ kopiuj($("outTytul").textContent, this); };
+  $("kopiujO").onclick=function(){ kopiuj($("outOpis").textContent, this); };
+  $("cena").addEventListener("input", function(){ this.dataset.touched="1"; render(); });
+  document.querySelectorAll("input:not(#cena):not([type=checkbox]),textarea").forEach(function(el){ el.addEventListener("input", render); });
+  document.querySelectorAll("select,input[type=checkbox]").forEach(function(el){ el.addEventListener("change", render); });
+  render();
+})();
+</script>
+</body>
+</html>

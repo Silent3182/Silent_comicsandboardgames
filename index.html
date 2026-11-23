@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moje kolekcje</title>
+<meta name="theme-color" content="#1f3a5f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <nav id="nav"></nav>
+  <main id="main"><p class="muted">Ładowanie…</p></main>
+</div>
+<div id="toast"></div>
+
+<!-- Rdzeń -->
+<script src="core/db.js"></script>
+<script src="core/app.js"></script>
+<script src="core/sync.js"></script>
+<!-- Moduły (każdy wątek dopisuje swój plik poniżej) -->
+<script src="moduly/planszowki/dane-bgg.js"></script>
+<script src="moduly/planszowki/planszowki.js"></script>
+<script src="moduly/sprzedaz/sprzedaz.js"></script>
+<script src="moduly/sprzedaz/sprzedaz-ui.js"></script>
+<script src="moduly/komiksy/komiksy.js"></script>
+<!-- /Moduły -->
+<script>App.start();</script>
+</body>
+</html>
