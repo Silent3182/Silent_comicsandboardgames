@@ -243,6 +243,7 @@
           <div class="kx-btns">
             <button id="kedit">✏️ Edytuj</button>
             <button id="ksell">💰 Wystaw na sprzedaż</button>
+            ${App.has('wypozyczenia.przycisk') && c.status !== 'missing' ? '<button id="klend">🤝 Pożycz</button>' : ''}
             ${c.status !== 'owned' ? '<button id="kshop">🛒 Do listy zakupów</button>' : ''}
             <a target="_blank" rel="noopener" href="https://allegro.pl/listing?string=${q}">Ceny: Allegro</a>
             <a target="_blank" rel="noopener" href="https://www.olx.pl/oferty/q-${encodeURIComponent((c.title || '').replace(/\s+/g, '-'))}/">OLX</a>
@@ -258,6 +259,7 @@
     el.querySelectorAll('.kx-stars button').forEach(b => b.onclick = () => save({ myRating: +b.dataset.r || null }));
     $('#kedit').onclick = () => editComic(c);
     $('#ksell').onclick = () => App.call('sprzedaz.wystaw', { itemType: 'comic', itemId: c.id });
+    if ($('#klend')) App.call('wypozyczenia.przycisk', $('#klend'), 'comic', c.id);
     if ($('#kshop')) $('#kshop').onclick = async () => {
       await DB.put('shoppingList', { title: c.title, itemType: 'comic', series: c.series, volume: c.volume, comicId: c.id, publisher: c.publisher, bought: false });
       App.ui.toast('Dodano do listy zakupów');
@@ -575,5 +577,6 @@
   App.registerModule({ id: 'zakupy', title: 'Zakupy', icon: '🛒', order: 30, render: renderZakupy });
   // usługa dla innych modułów: następny komiks do czytania (np. na stronę główną)
   App.provide('komiksy.nastepny', async () => { const S = await mroState(); return S.next ? { title: S.next.title, part: S.next.sec, wyd: S.next.wyd } : null; });
+  App.provide('komiksy.seed', ensureSeed);
   App.provide('zakupy.dodaj', async item => DB.put('shoppingList', Object.assign({ bought: false }, item)));
 })();

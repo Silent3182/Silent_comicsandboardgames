@@ -236,6 +236,7 @@
             <button class="primary" id="play">+ Rozgrywka</button>
             <button id="edit">Edytuj</button>
             <button id="sell">💰 Wystaw na sprzedaż</button>
+            ${App.has('wypozyczenia.przycisk') ? '<button id="lend">🤝 Pożycz</button>' : ''}
             ${g.bggId ? `<a class="btn" href="https://boardgamegeek.com/boardgame/${g.bggId}" target="_blank" rel="noopener">BGG ↗</a>` : ''}
             <button id="del" class="danger ghost">Usuń</button>
           </p>
@@ -258,6 +259,7 @@
     $('#play').onclick = async () => { if (await editPlay(null, id)) App.refresh(); };
     $('#edit').onclick = async () => { if (await editGame(g)) App.refresh(); };
     $('#sell').onclick = () => App.call('sprzedaz.wystaw', { itemType: 'game', itemId: id });
+    if ($('#lend')) App.call('wypozyczenia.przycisk', $('#lend'), 'game', id);
     $('#del').onclick = async () => {
       if (!await App.ui.confirm(`Usunąć „${g.title}” z kolekcji?${ps.length ? ' Rozgrywki tej gry zostaną w statystykach.' : ''}\n\nJeśli grę sprzedałeś, lepiej zmień jej status na „sprzedana” (Edytuj).`)) return;
       await DB.remove('games', id); App.ui.toast('Usunięto'); App.go('planszowki');
