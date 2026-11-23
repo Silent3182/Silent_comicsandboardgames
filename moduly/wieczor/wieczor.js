@@ -91,7 +91,8 @@
     css();
     const s = load();
     const polka = await dane();
-    if (!polka.length) { el.innerHTML = '<h2>Wieczór gier</h2><div class="empty">Brak gier na półce. Otwórz najpierw zakładkę Planszówki, żeby wczytać kolekcję.</div>'; return; }
+    const kz = () => el.querySelectorAll('[data-kz]').forEach(b => b.onclick = () => App.call('wieczor.ktoZaczyna'));
+    if (!polka.length) { el.innerHTML = '<div class="row" style="align-items:center"><h2 style="margin:0">Wieczór gier</h2><span class="spacer"></span><button class="primary" data-kz>👆 Kto zaczyna?</button></div><div class="empty">Brak gier na półce. Otwórz najpierw zakładkę Planszówki, żeby wczytać kolekcję.</div>'; kz(); return; }
     const wyniki = polka.map(g => pasuje(g, s)).filter(Boolean).sort((a, b) => b.pkt - a.pkt);
     const bezDanych = polka.filter(g => !g._info);
     const niepewne = polka.filter(g => g._info && g._info.zrodlo === 'niepewne').length;
@@ -100,7 +101,7 @@
     if (wylosowana && !wyniki.some(r => r.g.id === wylosowana)) wylosowana = null;
     const opt = (name, list, cur) => `<div class="wz-opt" data-k="${name}">${list.map(([v, l]) => `<button data-v="${v}" class="${String(v) === String(cur) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
     el.innerHTML = `
-      <h2>Wieczór gier</h2>
+      <div class="row" style="align-items:center"><h2 style="margin:0">Wieczór gier</h2><span class="spacer"></span><button class="primary" data-kz>👆 Kto zaczyna?</button></div>
       <div class="card wz-f">
         <div><div class="l">Ile osób gra?</div>${opt('osoby', [1, 2, 3, 4, 5, 6, 7, 8, 10].map(n => [n, n === 10 ? '9+' : n]), s.osoby)}</div>
         <div><div class="l">Ile macie czasu?</div>${opt('czas', CZASY, s.czas)}</div>
@@ -117,6 +118,7 @@
       ${bezDanych.length ? `<details class="card"><summary><b>Bez danych o liczbie graczy: ${bezDanych.length}</b> – te gry nie są podpowiadane</summary>
         <div class="list" style="margin-top:10px">${bezDanych.map(g => `<div class="li"><div class="main"><div class="t">${esc(g.title)}</div></div><button class="small" data-uzup="${esc(g.id)}">Uzupełnij</button></div>`).join('')}</div></details>` : ''}`;
 
+    kz();
     el.querySelectorAll('.wz-opt').forEach(box => box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const k = box.dataset.k; s[k] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; save(s); wylosowana = null; render(el);
     }));
