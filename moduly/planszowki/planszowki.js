@@ -146,6 +146,15 @@
   };
   const FILTERS = { all: 'Wszystkie', base: 'Bez dodatków', exp: 'Dodatki', unplayed: 'Nigdy nie grane', forSale: 'Na sprzedaż', sold: 'Sprzedane', wishlist: 'Chcę kupić' };
 
+  // Przycisk „BGG ↗” na kafelku/wierszu: od razu strona gry na BoardGameGeek (kliknięcie w resztę kafelka = karta gry).
+  function bindBgg(root) {
+    root.querySelectorAll('[data-bgg]').forEach(b => b.onclick = e => {
+      e.stopPropagation();
+      const u = 'https://boardgamegeek.com/boardgame/' + b.dataset.bgg;
+      const w = window.open(u, '_blank'); if (w) w.opener = null; else location.href = u;
+    });
+  }
+
   async function renderList(el) {
     const d = await load();
     let q = prefs.get('q', ''), sort = prefs.get('sort', 'title'), filter = prefs.get('filter', 'base'), view = prefs.get('view', 'grid'), dir = prefs.get('dir', '1');
@@ -191,9 +200,10 @@
         return bits.join(' · ');
       };
       $('#out').innerHTML = !arr.length ? '<div class="empty">Nic nie znaleziono.</div>' : view === 'grid'
-        ? `<div class="grid">${arr.map(g => `<div class="tile" data-id="${esc(g.id)}"><div class="cov">${cover(g)}${statusBadge(g)}</div><div class="meta"><div class="t">${esc(g.title)}</div><div class="s">${g.isExpansion ? '<span class="badge exp">dodatek</span> ' : ''}${esc(sub(g))}</div></div></div>`).join('')}</div>`
-        : `<div class="list">${arr.map(g => `<div class="li" data-id="${esc(g.id)}">${cover(g)}<div class="main"><div class="t">${esc(g.title)} ${statusBadge(g)}</div><div class="s">${[g.year, g.isExpansion ? 'dodatek' : '', players(g), g.weight ? 'złożoność ' + num(g.weight) : ''].filter(Boolean).join(' · ')}</div></div><div class="num">${g.myRating ? '★ ' + num(g.myRating) : ''}<div class="s muted">${g._plays ? g._plays + '×' : ''}</div></div></div>`).join('')}</div>`;
+        ? `<div class="grid">${arr.map(g => `<div class="tile" data-id="${esc(g.id)}"><div class="cov">${cover(g)}${statusBadge(g)}${g.bggId ? `<button class="pl-bgg" data-bgg="${g.bggId}" title="Otwórz stronę gry na BoardGameGeek">BGG ↗</button>` : ''}</div><div class="meta"><div class="t">${esc(g.title)}</div><div class="s">${g.isExpansion ? '<span class="badge exp">dodatek</span> ' : ''}${esc(sub(g))}</div></div></div>`).join('')}</div>`
+        : `<div class="list">${arr.map(g => `<div class="li" data-id="${esc(g.id)}">${cover(g)}<div class="main"><div class="t">${esc(g.title)} ${statusBadge(g)}</div><div class="s">${[g.year, g.isExpansion ? 'dodatek' : '', players(g), g.weight ? 'złożoność ' + num(g.weight) : ''].filter(Boolean).join(' · ')}</div></div><div class="num">${g.myRating ? '★ ' + num(g.myRating) : ''}<div class="s muted">${g._plays ? g._plays + '×' : ''}</div></div>${g.bggId ? `<button class="pl-bgg pl-bgg-li" data-bgg="${g.bggId}" title="Otwórz stronę gry na BoardGameGeek">BGG ↗</button>` : ''}</div>`).join('')}</div>`;
       $('#out').querySelectorAll('[data-id]').forEach(t => t.onclick = () => App.go('planszowki', { gra: t.dataset.id }));
+      bindBgg($('#out'));
     }
     $('#q').oninput = e => { q = e.target.value; prefs.set('q', q); draw(); };
     $('#filter').onchange = e => { filter = e.target.value; prefs.set('filter', filter); draw(); };
@@ -236,7 +246,7 @@
             <button class="primary" id="play">+ Rozgrywka</button>
             <button id="edit">Edytuj</button>
             <button id="sell">💰 Wystaw na sprzedaż</button>
-            ${g.bggId ? `<a class="btn" href="https://boardgamegeek.com/boardgame/${g.bggId}" target="_blank" rel="noopener">BGG ↗</a>` : ''}
+            ${g.bggId ? `<a class="btn" href="https://boardgamegeek.com/boardgame/${g.bggId}" target="_blank" rel="noopener">Otwórz BGG ↗</a>` : ''}
             <button id="del" class="danger ghost">Usuń</button>
           </p>
         </div>
