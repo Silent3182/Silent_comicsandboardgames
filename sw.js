@@ -5,7 +5,7 @@ const FILES = [
   'core/db.js', 'core/app.js', 'core/sync.js',
   'moduly/planszowki/dane-bgg.js', 'moduly/planszowki/planszowki.js'
   , 'moduly/sprzedaz/sprzedaz.js', 'moduly/sprzedaz/sprzedaz-ui.js'
-  ,'moduly/komiksy/komiksy.js', 'moduly/komiksy/dane-komiksy.js', 'moduly/komiksy/dane-mro.js'
+  ,'moduly/komiksy/komiksy.js', 'moduly/komiksy/dane-komiksy.js', 'moduly/komiksy/dane-mro.js', 'moduly/komiksy/zapowiedzi.js'
   ,'moduly/wieczor/dane-gracze.js', 'moduly/wieczor/wieczor.js', 'moduly/postep/postep.js', 'moduly/kopia/kopia.js'
   // moduły dopisują tu swoje pliki
 ];

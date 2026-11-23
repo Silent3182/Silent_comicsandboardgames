@@ -546,12 +546,13 @@
     el.innerHTML = `
       <h2>Lista zakupów</h2>
       <div class="kx-btns"><button class="pri" id="zadd">+ Dodaj</button>
-        <a href="https://egmont.pl/komiksy" target="_blank" rel="noopener">Zapowiedzi Egmontu ↗</a>
         <a href="https://www.google.com/search?q=egmont+marvel+zapowiedzi" target="_blank" rel="noopener">Szukaj zapowiedzi Marvela ↗</a></div>
       <p class="kx-muted">${todo.length} do kupienia${sum ? ` · razem ok. ${sum.toFixed(2)} zł` : ''}. Brakujące tomy dodasz też z karty komiksu („🛒 Do listy zakupów”).</p>
+      <div id="kx-zap" class="card" style="margin:8px 0"></div>
       <div>${todo.map(row).join('') || '<p>Lista jest pusta.</p>'}</div>
       ${done.length ? `<details><summary>Kupione (${done.length})</summary>${done.slice(0, 200).map(row).join('')}</details>` : ''}`;
     el.querySelector('#zadd').onclick = () => editShop(null);
+    if (window.KXZapowiedzi) window.KXZapowiedzi.render(el.querySelector('#kx-zap')); else el.querySelector('#kx-zap').remove();
     el.querySelectorAll('[data-e]').forEach(b => b.onclick = async () => editShop(await DB.get('shoppingList', b.dataset.e)));
     el.querySelectorAll('[data-d]').forEach(b => b.onclick = async () => { await DB.remove('shoppingList', b.dataset.d); App.refresh(); });
     el.querySelectorAll('[data-b]').forEach(cb => cb.onchange = async () => {

@@ -1,0 +1,586 @@
+{
+ "zrodlo": "https://egmont.pl/zapowiedzi",
+ "data": "2026-11-23",
+ "pozycje": [
+  {
+   "id": "101377248",
+   "title": "Kaczor Donald. Magazyn 8/2026",
+   "url": "https://egmont.pl/Kaczor-Donald.-Magazyn-8-2026-101377248.html",
+   "series": "KACZOR DONALD",
+   "release": "2026-11-20",
+   "price": 16.09,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/2/6/26_pl_ddw_08_001.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101377249",
+   "title": "Mini Mini +. Magazyn 6/2026",
+   "url": "https://egmont.pl/Mini-Mini-.-Magazyn-6-2026-101377249.html",
+   "series": "MINIMINI+",
+   "release": "2026-11-20",
+   "price": 16.09,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/2/6/26_pl_mmi_06_001.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101377250",
+   "title": "Barbie. Magazyn 11/2026",
+   "url": "https://egmont.pl/Barbie.-Magazyn-11-2026-101377250.html",
+   "series": "BARBIE",
+   "release": "2026-11-24",
+   "price": 16.09,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/2/6/26_pl_bar_11_001.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101377251",
+   "title": "Littlest Pet Shop Magazyn 6/2026",
+   "url": "https://egmont.pl/Littlest-Pet-Shop-Magazyn-6-2026-101377251.html",
+   "series": "LITTLEST PET SHOP",
+   "release": "2026-11-24",
+   "price": 17.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/2/6/26_pl_lps_06_001_1.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335113",
+   "title": "Adaptacje literatury. Alicja w Krainie Czarów",
+   "url": "https://egmont.pl/Adaptacje-literatury.-Alicja-w-Krainie-Czarow-101335113.html",
+   "series": "ADAPTACJE LITERATURY",
+   "release": "2026-11-25",
+   "price": 48.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/l/alicja_w_krainie_czarow_072.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335118",
+   "title": "Amazing Spider-Man. Uzbrojony i niebezpieczny. Tom 7",
+   "url": "https://egmont.pl/Amazing-Spider-Man.-Uzbrojony-i-niebezpieczny.-Tom-7-101335118.html",
+   "series": "MARVEL FRESH",
+   "release": "2026-11-25",
+   "price": 55.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/s/asm_asm_7_uzbrojony_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335108",
+   "title": "Asteriks. Róża i miecz. Tom 29",
+   "url": "https://egmont.pl/Asteriks.-Roza-i-miecz.-Tom-29-101335108.html",
+   "series": "ASTERIKS",
+   "release": "2026-11-25",
+   "price": 41.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/s/asteriks_hc_t29_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335109",
+   "title": "Komiksy są super! Ptyś i Bill. Bill i Karolina. Tom 14",
+   "url": "https://egmont.pl/Komiksy-sa-super-Ptys-i-Bill.-Bill-i-Karolina.-Tom-14-101335109.html",
+   "series": "KOMIKSY SĄ SUPER! , PTYŚ I BILL",
+   "release": "2026-11-25",
+   "price": 38.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/p/t/ptys-oprawa-tom14-300dpi_rgb_300.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335127",
+   "title": "Odzew, Cthulhu",
+   "url": "https://egmont.pl/Odzew,-Cthulhu-101335127.html",
+   "series": "",
+   "release": "2026-11-25",
+   "price": 34.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/_/a_call_to_cthulhu-cov_072dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335103",
+   "title": "Pałac wszystkich przyszłości. Tom 4",
+   "url": "https://egmont.pl/Palac-wszystkich-przyszlosci.-Tom-4-101335103.html",
+   "series": "PAŁAC WSZYSTKICH PRZYSZŁOŚCI",
+   "release": "2026-11-25",
+   "price": 34.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/0/0/000_palac_saski04_okladki_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335125",
+   "title": "Star Wars. Doktor Aphra. Agentka chaosu",
+   "url": "https://egmont.pl/Star-Wars.-Doktor-Aphra.-Agentka-chaosu-101335125.html",
+   "series": "STAR WARS",
+   "release": "2026-11-25",
+   "price": 34.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/w/sw_agentka_chaosu_72dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335126",
+   "title": "Star Wars. Thrawn. Sojusze",
+   "url": "https://egmont.pl/Star-Wars.-Thrawn.-Sojusze-101335126.html",
+   "series": "STAR WARS",
+   "release": "2026-11-25",
+   "price": 34.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/w/sw_thrawn_sojusze_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335117",
+   "title": "Superman. Wszystkie kolory kryptonitu",
+   "url": "https://egmont.pl/Superman.-Wszystkie-kolory-kryptonitu-101335117.html",
+   "series": "SUPERMAN",
+   "release": "2026-11-25",
+   "price": 62.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/u/superman_kryptonit_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335112",
+   "title": "Świat mitów. Afrodyta",
+   "url": "https://egmont.pl/swiat-mitow.-Afrodyta-101335112.html",
+   "series": "ŚWIAT MITÓW",
+   "release": "2026-11-25",
+   "price": 62.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/f/afrodyta-okladkapl_rgb_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101368449",
+   "title": "Thorgal. Yggdrasil. Tom 44",
+   "url": "https://egmont.pl/Thorgal.-Yggdrasil.-Tom-44-101368449.html",
+   "series": "THORGAL",
+   "release": "2026-11-25",
+   "price": 20.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/t/h/thorgal_44-cov_hcc_072dpi_2_1.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101368448",
+   "title": "Thorgal. Yggdrasil. Tom 44",
+   "url": "https://egmont.pl/Thorgal.-Yggdrasil.-Tom-44-101368448.html",
+   "series": "THORGAL",
+   "release": "2026-11-25",
+   "price": 27.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/t/h/thorgal_44-cov_hcc_072dpi_2.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335123",
+   "title": "Twisted-Wonderland. Zdarzenia w Savanaclaw. Tom 3",
+   "url": "https://egmont.pl/Twisted-Wonderland.-Zdarzenia-w-Savanaclaw.-Tom-3-101335123.html",
+   "series": "MANGA",
+   "release": "2026-11-25",
+   "price": 24.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/t/w/tw_savanaclaw_3_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335119",
+   "title": "Upadek X. Nieśmiertelni X-Men",
+   "url": "https://egmont.pl/Upadek-X.-Niesmiertelni-X-Men-101335119.html",
+   "series": "MARVEL FRESH",
+   "release": "2026-11-25",
+   "price": 76.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/u/p/upadek_x_niesmiertelni_x-men_1_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335124",
+   "title": "Wujek Sknerus. Przygody w rodzinnym gronie. „Biedny, stary kaczor” oraz inne historie. Tom 3",
+   "url": "https://egmont.pl/Wujek-Sknerus.-Przygody-w-rodzinnym-gronie.-Biedny,-stary-kaczor-oraz-inne-historie.-Tom-3-101335124.html",
+   "series": "WIELCY BOHATEROWIE DISNEYA",
+   "release": "2026-11-25",
+   "price": 83.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/w/b/wbd_sknerus_03_okladka_72dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101377252",
+   "title": "Świnka Peppa. Magazyn 12/2026",
+   "url": "https://egmont.pl/swinka-Peppa.-Magazyn-12-2026-101377252.html",
+   "series": "ŚWINKA PEPPA",
+   "release": "2026-11-26",
+   "price": 16.09,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/2/6/26_pl_pep_12_001.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101370843",
+   "title": "Gigant Poleca Special. Tom 4/2026. Wielka afera prezentowa",
+   "url": "https://egmont.pl/Gigant-Poleca-Special.-Tom-4-2026.-Wielka-afera-prezentowa-101370843.html",
+   "series": "GIGANT POLECA SPECIAL , KOMIKSY GIGANT",
+   "release": "2026-11-27",
+   "price": 20.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/s/gsp_004_2026_p257_pl_preview_1.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101376212",
+   "title": "Lucky Luke. Zew Dzikiego Zachodu. Pięć opowieści o Lucky Luke’u",
+   "url": "https://egmont.pl/Lucky-Luke.-Zew-Dzikiego-Zachodu.-Piec-opowiesci-o-Lucky-Luke-u-101376212.html",
+   "series": "LUCKY LUKE",
+   "release": "2026-11-30",
+   "price": 62.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/l/l/ll_zew_zachod_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367555",
+   "title": "Absolute Batman. Abominacja. Tom 2",
+   "url": "https://egmont.pl/Absolute-Batman.-Abominacja.-Tom-2-101367555.html",
+   "series": "DC ALL IN ABSOLUTE",
+   "release": "2026-12-09",
+   "price": 62.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/b/absolute_batman_02_abominacja_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367550",
+   "title": "Asteriks. Galera Obeliksa. Tom 30",
+   "url": "https://egmont.pl/Asteriks.-Galera-Obeliksa.-Tom-30-101367550.html",
+   "series": "ASTERIKS",
+   "release": "2026-12-09",
+   "price": 41.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/s/asteriks_hc_t30_300.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367565",
+   "title": "Asteriks. Królestwo Nubii",
+   "url": "https://egmont.pl/Asteriks.-Krolestwo-Nubii-101367565.html",
+   "series": "ASTERIKS",
+   "release": "2026-12-09",
+   "price": 23.09,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/s/asteriks_krolestwo_nubii_072.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367559",
+   "title": "Avengers. Śnienie zmierzchu. Tom 2",
+   "url": "https://egmont.pl/Avengers.-snienie-zmierzchu.-Tom-2-101367559.html",
+   "series": "MARVEL FRESH",
+   "release": "2026-12-09",
+   "price": 41.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/v/avengers_mackay_2_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367557",
+   "title": "Batman. Mroczny rycerz mrocznego miasta",
+   "url": "https://egmont.pl/Batman.-Mroczny-rycerz-mrocznego-miasta-101367557.html",
+   "series": "DC CLASSIC",
+   "release": "2026-12-09",
+   "price": 69.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/b/a/batman_mroczny_rycerz_mrocznego_miasta_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367556",
+   "title": "Batman/Superman: World's Finest. Całkowite zaćmienie. Tom 7",
+   "url": "https://egmont.pl/Batman-Superman-World-s-Finest.-Calkowite-zacmienie.-Tom-7-101367556.html",
+   "series": "UNIWERSUM DC",
+   "release": "2026-12-09",
+   "price": 41.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/w/o/world_finest_07_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367554",
+   "title": "Flash. W cieniu Eclipso. Tom 4",
+   "url": "https://egmont.pl/Flash.-W-cieniu-Eclipso.-Tom-4-101367554.html",
+   "series": "DC ALL IN",
+   "release": "2026-12-09",
+   "price": 55.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/f/l/flash_2025__04_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367552",
+   "title": "Frnck. Druga szansa. Tom 11",
+   "url": "https://egmont.pl/Frnck.-Druga-szansa.-Tom-11-101367552.html",
+   "series": "FRNCK",
+   "release": "2026-12-09",
+   "price": 27.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/f/r/frnck_t11_rgb_072.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101333554",
+   "title": "Garfield. Tłusty koci trójpak. Tom 19",
+   "url": "https://egmont.pl/Garfield.-Tlusty-koci-trojpak.-Tom-19-101333554.html",
+   "series": "GARFIELD",
+   "release": "2026-12-09",
+   "price": 69.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/a/garfield_19_cover_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367558",
+   "title": "Hellblazer Peter Miligan. Tom 1",
+   "url": "https://egmont.pl/Hellblazer-Peter-Miligan.-Tom-1-101367558.html",
+   "series": "HELLBLAZER",
+   "release": "2026-12-09",
+   "price": 139.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/h/e/hellblazer_milligan_01-072dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367563",
+   "title": "Nasza czarowna Magika",
+   "url": "https://egmont.pl/Nasza-czarowna-Magika-101367563.html",
+   "series": "",
+   "release": "2026-12-09",
+   "price": 118.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/c/o/cover_magika_72dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367551",
+   "title": "Pięć Krain. Po prostu żyć. Tom 15",
+   "url": "https://egmont.pl/Piec-Krain.-Po-prostu-zyc.-Tom-15-101367551.html",
+   "series": "PIĘĆ KRAIN",
+   "release": "2026-12-09",
+   "price": 27.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/p/i/piec_krain_15-cov_072dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367564",
+   "title": "Star Wars. Epic Collection. Legendy: Imperium",
+   "url": "https://egmont.pl/Star-Wars.-Epic-Collection.-Legendy-Imperium-101367564.html",
+   "series": "STAR WARS",
+   "release": "2026-12-09",
+   "price": 111.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/w/sw_1_legendy_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367561",
+   "title": "Star Wars. Thrawn. Tom 1",
+   "url": "https://egmont.pl/Star-Wars.-Thrawn.-Tom-1-101367561.html",
+   "series": "MANGA , STAR WARS",
+   "release": "2026-12-09",
+   "price": 27.29,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/w/sw_thrawn_obwoluta.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367562",
+   "title": "Star Wars. Wyjście z mroku",
+   "url": "https://egmont.pl/Star-Wars.-Wyjscie-z-mroku-101367562.html",
+   "series": "STAR WARS",
+   "release": "2026-12-09",
+   "price": 55.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/w/sw_wyjscie_z_mroku_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367553",
+   "title": "Świat Akwilonu. Elfy. Smak śmierci. Tom 23",
+   "url": "https://egmont.pl/swiat-Akwilonu.-Elfy.-Smak-smierci.-Tom-23-101367553.html",
+   "series": "ELFY , ŚWIAT AKWILONU",
+   "release": "2026-12-09",
+   "price": 24.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/e/l/elfy_tom23_072.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101367560",
+   "title": "Upadek X. Wolverine. Tom 1",
+   "url": "https://egmont.pl/Upadek-X.-Wolverine.-Tom-1-101367560.html",
+   "series": "MARVEL FRESH",
+   "release": "2026-12-09",
+   "price": 41.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/u/p/upadek_x_woverine_1_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101335284",
+   "title": "Wiedźmin. Adaptacje opowiadań Andrzeja Sapkowskiego. Ostatnie życzenie. Wydanie zbiorcze",
+   "url": "https://egmont.pl/Wiedzmin.-Adaptacje-opowiadan-Andrzeja-Sapkowskiego.-Ostatnie-zyczenie.-Wydanie-zbiorcze-101335284.html",
+   "series": "WIEDŹMIN. ADAPTACJE OPOWIADAŃ ANDRZEJA SAPKOWSKIEGO",
+   "release": "2026-12-16",
+   "price": 132.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/i/n/integral_wiedzmin-sapkowski-072dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379958",
+   "title": "Absolute Wonder Woman. Córka swoich matek. Tom 2",
+   "url": "https://egmont.pl/Absolute-Wonder-Woman.-Corka-swoich-matek.-Tom-2-101379958.html",
+   "series": "DC ALL IN ABSOUTE",
+   "release": "2027-01-20",
+   "price": 62.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/b/absolute_wonder-woman_02_corka_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379965",
+   "title": "Adaptacje literatury. Sandokan. Tygrys z Mompracem",
+   "url": "https://egmont.pl/Adaptacje-literatury.-Sandokan.-Tygrys-z-Mompracem-101379965.html",
+   "series": "ADAPTACJE LITERATURY",
+   "release": "2027-01-20",
+   "price": 24.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/a/sandokan_072.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379951",
+   "title": "Czarolina. Gra Vorna. Tom 8",
+   "url": "https://egmont.pl/Czarolina.-Gra-Vorna.-Tom-8-101379951.html",
+   "series": "CZAROLINA",
+   "release": "2027-01-20",
+   "price": 34.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/c/o/cover_czarolina_08_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379960",
+   "title": "Godzilla rozwala uniwersum Marvela",
+   "url": "https://egmont.pl/Godzilla-rozwala-uniwersum-Marvela-101379960.html",
+   "series": "GODZILLA KONTRA MARVEL",
+   "release": "2027-01-20",
+   "price": 34.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/g/o/godzilla_rozwala_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379957",
+   "title": "Injustice 2. Tom 2",
+   "url": "https://egmont.pl/Injustice-2.-Tom-2-101379957.html",
+   "series": "INJUSTICE",
+   "release": "2027-01-20",
+   "price": 153.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/i/n/injustice_02b_cover_72_1.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379955",
+   "title": "Niepisane. Tom 5",
+   "url": "https://egmont.pl/Niepisane.-Tom-5-101379955.html",
+   "series": "NIEPISANE",
+   "release": "2027-01-20",
+   "price": 139.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/n/i/niepisane_05-cov_072dpi.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379967",
+   "title": "Stitch. Podróże w czasie. Regencyjna Anglia. Tom 3",
+   "url": "https://egmont.pl/Stitch.-Podroze-w-czasie.-Regencyjna-Anglia.-Tom-3-101379967.html",
+   "series": "MANGA , STITCH , STITCH. PODRÓŻE W CZASIE",
+   "release": "2027-01-20",
+   "price": 24.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/t/stitch_3_regencyjna_anglia_obwoluta.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379964",
+   "title": "Świat Akwilonu. Krasnoludy. Brum z Bractwa Wykluczonych. Tom 14",
+   "url": "https://egmont.pl/swiat-Akwilonu.-Krasnoludy.-Brum-z-Bractwa-Wykluczonych.-Tom-14-101379964.html",
+   "series": "KRASNOLUDY , ŚWIAT AKWILONU",
+   "release": "2027-01-20",
+   "price": 24.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/k/r/krasnoludy_tom14_okladka_072.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379953",
+   "title": "Świat Smerfów. Smerfy uprawiają sport. Tom 6",
+   "url": "https://egmont.pl/swiat-Smerfow.-Smerfy-uprawiaja-sport.-Tom-6-101379953.html",
+   "series": "ŚWIAT SMERFÓW",
+   "release": "2027-01-20",
+   "price": 27.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/w/swiatsmerfow_6_smerfyuprawiajasport_cv_072.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379966",
+   "title": "W głowie się nie mieści 2",
+   "url": "https://egmont.pl/W-glowie-sie-nie-miesci-2-101379966.html",
+   "series": "MAGICZNY ŚWIAT DISNEYA W KOMIKSIE",
+   "release": "2027-01-20",
+   "price": 24.49,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/w/_/w_glowie_sie_nie_miesci_2_okladka_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379952",
+   "title": "Yakari. Yakari i Długouchy. Tom27",
+   "url": "https://egmont.pl/Yakari.-Yakari-i-Dlugouchy.-Tom27-101379952.html",
+   "series": "YAKARI",
+   "release": "2027-01-20",
+   "price": 27.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/y/a/yakari_27__yakari_i_dlugouchy_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379962",
+   "title": "Amazing Spider-Man. Pierwsze łowy Spider-Mana. Tom 8",
+   "url": "https://egmont.pl/Amazing-Spider-Man.-Pierwsze-lowy-Spider-Mana.-Tom-8-101379962.html",
+   "series": "MARVEL FRESH",
+   "release": "2027-01-27",
+   "price": 48.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/s/asm_pierwsze_owy_spider-mana_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379950",
+   "title": "Asteriks. Asteriks i Latraviata. Tom 31",
+   "url": "https://egmont.pl/Asteriks.-Asteriks-i-Latraviata.-Tom-31-101379950.html",
+   "series": "ASTERIKS",
+   "release": "2027-01-27",
+   "price": 41.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/a/s/asteriks_hc_t31_latraviata_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379956",
+   "title": "Batman Detective Comics. Elixir. Tom 2",
+   "url": "https://egmont.pl/Batman-Detective-Comics.-Elixir.-Tom-2-101379956.html",
+   "series": "BATMAN DETECTIVE COMICS",
+   "release": "2027-01-27",
+   "price": 55.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/b/a/batman_detective_02_eliksir_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379959",
+   "title": "Nightwing. Widowisko. Tom 1",
+   "url": "https://egmont.pl/Nightwing.-Widowisko.-Tom-1-101379959.html",
+   "series": "Nightwing",
+   "release": "2027-01-27",
+   "price": 41.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/n/i/nightwing_all_in_01_72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379961",
+   "title": "Nowy świat Ultimate. Ultimates. Tom 2",
+   "url": "https://egmont.pl/Nowy-swiat-Ultimate.-Ultimates.-Tom-2-101379961.html",
+   "series": "MARVEL FRESH",
+   "release": "2027-01-27",
+   "price": 55.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/u/l/ultimates_2_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379954",
+   "title": "Star Wars. Era Republiki. Wrogowie",
+   "url": "https://egmont.pl/Star-Wars.-Era-Republiki.-Wrogowie-101379954.html",
+   "series": "STAR WARS",
+   "release": "2027-01-27",
+   "price": 34.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/s/w/sw_wrogowie_okladka.72.jpg",
+   "dodano": "2026-11-23"
+  },
+  {
+   "id": "101379963",
+   "title": "X-Men. Punkty zwrotne. Operacja „Zero tolerancji”",
+   "url": "https://egmont.pl/X-Men.-Punkty-zwrotne.-Operacja-Zero-tolerancji-101379963.html",
+   "series": "MARVEL CLASSIC",
+   "release": "2027-01-27",
+   "price": 153.99,
+   "img": "https://egmont.pl/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/x/-/x-men_operacja_zero_tolerancji.72.jpg",
+   "dodano": "2026-11-23"
+  }
+ ]
+}
