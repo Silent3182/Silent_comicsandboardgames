@@ -570,6 +570,8 @@
     });
   }
 
+  // Dla modułu „Postęp czytania”: lista Master Reading Order i stan przeczytanych
+  App.provide('komiksy.mro', async () => { await ensureSeed(); const S = await mroState(); return { list: MRO.list, secs: MRO.secs, S }; });
   App.registerModule({ id: 'komiksy', title: 'Komiksy', icon: '📚', order: 20, render: renderKomiksy });
   App.registerModule({ id: 'czytanie', title: 'Do czytania', icon: '📖', order: 21, render: renderCzytanie });
   App.registerModule({ id: 'zakupy', title: 'Zakupy', icon: '🛒', order: 30, render: renderZakupy });
