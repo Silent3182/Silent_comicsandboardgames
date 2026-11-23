@@ -9,8 +9,16 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css">
+<script>/* Wygląd z Ustawień (core/wyglad.js): styl ikon i motyw, ustawiane przed narysowaniem strony */
+try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;}catch(e){document.documentElement.dataset.ikony='kolor';}</script>
 </head>
 <body>
+<!-- Ekran startowy (core/splash.js): znika po 2 s -->
+<div id="splash" aria-hidden="true">
+  <div class="sp-wall"></div>
+  <div class="sp-shade"></div>
+  <div class="sp-title"><small>Moje kolekcje</small><h1><span>Kolekcja</span> <b>Marcina</b></h1><p class="sp-cnt">planszówki · komiksy</p></div>
+</div>
 <div id="app">
   <nav id="nav"></nav>
   <main id="main"><p class="muted">Ładowanie…</p></main>
@@ -18,6 +26,7 @@
 <div id="toast"></div>
 
 <!-- Rdzeń -->
+<script src="core/ikony.js"></script>
 <script src="core/db.js"></script>
 <script src="core/app.js"></script>
 <script src="core/sync.js"></script>
@@ -38,6 +47,8 @@
 <script src="moduly/wypozyczenia/wypozyczenia.js"></script>
 <script src="moduly/wartosc/wartosc.js"></script>
 <!-- /Moduły -->
+<script src="core/wyglad.js"></script>
+<script src="core/splash.js"></script>
 <script>App.start();</script>
 </body>
 </html>

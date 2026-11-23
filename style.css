@@ -307,3 +307,66 @@ dialog.dlg label input[type=checkbox] { width: 20px; height: 20px; }
 .pl-gopt span { display: flex; flex-direction: column; min-width: 0; }
 .pl-gopt small { color: var(--muted); font-size: 12px; }
 .pl-gnote { font-size: 12px; color: var(--muted); padding: 6px 2px 2px; }
+
+/* ---------- Ikony zakładek (core/ikony.js) ---------- */
+#nav .ico svg.ic { width: 22px; height: 22px; display: block; margin: 0 auto; }
+#nav .ico svg.ic .f { fill: currentColor; fill-opacity: .14; }
+#nav button.active .ico svg.ic .f { fill-opacity: .32; }
+#nav button:not(.active) .ico { color: var(--muted); }
+#nav button:not(.active):hover .ico { color: var(--text); }
+html[data-ikony="kontur"] #nav .ico svg.ic .f { fill-opacity: 0; }
+html[data-ikony="wypelnione"] #nav .ico svg.ic .f { fill-opacity: .14; }
+html[data-ikony="kontur"] #nav button.active .ico svg.ic .f { fill-opacity: .22; }
+/* wariant „kolor”: biały znak na kolorowym kafelku */
+html[data-ikony="kolor"] #nav .ico svg.ic { width: 30px; height: 30px; padding: 5px; border-radius: 9px; background: var(--ik); color: #fff; box-shadow: 0 2px 6px color-mix(in srgb, var(--ik) 40%, transparent); }
+html[data-ikony="kolor"] #nav .ico svg.ic .f { fill: #fff; fill-opacity: .28; }
+html[data-ikony="kolor"] #nav button:not(.active) .ico { color: #fff; }
+html[data-ikony="kolor"] #nav button:not(.active) .ico svg.ic { opacity: .82; }
+@media (max-width: 760px) {
+  #nav > button .ico { padding: 4px 16px; }
+  html[data-ikony="kolor"] #nav > button .ico { padding: 2px 14px; }
+  html[data-ikony="kolor"] #nav > button .ico svg.ic { width: 30px; height: 30px; }
+  html[data-ikony="kolor"] #nav .more-sheet .ico svg.ic { width: 40px; height: 40px; padding: 7px; border-radius: 12px; }
+  #nav > button .ico svg.ic { width: 24px; height: 24px; }
+  #nav .more-sheet .ico svg.ic { width: 28px; height: 28px; }
+}
+
+/* ---------- Ekran startowy (core/splash.js) ---------- */
+#splash { position: fixed; inset: 0; z-index: 1000; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0d1117; color: #fff; transition: opacity .55s ease, transform .55s ease; cursor: pointer; }
+#splash.out { opacity: 0; transform: scale(1.06); pointer-events: none; }
+/* Wariant A: ściana okładek z kolekcji */
+#splash .sp-wall { position: absolute; inset: -35% -40%; display: flex; justify-content: center; gap: 10px; transform: rotate(-12deg); }
+#splash .sp-col { flex: 0 0 var(--colw, 92px); display: flex; flex-direction: column; gap: 10px; animation: spUp 26s linear infinite; }
+#splash .sp-col:nth-child(even) { animation-name: spDown; margin-top: -60px; }
+@keyframes spUp { to { transform: translateY(-50%); } }
+@keyframes spDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+#splash .sp-t { position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 18px rgba(0,0,0,.45); background: #fff; }
+#splash .sp-t img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#splash .sp-t:not(.ok) { visibility: hidden; }
+#splash .sp-shade { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 45% at 50% 50%, rgba(13,17,23,.92) 0%, rgba(13,17,23,.7) 45%, rgba(13,17,23,.25) 100%); }
+#splash .sp-title { position: relative; text-align: center; padding: 24px; animation: spIn .7s cubic-bezier(.2,.8,.2,1) both; }
+#splash .sp-title small { display: block; font: 800 12px/1 system-ui, sans-serif; letter-spacing: .32em; text-transform: uppercase; color: #f0b45a; margin-bottom: 12px; }
+#splash .sp-title h1 { margin: 0; font: 900 clamp(40px, 11vw, 76px)/.95 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing: -.03em; text-shadow: 0 4px 30px rgba(0,0,0,.6); }
+#splash .sp-title h1 span { display: block; font-weight: 300; font-size: .62em; letter-spacing: .01em; opacity: .92; }
+#splash .sp-title h1 b { background: linear-gradient(90deg, #ff5a4e, #f0b45a 55%, #6fb3ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#splash .sp-title p { margin: 14px 0 0; font: 600 14px/1.3 system-ui, sans-serif; color: rgba(255,255,255,.75); letter-spacing: .02em; }
+@keyframes spIn { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+@media (prefers-reduced-motion: reduce) { #splash .sp-col { animation: none; } }
+
+/* ---------- Ustawienia › Wygląd (core/wyglad.js) ---------- */
+.wy-lab { font-size: 13px; font-weight: 650; color: var(--muted); margin: 2px 0 8px; }
+.wy-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+.wy-opt { flex-direction: column; gap: 8px; padding: 12px 6px; font-size: 13px; min-height: 92px; }
+.wy-opt.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.wy-prev { display: flex; gap: 6px; color: var(--accent); }
+.wy-prev svg.ic { width: 26px; height: 26px; }
+.wy-prev svg.ic .f { fill: currentColor; fill-opacity: .16; }
+.wy-prev[data-ikony="kontur"] svg.ic .f { fill-opacity: 0; }
+.wy-prev[data-ikony="kolor"] svg.ic { padding: 4px; border-radius: 8px; background: var(--ik); color: #fff; }
+.wy-prev[data-ikony="kolor"] svg.ic .f { fill: #fff; fill-opacity: .28; }
+.wy-seg { display: flex; width: 100%; }
+.wy-seg button { flex: 1; }
+.wy-n { white-space: nowrap; }
+.wy-n b { color: var(--muted); margin-right: 2px; }
+.wy-opt.on .wy-n b { color: inherit; }
+.wy-hint { font-size: 13px; margin: 10px 0 0; }
