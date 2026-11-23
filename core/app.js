@@ -61,11 +61,30 @@
     today() { const d = new Date(); return d.toISOString().slice(0, 10); }
   };
 
+  /* Nawigacja: na komputerze boczny pasek, na telefonie dolny pasek z 4 głównymi zakładkami
+   * (NAV_MAIN) i przyciskiem „Więcej” z resztą. Krótkie podpisy na telefon: NAV_SHORT. */
+  const NAV_MAIN = ['planszowki', 'rozgrywki', 'komiksy', 'czytanie'];
+  const NAV_SHORT = { czytanie: 'Czytanie', planszowki: 'Gry', ustawienia: 'Ustawienia' };
   function renderNav() {
     const nav = document.getElementById('nav');
-    nav.innerHTML = modules.map(m => `<button data-id="${m.id}" class="${current && current.id === m.id ? 'active' : ''}"><span class="ico">${m.icon || '•'}</span><span class="lab">${esc(m.title)}</span></button>`).join('');
-    nav.querySelectorAll('button').forEach(b => b.onclick = () => App.go(b.dataset.id));
+    const isMain = m => NAV_MAIN.includes(m.id);
+    let lastGroup = null;
+    const btn = (m, inSheet) => {
+      const group = Math.floor((m.order || 100) / 100);
+      const sep = !inSheet && lastGroup !== null && group !== lastGroup ? '<div class="sep bottom"></div>' : '';
+      if (!inSheet) lastGroup = group;
+      return `${sep}<button data-id="${m.id}" class="${current && current.id === m.id ? 'active' : ''} ${isMain(m) ? 'pri' : 'sec'}"><span class="ico">${m.icon || '•'}</span><span class="lab">${esc(m.title)}</span><span class="lab-s">${esc(NAV_SHORT[m.id] || m.title)}</span></button>`;
+    };
+    const rest = modules.filter(m => !isMain(m));
+    nav.innerHTML = `<div class="brand"><img src="icons/icon-192.png" alt="">Moje kolekcje</div>`
+      + modules.map(m => btn(m)).join('')
+      + (rest.length ? `<button class="more ${current && !isMain(current) ? 'active' : ''}" aria-label="Więcej"><span class="ico">☰</span><span class="lab-s">Więcej</span></button><div class="more-sheet">${rest.map(m => btn(m, true)).join('')}</div>` : '');
+    nav.classList.remove('open');
+    nav.querySelectorAll('button[data-id]').forEach(b => b.onclick = () => { nav.classList.remove('open'); App.go(b.dataset.id); });
+    const more = nav.querySelector('.more');
+    if (more) more.onclick = e => { e.stopPropagation(); nav.classList.toggle('open'); };
   }
+  document.addEventListener('click', e => { const nav = document.getElementById('nav'); if (nav && nav.classList.contains('open') && !nav.contains(e.target)) nav.classList.remove('open'); });
 
   function parseHash() {
     const [id, q] = location.hash.replace(/^#\/?/, '').split('?');
