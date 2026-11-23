@@ -53,12 +53,31 @@ jobs:
 
       - name: Zbuduj APK
         run: |
-          mkdir -p ~/.android
-          cp android-build/klucz.keystore ~/.android/debug.keystore
+          # Podpis zawsze tym samym kluczem z repo – inaczej Android odrzuca aktualizację („Nie zaktualizowano”).
+          KS="$GITHUB_WORKSPACE/android-build/klucz.keystore"
           cd build/android
+          cat >> app/build.gradle <<EOF2
+          android {
+              signingConfigs {
+                  stalyKlucz {
+                      storeFile file('$KS')
+                      storePassword 'android'
+                      keyAlias 'androiddebugkey'
+                      keyPassword 'android'
+                  }
+              }
+              buildTypes { debug { signingConfig signingConfigs.stalyKlucz } }
+          }
+          EOF2
           sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/; s/versionName \"1.0\"/versionName \"0.1.${{ github.run_number }}\"/" app/build.gradle
           ./gradlew assembleDebug --no-daemon -q
           cp app/build/outputs/apk/debug/app-debug.apk ../../moje-kolekcje.apk
+          # kontrola: APK musi mieć podpis z klucza w repo
+          unzip -p ../../moje-kolekcje.apk 'META-INF/*.RSA' > /tmp/c.rsa
+          A=$(keytool -printcert -file /tmp/c.rsa | grep -m1 'SHA256:')
+          B=$(keytool -list -v -keystore "$KS" -storepass android | grep -m1 'SHA256:')
+          echo "APK: $A"; echo "Klucz: $B"
+          [ "$A" = "$B" ] || { echo 'Zły podpis APK'; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:
