@@ -297,6 +297,10 @@ dialog.dlg label input[type=checkbox] { width: 20px; height: 20px; }
 .pl-bgg { position: absolute; right: 6px; bottom: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; border-radius: 999px; background: var(--surface); color: var(--accent); border: 1px solid var(--line); box-shadow: var(--shadow); cursor: pointer; z-index: 2; line-height: 1.2; }
 .pl-bgg:hover { background: var(--accent); color: var(--surface); }
 .pl-bgg.pl-bgg-li { position: static; flex-shrink: 0; margin-left: 6px; box-shadow: none; }
+/* przytrzymanie okładki = szybka partia (planszowki.js): bez menu „zapisz obraz” i zaznaczania, delikatne wciśnięcie */
+.pl-lista [data-id] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.pl-lista [data-id] img { -webkit-user-drag: none; }
+.pl-lista [data-id].pl-hold { transform: scale(.96); transition: transform .6s ease; }
 
 /* Planszówki: wyszukiwarka gry w oknie rozgrywki (lista pod polem, nie nakłada się na inne pola) */
 .pl-gres { display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow-y: auto; margin-top: 4px; }

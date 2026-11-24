@@ -227,6 +227,7 @@
 
   async function renderList(el) {
     const d = await load();
+    let przytrzymano = 0;
     let q = prefs.get('q', ''), sort = prefs.get('sort', 'title'), filter = prefs.get('filter', 'base'), view = prefs.get('view', 'grid'), dir = prefs.get('dir', '1');
     d.games.forEach(g => { const ps = d.byGame.get(g.id) || []; g._plays = ps.length + (g.bggPlays || 0); g._last = ps[0] && ps[0].date; });
     const owned = d.games.filter(g => g.status === 'owned' || g.status === 'forSale');
@@ -279,8 +280,31 @@
       out.onclick = e => {
         const b = e.target.closest('[data-bgg]');
         if (b) { e.stopPropagation(); const u = 'https://boardgamegeek.com/boardgame/' + b.dataset.bgg; const w = window.open(u, '_blank'); if (w) w.opener = null; else location.href = u; return; }
+        if (Date.now() - przytrzymano < 700) return; // to był koniec przytrzymania, nie kliknięcie
         const t = e.target.closest('[data-id]'); if (t) App.go('planszowki', { gra: t.dataset.id });
       };
+      // przytrzymanie okładki (ok. 0,6 s) = szybka partia: licznik punktów z tą grą i graczami z ostatniej partii.
+      // Ruch palca o więcej niż kilka pikseli (przewijanie) albo puszczenie wcześniej = zwykłe przewijanie / kliknięcie.
+      out.classList.add('pl-lista');
+      let tm = null, x0 = 0, y0 = 0;
+      const stop = () => { clearTimeout(tm); tm = null; out.querySelectorAll('.pl-hold').forEach(x => x.classList.remove('pl-hold')); };
+      out.onpointerdown = e => {
+        stop();
+        if (e.button > 0 || e.isPrimary === false || !App.has('licznik.start') || e.target.closest('[data-bgg]')) return;
+        const t = e.target.closest('[data-id]'); if (!t) return;
+        x0 = e.clientX; y0 = e.clientY;
+        t.classList.add('pl-hold');
+        window.addEventListener('scroll', stop, { passive: true, once: true });
+        tm = setTimeout(() => {
+          stop(); przytrzymano = Date.now();
+          try { if (navigator.vibrate) navigator.vibrate(30); } catch (er) {}
+          App.call('licznik.start', t.dataset.id);
+        }, 600);
+      };
+      out.onpointermove = e => { if (tm && Math.hypot(e.clientX - x0, e.clientY - y0) > 10) stop(); };
+      out.onpointerup = out.onpointercancel = out.onpointerleave = stop;
+      // bez systemowego menu „zapisz obraz” przy przytrzymaniu okładki
+      out.oncontextmenu = e => { if (e.target.closest('[data-id]') && App.has('licznik.start')) e.preventDefault(); };
     }
     $('#q').oninput = e => { q = e.target.value; prefs.set('q', q); draw(); };
     $('#filter').onchange = e => { filter = e.target.value; prefs.set('filter', filter); draw(); };
