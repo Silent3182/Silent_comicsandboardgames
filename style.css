@@ -424,3 +424,26 @@ html[data-ikony="kolor"] .st-ic svg.ic .f { fill: #fff; fill-opacity: .3; }
   #nav .more-sheet { max-height: 62vh; overflow-y: auto; }
 }
 @media (prefers-reduced-motion: reduce) { .st-tile.edit { animation: none; } }
+
+/* ===== Przegląd UX (działy menu, pola wyboru, przyciski pływające) ===== */
+/* działy w bocznym menu i w „Więcej” */
+#nav .nav-h { margin: 14px 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+#nav .brand + .nav-h { margin-top: 6px; }
+#nav .ms-h { display: none; }
+@media (max-width: 760px) {
+  #nav > .nav-h { display: none; }
+  #nav.open .more-sheet .ms-h { display: block; grid-column: 1 / -1; margin: 8px 4px 0; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  #nav.open .more-sheet .ms-h:first-child { margin-top: 0; }
+}
+/* pola wyboru: większe i tekst zawsze obok kwadracika, cały wiersz klikalny */
+#main input[type=checkbox], #main input[type=radio] { width: 20px; height: 20px; flex: 0 0 auto; margin: 0; }
+#main label.row:has(> input[type=checkbox]), #main label.row:has(> input[type=radio]), #main label.chk { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; min-height: 40px; cursor: pointer; }
+#main label.chk { margin: 2px 0; }
+/* tytuł zakładki: h2 na górze ekranu wygląda jak h1 w innych zakładkach */
+#main > h2:first-child, #main > div:first-child > h2:first-child { font-size: 24px; margin-top: 0; }
+/* telefon: miejsce pod treścią na przyciski pływające, chowanie ich przy przewijaniu w dół */
+@media (max-width: 760px) {
+  #main { padding-bottom: calc(150px + env(safe-area-inset-bottom)) !important; }
+  #sk-fab, #as-fab { transition: transform .25s ease, opacity .25s ease; }
+  body.fab-schowane #sk-fab, body.fab-schowane #as-fab { transform: translateY(170px); opacity: 0; pointer-events: none; }
+}
