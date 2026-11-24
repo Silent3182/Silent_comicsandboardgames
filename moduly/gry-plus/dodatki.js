@@ -64,7 +64,7 @@
         ${ex.map(e => dodHtml(d, e)).join('')}
         ${br.length ? `<details style="margin-top:6px"><summary class="muted" style="font-size:13px">Brakujące dodatki wg BGG: ${br.length}</summary><div style="margin-top:6px">${br.map(n => `<div class="row" style="gap:6px;margin:3px 0"><span style="flex:1;font-size:14px">${esc(n)}</span><button class="small ghost" data-chce="${esc(n)}">⭐ chcę</button></div>`).join('')}</div></details>` : ''}</div>`; }).join('') || '<p class="muted">Brak dodatków przypisanych do gier.</p>'}
       ${sieroty.length ? `<details class="card" style="margin-top:12px"><summary><b>Dodatki bez gry bazowej: ${sieroty.length}</b></summary><div class="list" style="margin-top:8px">${sieroty.map(e => `<div class="li" data-baza="${esc(e.id)}"><div class="main"><div class="t">${esc(e.title)}</div></div><button class="small">Wybierz grę</button></div>`).join('')}</div></details>` : ''}
-      <p class="muted" style="font-size:12.5px;margin-top:12px">„Grany” = jest partia z tym dodatkiem albo zaznaczyłeś „✓ grałem”. Lista brakujących pochodzi z BGG (stan ze stycznia 2022, bez promek).</p>`;
+      <p class="muted" style="font-size:12.5px;margin-top:12px">„Grany” = jest partia z tym dodatkiem albo zaznaczyłeś „✓ grałem”. Lista brakujących pochodzi z BGG (${window.GRY_DANE && GRY_DANE.zrodloBgg ? esc(GRY_DANE.zrodloBgg) : 'stan ze stycznia 2022'}, bez promek).</p>`;
     el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { st.filtr = b.dataset.f; render(el); });
     el.querySelectorAll('[data-baza]').forEach(li => li.onclick = async () => { if (await wybierzBaze(d.gameById.get(li.dataset.baza), d)) render(el); });
     bindDod(el, d, () => render(el));
