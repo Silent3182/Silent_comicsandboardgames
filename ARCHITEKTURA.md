@@ -98,7 +98,6 @@ Asystent głosowy (`moduly/asystent`): polecenia po polsku (Web Speech API w prz
 
 Udostępnianie (`moduly/udostepnij` + strona `kolekcja.html`): link tylko do odczytu. Dozwolone pola: tytuł, rok, bggId, dodatek, opcjonalnie ocena/partie/na sprzedaż/pożyczona/okładka, komiksy jako seria + numery. Nigdy: notatki, ceny, kody, półki, gracze, osoby z wypożyczeń, tokeny. `#k=` = spis skompresowany w linku (deflate-raw + base64url), `#g=` = sekretny Gist (token z uprawnieniem Gists w `DB.local('udostepnijToken')` albo token synchronizacji). Ustawienie `udostepnij`.
 
-Tryb imprezy (`moduly/impreza` + strona gościa `impreza.html#t=<kanał>`): goście dołączają przez kod QR; wiadomości przez ntfy.sh (losowy kanał `mk…`, tylko imiona, kolory, wyniki, tytuł gry). Stan w localStorage `impreza.stan`; na koniec zapis do plays albo przekazanie do `licznik.stan`.
 
 ## Komunikaty i błędy
 - Pytania Tak/Nie: `await App.ui.confirm('Usunąć…?')` – okno aplikacji, nie systemowe. Nie używaj `alert/confirm/prompt` przeglądarki (test to sprawdza).

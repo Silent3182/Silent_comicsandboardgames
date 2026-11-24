@@ -3,7 +3,7 @@
  *   „dodaj rozgrywkę Azul, wygrał Marcin”                  → rozgrywka ze zwycięzcą
  *   „zagraliśmy w Carcassonne z Kasią i Tomkiem”           → rozgrywka z graczami
  *   „dodaj do listy zakupów Thorgal 66”, „czy mam Wingspan”, „pokaż Brass”, „co mam czytać”,
- *   „licznik Azul”, „impreza”, „wystaw na sprzedaż Azul”
+ *   „licznik Azul”, „wystaw na sprzedaż Azul”
  * Zawsze przed zapisem pokazuje podgląd do potwierdzenia (gra, gracze, punkty, zwycięzca).
  * Rozpoznawanie mowy: w przeglądarce Web Speech API (Chrome/Edge, pl-PL); w APK wtyczka
  * @capacitor-community/speech-recognition (Android). Bez mikrofonu zawsze można wpisać polecenie.
@@ -95,7 +95,6 @@
     if (/^(dodaj (do )?(listy )?zakup\w*|do listy zakupow|kup|kupic|dopisz do zakupow)\b/.test(t)) return Object.assign(T, { typ: 'zakupy', co: t.replace(/^(dodaj (do )?(listy )?zakup\w*|do listy zakupow|kup|kupic|dopisz do zakupow)\s*/, '') });
     if (/^czy mam\b/.test(t)) return Object.assign(T, { typ: 'czymam', co: t.replace(/^czy mam\s*/, '') });
     if (/^(co (mam )?(teraz )?czytac|nastepny komiks|co dalej czytac|co czytam)/.test(t)) return Object.assign(T, { typ: 'czytaj' });
-    if (/^(tryb imprezy|impreza|kod qr)/.test(t)) return Object.assign(T, { typ: 'impreza' });
     if (/^(wystaw|sprzedaj|sprzedam)( na sprzedaz)?\b/.test(t)) return Object.assign(T, { typ: 'sprzedaz', co: t.replace(/^(wystaw|sprzedaj|sprzedam)( na sprzedaz)?\s*/, '') });
     if (/^(licznik|liczymy|licz punkty|zacznij gre|zaczynamy)\b/.test(t) && !/\d/.test(t)) return Object.assign(T, { typ: 'licznik', co: t.replace(/^(licznik( punktow)?|liczymy( punkty)?|licz punkty|zacznij gre|zaczynamy)\s*(w\s+)?/, '') });
     if (/^(pokaz|otworz|znajdz)\b/.test(t)) return Object.assign(T, { typ: 'pokaz', co: t.replace(/^(pokaz|otworz|znajdz)\s*/, '') });
@@ -174,7 +173,6 @@
       const n = App.has('komiksy.nastepny') ? await App.call('komiksy.nastepny') : null;
       return odp(n ? `Następny do przeczytania: ${n.title}${n.wyd ? ' (' + n.wyd + ')' : ''}.` : 'Nie wiem, co jest następne – otwórz zakładkę Czytanie.');
     }
-    if (R.typ === 'impreza') { App.go('impreza'); return odp('Otwieram tryb imprezy.'); }
     if (R.typ === 'licznik' || R.typ === 'pokaz' || R.typ === 'sprzedaz') {
       const g = await wybierzGre(znajdzGry(R.co, R.typ === 'pokaz' ? games : wlasne), R.co, wlasne);
       if (!g) {
@@ -353,7 +351,7 @@
     let b = document.getElementById('as-fab');
     if (!b) { b = document.createElement('button'); b.id = 'as-fab'; b.setAttribute('aria-label', 'Asystent głosowy'); b.title = 'Asystent głosowy'; b.innerHTML = MIC; document.body.appendChild(b); b.onclick = () => mozeSluchac() ? nasluch(b, document.getElementById('as-live')) : App.go('asystent'); }
     const id = location.hash.replace(/^#\/?/, '').split('?')[0];
-    b.classList.toggle('hide', !ls.get('asystent.fab', true) || id === 'asystent' || id === 'licznik' || id === 'impreza');
+    b.classList.toggle('hide', !ls.get('asystent.fab', true) || id === 'asystent' || id === 'licznik');
   }
   window.addEventListener('hashchange', fab);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fab); else fab();
