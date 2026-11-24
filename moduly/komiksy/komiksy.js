@@ -250,6 +250,7 @@
             <button id="kedit">✏️ Edytuj</button>
             <button id="ksell">💰 Wystaw na sprzedaż</button>
             ${App.has('wypozyczenia.przycisk') && c.status !== 'missing' ? '<button id="klend">🤝 Pożycz</button>' : ''}
+            ${App.has('polki.przycisk') && (c.status === 'owned' || c.status === 'forSale') ? '<button id="kshelf">📍 Półka</button>' : ''}
             ${c.status !== 'owned' ? '<button id="kshop">🛒 Do listy zakupów</button>' : ''}
             <a target="_blank" rel="noopener" href="https://allegro.pl/listing?string=${q}">Ceny: Allegro</a>
             <a target="_blank" rel="noopener" href="https://www.olx.pl/oferty/q-${encodeURIComponent((c.title || '').replace(/\s+/g, '-'))}/">OLX</a>
@@ -261,11 +262,12 @@
     const $ = s => el.querySelector(s);
     const save = async patch => { await DB.put('comics', Object.assign({}, c, patch)); App.refresh(); };
     $('#kown').onclick = () => save({ status: c.status === 'owned' ? 'missing' : 'owned' });
-    $('#kread').onclick = () => save({ read: !c.read });
+    $('#kread').onclick = () => save({ read: !c.read, readAt: !c.read ? new Date().toISOString() : null });
     el.querySelectorAll('.kx-stars button').forEach(b => b.onclick = () => save({ myRating: +b.dataset.r || null }));
     $('#kedit').onclick = () => editComic(c);
     $('#ksell').onclick = () => App.call('sprzedaz.wystaw', { itemType: 'comic', itemId: c.id });
     if ($('#klend')) App.call('wypozyczenia.przycisk', $('#klend'), 'comic', c.id);
+    if ($('#kshelf')) App.call('polki.przycisk', $('#kshelf'), 'comic', c.id);
     if ($('#kshop')) $('#kshop').onclick = async () => {
       await DB.put('shoppingList', { title: c.title, itemType: 'comic', series: c.series, volume: c.volume, comicId: c.id, publisher: c.publisher, bought: false });
       App.ui.toast('Dodano do listy zakupów');
@@ -408,6 +410,7 @@
           <h3>${esc(nx.title)}</h3>
           <div>${e.mustRead ? '<span class="kx-b must">Must read</span>' : ''}${e.ocena ? `<span class="kx-b">ocena ${e.ocena}</span>` : ''}${e.typ ? `<span class="kx-b">${esc(e.typ)}</span>` : ''}${e.uwagi ? esc(e.uwagi) : ''}</div>
           <p>${codesHtml([nx.wyd, e.nosnik].filter(Boolean).join(' / '), idx, S.vols(nx)).trim() || '<span class="kx-muted">Nie znalazłem tego zeszytu w żadnym tomie kolekcji</span>'}</p>
+          <p id="czpolka"></p>
           <div class="kx-btns"><button class="pri" id="czok">✓ Przeczytane</button><button id="czskip">Pomiń (oznacz jako przeczytane bez czytania)</button><button id="cztom">📎 Tom</button></div>
           ${S.backlog.length ? `<p class="kx-muted">Masz ${S.backlog.length} zaległych pozycji wcześniej w kolejności – zobacz „Zaległe”.</p>` : ''}
         </div>
@@ -415,6 +418,9 @@
       body.querySelector('#czok').onclick = async () => { await setRead([nx], true); App.ui.toast('✓ ' + nx.title); App.refresh(); };
       body.querySelector('#czskip').onclick = async () => { await DB.put('readingOrder', Object.assign({}, S.ov.get(nx.id) || {}, { id: nx.id, order: nx.i + 1, part: nx.sec, title: nx.title, read: true, skipped: true, readAt: null })); App.refresh(); };
       body.querySelector('#cztom').onclick = () => assignVolume(nx, S);
+      if (App.has('polki.html') && S.vols(nx).length) { // gdzie stoi tom z następnym zeszytem
+        Promise.all(S.vols(nx).map(i => DB.get('comics', i))).then(cs => { const h = cs.filter(Boolean).map(k => App.call('polki.html', 'comic', k)).filter(Boolean); const p = body.querySelector('#czpolka'); if (p && h.length) p.innerHTML = [...new Set(h)].join(' '); });
+      }
       bindRows(body, S);
     } else if (cz.view === 'backlog') {
       body.innerHTML = S.backlog.length ? `<p class="kx-muted">Pozycje przed miejscem, w którym jesteś, które nie są odznaczone. Odznacz, gdy przeczytasz.</p>${S.backlog.map(x => itemRow(x, S, idx, { sec: true })).join('')}` : '<p>Brak zaległości 👍</p>';

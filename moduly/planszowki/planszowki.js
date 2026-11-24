@@ -125,7 +125,7 @@
         // wybór gry: najpierw kolekcja, potem (z internetem) gry spoza kolekcji z BGG
         const gi = dlg.querySelector('#pl-game'), gres = dlg.querySelector('#pl-gres');
         let tmr = null, seq = 0;
-        const pick = g => { picked = g; gi.value = g.title; gres.innerHTML = ''; };
+        const pick = g => { picked = g; gi.value = g.title; seq++; clearTimeout(tmr); gres.innerHTML = App.has('polki.html') ? App.call('polki.html', 'game', g) : ''; /* gdzie stoi gra */ };
         const row = (g, i, src) => `<button type="button" class="pl-gopt" data-src="${src}" data-i="${i}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="ph">🎲</span>'}<span><b>${esc(g.title)}</b><small>${[g.year, src === 'bgg' ? 'spoza kolekcji · BGG' : (g.status !== 'owned' ? STATUS[g.status] : '')].filter(Boolean).join(' · ')}</small></span></button>`;
         let local = [], online = [];
         const draw = (note) => {
@@ -307,9 +307,11 @@
           </dl>
           <p class="row" style="margin-top:14px">
             <button class="primary" id="play">+ Rozgrywka</button>
+            ${App.has('licznik.start') ? '<button id="licz">🧮 Licznik punktów</button>' : ''}
             <button id="edit">Edytuj</button>
             <button id="sell">💰 Wystaw na sprzedaż</button>
             ${App.has('wypozyczenia.przycisk') ? '<button id="lend">🤝 Pożycz</button>' : ''}
+            ${App.has('polki.przycisk') && g.status !== 'wishlist' && g.status !== 'played' ? '<button id="shelf">📍 Półka</button>' : ''}
             ${g.bggId ? `<a class="btn" href="https://boardgamegeek.com/boardgame/${g.bggId}" target="_blank" rel="noopener">Otwórz BGG ↗</a>` : ''}
             <button id="del" class="danger ghost">Usuń</button>
           </p>
@@ -330,9 +332,11 @@
       <div id="plays">${playsList(ps, d, false)}</div>`;
     const $ = s => el.querySelector(s);
     $('#play').onclick = async () => { if (await editPlay(null, id)) App.refresh(); };
+    if ($('#licz')) $('#licz').onclick = () => App.call('licznik.start', id);
     $('#edit').onclick = async () => { if (await editGame(g)) App.refresh(); };
     $('#sell').onclick = () => App.call('sprzedaz.wystaw', { itemType: 'game', itemId: id });
     if ($('#lend')) App.call('wypozyczenia.przycisk', $('#lend'), 'game', id);
+    if ($('#shelf')) App.call('polki.przycisk', $('#shelf'), 'game', id);
     $('#del').onclick = async () => {
       if (!await App.ui.confirm(`Usunąć „${g.title}” z kolekcji?${ps.length ? ' Rozgrywki tej gry zostaną w statystykach.' : ''}\n\nJeśli grę sprzedałeś, lepiej zmień jej status na „sprzedana” (Edytuj).`)) return;
       await DB.remove('games', id); App.ui.toast('Usunięto'); App.go('planszowki');
@@ -397,12 +401,13 @@
       el.innerHTML = `
         <div class="row" style="margin-bottom:8px"><h1 style="margin:0">Rozgrywki</h1><span class="spacer"></span>
           <select id="rok"><option value="">Cały czas</option>${years.map(y => `<option ${y === year ? 'selected' : ''}>${y}</option>`).join('')}</select>
-          <button class="primary" id="addPlay">+ Rozgrywka</button></div>
+          ${App.has('licznik.start') ? '<button id="liczPlay">🧮 Licznik</button>' : ''}<button class="primary" id="addPlay">+ Rozgrywka</button></div>
         <div class="tabs">${[['staty', 'Statystyki'], ['historia', 'Historia'], ['gracze', 'Gracze'], ['polka', 'Półka wstydu']].map(([k, v]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${v}</button>`).join('')}</div>
         <div id="out"></div>`;
       el.querySelectorAll('.tabs button').forEach(b => b.onclick = () => App.go('rozgrywki', Object.assign({ tab: b.dataset.t }, year ? { rok: year } : {})));
       el.querySelector('#rok').onchange = e => App.go('rozgrywki', Object.assign({ tab }, e.target.value ? { rok: e.target.value } : {}));
       el.querySelector('#addPlay').onclick = async () => { if (await editPlay()) App.refresh(); };
+      if (el.querySelector('#liczPlay')) el.querySelector('#liczPlay').onclick = () => App.call('licznik.start');
       const out = el.querySelector('#out');
       const plays = d.plays.filter(p => !year || (p.date || '').startsWith(year)).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));
 
@@ -413,7 +418,7 @@
         const known = new Set(st.map(s => s.id));
         d.players.filter(p => !known.has(p.id)).forEach(p => st.push({ id: p.id, name: p.name, plays: 0, wins: 0, best: null, games: new Set() }));
         out.innerHTML = `<div class="card"><table class="tbl"><thead><tr><th>Gracz</th><th class="n">Partie</th><th class="n">Wygrane</th><th class="n">% wygranych</th><th class="n">Różnych gier</th><th></th></tr></thead><tbody>
-          ${st.map(s => `<tr><td>${esc(s.name)}${(d.playerById.get(s.id) || {}).isMe ? ' <span class="chip">to ja</span>' : ''}</td><td class="n">${s.plays}</td><td class="n">${s.wins}</td><td class="n">${s.plays ? Math.round(s.wins / s.plays * 100) + '%' : ''}</td><td class="n">${s.games.size}</td><td class="n"><button class="small ghost" data-ren="${esc(s.id)}">Zmień nazwę</button></td></tr>`).join('')}
+          ${st.map(s => `<tr><td>${App.has('gracze.avatar') ? `<a href="#/gracze?gracz=${encodeURIComponent(s.id)}">${esc(s.name)}</a>` : esc(s.name)}${(d.playerById.get(s.id) || {}).isMe ? ' <span class="chip">to ja</span>' : ''}</td><td class="n">${s.plays}</td><td class="n">${s.wins}</td><td class="n">${s.plays ? Math.round(s.wins / s.plays * 100) + '%' : ''}</td><td class="n">${s.games.size}</td><td class="n"><button class="small ghost" data-ren="${esc(s.id)}">Zmień nazwę</button></td></tr>`).join('')}
           </tbody></table></div><p><button id="addP">+ Dodaj gracza</button></p>`;
         out.querySelectorAll('[data-ren]').forEach(b => b.onclick = async () => {
           const p = d.playerById.get(b.dataset.ren); if (!p) return;

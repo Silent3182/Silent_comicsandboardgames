@@ -62,6 +62,17 @@ Pola dodatkowe (moduły `sklep`, `wartosc`): w **games**, **comics** i **shoppin
 
 Usługi: `App.call('sklep.skanuj')` (skaner → „czy mam?”), `App.call('wypozyczenia.pozycz', {itemType,itemId})`, `App.call('wypozyczenia.przycisk', button, itemType, itemId)`, `App.call('komiksy.seed')` (wczytuje startowe komiksy).
 
+**shelves** – regały (moduł `moduly/polki`)
+`name, kind ('kallax'|'regal'), rows, cols, place, notes, cells: {'r-c': 'nazwa przegródki'}, order`
+Miejsce rzeczy: pole `polka = {s: id regału, r: rząd od góry, c: kolumna od lewej}` w **games** i **comics**; całe serie komiksów w ustawieniu `polkiSerii = {seria: {s,r,c}}`.
+Usługi: `App.call('polki.tekst', itemType, item)` (synchronicznie, np. „Kallax salon · rząd 2, kol. 3”), `App.call('polki.html', …)`, `App.call('polki.przycisk', button, itemType, itemId)`, `App.call('polki.wybierz', itemType, itemId)`.
+
+Lista życzeń (moduł `moduly/wishlista`): gry w **games** ze statusem `wishlist`, pola `wishPriority` (1–5 jak BGG), `plTitle`, `cenaDocelowa`, `ceny = {data, min, max, sklepy, url, hist}`, `promo`. Ceny z planszeo.pl sprawdza telefon (APK) co 3 dni.
+
+Powiadomienia (moduł `moduly/powiadomienia`): APK – @capacitor/local-notifications (premiery z shoppingList, terminy z loans); przeglądarka – przy otwarciu. `App.call('powiadomienia.teraz', tytuł, treść, {go})`.
+
+Widżet Androida (moduł `moduly/widzet` + natywny kod w `android-native/`, wtyczka Capacitor `Widzet`): kolejka MRO na ekranie telefonu i „✓ Przeczytane”.
+
 **events** – kalendarz imprez (moduł `moduly/kalendarz`)
 własne: `source:'own', title, start, end ('RRRR-MM-DD'), city, kind ('plansz'|'komiks'|'mieszane'|'fantastyka'|'gry'|'inne'), status ('tak'|'moze'|''), url, notes`
 oznaczenia imprez z kalendarza: `id:'kp-<nr>'|'ics-…', source:'mark', status, notes, hidden`
@@ -70,3 +81,20 @@ Imprezy z konwenty-poludniowe.pl: APK czyta je sam (CapacitorHttp, ustawienie `k
 **listings** – ogłoszenia sprzedaży (wątek sprzedaży)
 `itemType ('game'|'comic'), itemId, platform ('olx'|'facebook'|'vinted'|'allegro'), condition, price, shipping, title, text, status ('draft'|'active'|'sold'), soldAt, soldPrice`
 Do pozycji: `const item = await DB.get(itemType==='game'?'games':'comics', itemId)`. Okładka: `item.image || item.thumb`.
+
+**challenges** – wyzwania (moduł `moduly/wyzwania`)
+`title, type ('nxn'|'plays'|'distinct'|'shelf'|'game'|'wins'|'read'|'sold'), target, gameId, period ('month'|'year'|'custom'), from, to, archived`
+
+Moduły gracze/licznik/wyzwania/podsumowanie (`moduly/gracze/wspolne.js` = wspólne pomocniki `window.KS`):
+- **players** ma też `photo` (dataURL 160×160 JPEG) i `color`. Usługi: `App.call('gracze.avatar', player, size)`, `App.call('licznik.start', gameId)`, `App.call('wyzwania.lista')`.
+- **plays** z licznika punktów mają `lowWins: true`, gdy wygrywa najmniej punktów.
+- **comics**: `readAt` (data odznaczenia „przeczytane”) – liczone w wyzwaniach i podsumowaniu roku.
+
+## Komunikaty i błędy
+- Pytania Tak/Nie: `await App.ui.confirm('Usunąć…?')` – okno aplikacji, nie systemowe. Nie używaj `alert/confirm/prompt` przeglądarki (test to sprawdza).
+- Błędy pokazuj przez `App.ui.toast(e)` albo `App.ui.toast('Nie udało się: ' + e.message)` – toast sam zamienia systemowe (angielskie) teksty na polskie. Tekst do wstawienia w stronę: `App.ui.komunikat(e)` (zwraca `null` dla anulowania, np. zamkniętego wyboru pliku).
+- Nieobsłużone wyjątki i odrzucone obietnice łapie `core/app.js` i pokazuje komunikat; zakładka, która się wywróci, dostaje komunikat z „Spróbuj ponownie”.
+
+## Wydawanie zmian (jeden wydawca)
+- Wątki nie scalają same: otwierają PR i zgłaszają go wątkowi „Wydawaj i testuj wszystkie zmiany”, który scala po kolei, rozwiązuje konflikty i wydaje wersję.
+- Każdy PR i każde wydanie przechodzi `node testy/test-aplikacji.js` (GitHub Actions „Testy aplikacji”; APK buduje się dopiero po zielonych testach). Nowy moduł: plik w `index.html` i `sw.js` (FILES), nowa kolekcja w `STORES` w `core/db.js` – inaczej test nie przejdzie.

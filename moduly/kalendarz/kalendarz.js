@@ -51,6 +51,7 @@
     if (ra === rb) return `${da} ${MIES_D[ma - 1]} – ${db} ${MIES_D[mb - 1]} ${ra}`;
     return `${da}.${String(ma).padStart(2, '0')}.${ra} – ${db}.${String(mb).padStart(2, '0')}.${rb}`;
   }
+  const kod = e => /^HTTP \d+/.test(e && e.message) ? ' (' + e.message.replace('HTTP', 'błąd') + ')' : '';
   const zaIle = n => n === 0 ? 'dziś' : n === 1 ? 'jutro' : n < 0 ? 'trwa' : `za ${n} dni`;
 
   /* ---------- konwenty-poludniowe.pl ---------- */
@@ -150,7 +151,7 @@
         const w = await zKP();
         if (w.length) { const d = { zrodlo: KP, pobrano: new Date().toISOString(), wydarzenia: w }; await DB.setting('kalendarzDane', d); kandydaci.push(d); }
         else blad = 'konwenty-poludniowe.pl nie zwróciło żadnych wydarzeń – możliwe, że zmienili stronę.';
-      } catch (e) { blad = 'Nie udało się odczytać konwenty-poludniowe.pl (' + e.message + '). Sprawdź internet.'; }
+      } catch (e) { blad = 'Nie udało się odczytać konwenty-poludniowe.pl' + kod(e) + '. Sprawdź internet.'; }
     }
     try {
       const r = await fetch(URL_JSON + '?t=' + Date.now(), { cache: 'no-store' });
@@ -176,7 +177,7 @@
         dane[s.id] = { pobrano: new Date().toISOString(), wydarzenia: w.filter(e => e.end >= od).slice(0, 400) };
       } catch (e) {
         bledy++;
-        App.ui.toast(http() ? `Nie udało się pobrać kalendarza „${s.name}” (${e.message}). Sprawdź adres.`
+        App.ui.toast(http() ? `Nie udało się pobrać kalendarza „${s.name}”${kod(e)}. Sprawdź adres.`
           : `Kalendarz „${s.name}” nie pozwala czytać się z przeglądarki. Odśwież go w aplikacji na telefonie – dane przyjdą tu przez synchronizację.`, 5000);
       }
     }
