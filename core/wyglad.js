@@ -1,10 +1,11 @@
-/* Wygląd: wybór stylu ikon menu (A/B/C) i motywu (automatyczny/jasny/ciemny).
+/* Wygląd: wybór stylu ikon menu (A/B/C), motywu (automatyczny/jasny/ciemny) i czasu ekranu startowego.
  * Ustawienie jest zapisane w tym urządzeniu (localStorage „wyglad”), stosowane już w <head> index.html.
  * Karta „Wygląd” jest dokładana na górę zakładki Ustawienia, bez zmian w core/sync.js. */
 (function () {
   const IKONY = [['wypelnione', 'A', 'Wypełnione'], ['kontur', 'B', 'Kontur'], ['kolor', 'C', 'Kolorowe']];
+  const SPLASH = [['0', 'Wyłączony'], ['1', '1 s'], ['2', '2 s'], ['3', '3 s'], ['5', '5 s']];
   const MOTYW = [['auto', 'Automatyczny'], ['light', 'Jasny'], ['dark', 'Ciemny']];
-  function get() { try { return Object.assign({ ikony: 'kolor', motyw: 'auto' }, JSON.parse(localStorage.getItem('wyglad') || '{}')); } catch (e) { return { ikony: 'kolor', motyw: 'auto' }; } }
+  function get() { try { return Object.assign({ ikony: 'kolor', motyw: 'auto', splash: '2' }, JSON.parse(localStorage.getItem('wyglad') || '{}')); } catch (e) { return { ikony: 'kolor', motyw: 'auto', splash: '2' }; } }
   function apply(w) {
     const h = document.documentElement;
     h.dataset.ikony = w.ikony;
@@ -25,7 +26,9 @@
         <div class="wy-opts">${IKONY.map(([v, lit, l]) => `<button class="wy-opt ${w.ikony === v ? 'on' : ''}" data-k="ikony" data-v="${v}"><span class="wy-prev" data-ikony="${v}">${['planszowki', 'komiksy', 'czytanie'].map(prev).join('')}</span><span class="wy-n"><b>${lit}</b> ${l}</span></button>`).join('')}</div>
         <div class="wy-lab">Motyw</div>
         <div class="seg wy-seg">${MOTYW.map(([v, l]) => `<button class="${w.motyw === v ? 'on' : ''}" data-k="motyw" data-v="${v}">${l}</button>`).join('')}</div>
-        <p class="muted wy-hint">Zapisuje się w tym urządzeniu. „Automatyczny” bierze jasny lub ciemny z ustawień telefonu albo komputera.</p>
+        <div class="wy-lab">Ekran startowy „Kolekcja Marcina”</div>
+        <div class="seg wy-seg">${SPLASH.map(([v, l]) => `<button class="${String(w.splash) === v ? 'on' : ''}" data-k="splash" data-v="${v}">${l}</button>`).join('')}</div>
+        <p class="muted wy-hint">Zapisuje się w tym urządzeniu. „Automatyczny” bierze jasny lub ciemny z ustawień telefonu albo komputera. Ekran startowy zawsze zamyka się od razu po dotknięciu.</p>
       </div>`;
   }
   function bind(box) {
