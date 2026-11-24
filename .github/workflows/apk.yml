@@ -53,6 +53,9 @@ jobs:
           mkdir -p build/www
           cp -r index.html style.css manifest.webmanifest sw.js core moduly icons build/www/
           find build/www -name '*.py' -delete; rm -rf build/www/moduly/*/narzedzia
+          # numer wersji APK widoczny w Ustawieniach → O aplikacji (żeby sprawdzić, czy telefon ma najnowszą)
+          sed -i 's/Moje kolekcje · wersja 0\.1\./Moje kolekcje · wersja 0.1.${{ github.run_number }} (Android)./' build/www/core/sync.js
+          grep -c '0.1.${{ github.run_number }} (Android)' build/www/core/sync.js
           cd build
           cat > package.json <<'EOF'
           { "name": "moje-kolekcje", "version": "0.1.0", "private": true }
