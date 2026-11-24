@@ -261,7 +261,7 @@
     const $ = s => el.querySelector(s);
     const save = async patch => { await DB.put('comics', Object.assign({}, c, patch)); App.refresh(); };
     $('#kown').onclick = () => save({ status: c.status === 'owned' ? 'missing' : 'owned' });
-    $('#kread').onclick = () => save({ read: !c.read });
+    $('#kread').onclick = () => save({ read: !c.read, readAt: !c.read ? new Date().toISOString() : null });
     el.querySelectorAll('.kx-stars button').forEach(b => b.onclick = () => save({ myRating: +b.dataset.r || null }));
     $('#kedit').onclick = () => editComic(c);
     $('#ksell').onclick = () => App.call('sprzedaz.wystaw', { itemType: 'comic', itemId: c.id });

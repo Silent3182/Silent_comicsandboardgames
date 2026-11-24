@@ -8,6 +8,7 @@ const FILES = [
   ,'moduly/komiksy/komiksy.js', 'moduly/komiksy/dane-komiksy.js', 'moduly/komiksy/dane-mro.js', 'moduly/komiksy/zapowiedzi.js'
   ,'moduly/wieczor/dane-gracze.js', 'moduly/wieczor/wieczor.js', 'moduly/wieczor/kto-zaczyna.js', 'moduly/postep/postep.js', 'moduly/kopia/kopia.js'
   ,'moduly/sklep/skaner.js', 'moduly/sklep/sklep.js', 'moduly/sklep/zxing.min.js', 'moduly/wypozyczenia/wypozyczenia.js', 'moduly/wartosc/wartosc.js'
+  ,'moduly/gracze/wspolne.js', 'moduly/gracze/gracze.js', 'moduly/licznik/licznik.js', 'moduly/wyzwania/wyzwania.js', 'moduly/podsumowanie/podsumowanie.js'
   // moduły dopisują tu swoje pliki
 ];
 self.addEventListener('install', e => {
