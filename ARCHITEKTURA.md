@@ -62,6 +62,11 @@ Pola dodatkowe (moduły `sklep`, `wartosc`): w **games**, **comics** i **shoppin
 
 Usługi: `App.call('sklep.skanuj')` (skaner → „czy mam?”), `App.call('wypozyczenia.pozycz', {itemType,itemId})`, `App.call('wypozyczenia.przycisk', button, itemType, itemId)`, `App.call('komiksy.seed')` (wczytuje startowe komiksy).
 
+**events** – kalendarz imprez (moduł `moduly/kalendarz`)
+własne: `source:'own', title, start, end ('RRRR-MM-DD'), city, kind ('plansz'|'komiks'|'mieszane'|'fantastyka'|'gry'|'inne'), status ('tak'|'moze'|''), url, notes`
+oznaczenia imprez z kalendarza: `id:'kp-<nr>'|'ics-…', source:'mark', status, notes, hidden`
+Imprezy z konwenty-poludniowe.pl: APK czyta je sam (CapacitorHttp, ustawienie `kalendarzDane`, synchronizowane), przeglądarka bierze nowszą z wersji z telefonu i `wydarzenia.json` (odświeża co tydzień `.github/workflows/kalendarz.yml` skryptem `moduly/kalendarz/narzedzia/pobierz.py`). Ustawienia: `kalendarz` (filtry, adresy iCal), `kalendarzIcal` (pobrane kalendarze iCal).
+
 **listings** – ogłoszenia sprzedaży (wątek sprzedaży)
 `itemType ('game'|'comic'), itemId, platform ('olx'|'facebook'|'vinted'|'allegro'), condition, price, shipping, title, text, status ('draft'|'active'|'sold'), soldAt, soldPrice`
 Do pozycji: `const item = await DB.get(itemType==='game'?'games':'comics', itemId)`. Okładka: `item.image || item.thumb`.

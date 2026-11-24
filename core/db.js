@@ -14,7 +14,7 @@
   const NAME = 'moje-kolekcje';
   // Wszystkie kolekcje w jednej bazie. Nowy moduł = nowa nazwa tutaj.
   // Wersji bazy nie trzeba już podbijać ręcznie: brakujące kolekcje dokładamy same (open() niżej).
-  const STORES = ['games', 'plays', 'players', 'comics', 'readingOrder', 'shoppingList', 'listings', 'settings', 'loans'];
+  const STORES = ['games', 'plays', 'players', 'comics', 'readingOrder', 'shoppingList', 'listings', 'settings', 'loans', 'events'];
 
   let dbp = null;
   function open() {
