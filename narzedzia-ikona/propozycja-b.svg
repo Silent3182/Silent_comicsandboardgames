@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+<pattern id="ht" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx="11" cy="11" r="5" fill="#f28c28" opacity=".55"/></pattern>
+<radialGradient id="bgB" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#ffc21a"/></radialGradient>
+</defs>
+<g id="bg"><rect width="512" height="512" fill="url(#bgB)"/><rect width="512" height="512" fill="url(#ht)"/></g>
+<g id="fg">
+ <path d="M130 120h252a40 40 0 0 1 40 40v170a40 40 0 0 1-40 40H250l-74 58 12-58h-58a40 40 0 0 1-40-40V160a40 40 0 0 1 40-40z" fill="#1a1f26" transform="translate(8 10)"/>
+ <path d="M130 120h252a40 40 0 0 1 40 40v170a40 40 0 0 1-40 40H250l-74 58 12-58h-58a40 40 0 0 1-40-40V160a40 40 0 0 1 40-40z" fill="#fff" stroke="#1a1f26" stroke-width="14" stroke-linejoin="round"/>
+ <g transform="rotate(-10 256 245)">
+  <rect x="186" y="175" width="140" height="140" rx="26" fill="#e63946" stroke="#1a1f26" stroke-width="10"/>
+  <g fill="#fff"><circle cx="222" cy="211" r="12"/><circle cx="290" cy="211" r="12"/><circle cx="222" cy="245" r="12"/><circle cx="290" cy="245" r="12"/><circle cx="222" cy="279" r="12"/><circle cx="290" cy="279" r="12"/></g>
+ </g>
+</g>
+</svg>

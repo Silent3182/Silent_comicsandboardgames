@@ -94,13 +94,12 @@ jobs:
 
       - name: Ikona aplikacji
         run: |
+          # Ikona adaptacyjna (Android 8+) i zwykła są w android-native/res/mipmap-* (skopiowane wyżej),
+          # generowane przez narzedzia-ikona/generuj.js. Nasze pliki zastępują domyślne Capacitora.
           cd build/android/app/src/main/res
-          rm -rf mipmap-anydpi-v26
-          for d in mipmap-*; do
-            cp ../../../../../www/icons/icon-192.png "$d/ic_launcher.png"
-            cp ../../../../../www/icons/icon-192.png "$d/ic_launcher_round.png"
-            rm -f "$d/ic_launcher_foreground.png"
-          done
+          cp -r ../../../../../../android-native/res/mipmap-* .
+          cat mipmap-anydpi-v26/ic_launcher.xml
+          ls -la mipmap-xxxhdpi
 
       - name: Zbuduj APK
         run: |
