@@ -143,7 +143,7 @@
   }
 
   /* ---------- zakładka KOMIKSY ---------- */
-  const st = { q: '', seria: '', filtr: 'all', sort: 'seria', limit: 120 };
+  const st = { q: '', seria: '', filtr: 'all', sort: 'seria' };
   async function renderKomiksy(el, params) {
     css();
     el.innerHTML = '<p class="muted">Ładowanie kolekcji…</p>';
@@ -168,25 +168,25 @@
       const q = norm(st.q);
       let rows = all.filter(c => (!st.seria || c.series === st.seria)
         && (st.filtr === 'all' || (st.filtr === 'unread' ? (c.status === 'owned' && !c.read) : st.filtr === 'rated' ? c.myRating : c.status === st.filtr))
-        && (!q || norm([c.title, c.origTitle, c.contents, c.series, c.notes].join(' ')).includes(q)));
+        && (!q || (c._q || (c._q = norm([c.title, c.origTitle, c.contents, c.series, c.notes].join(' ')))).includes(q)));
       const cmp = { seria: (a, b) => (a.series || '').localeCompare(b.series || '', 'pl') || (+a.volume || 0) - (+b.volume || 0) || (a.title || '').localeCompare(b.title || '', 'pl'),
         tytul: (a, b) => (a.title || '').localeCompare(b.title || '', 'pl'), ocena: (a, b) => (b.myRating || 0) - (a.myRating || 0),
         nowe: (a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || '') }[st.sort];
       rows.sort(cmp);
       const box = el.querySelector('#klist');
       const own = rows.filter(c => c.status === 'owned').length;
-      box.innerHTML = `<p class="kx-muted">${rows.length} pozycji · masz ${own}</p><div class="kx-grid">${rows.slice(0, st.limit).map(c => `
+      // doczytywanie: najpierw 48 kafelków, kolejne same przy przewijaniu (wydajność na telefonie)
+      App.ui.lista(box, rows, c => `
         <div class="kx-tile" data-id="${esc(c.id)}">${cover(c)}
           <div class="kx-t"><div>${esc(c.title)}</div><div class="kx-s">${esc(c.series || '')}${c.volume != null ? ' #' + esc(c.volume) : ''}</div>
-          <div>${statusBadge(c.status)}${c.read ? '<span class="kx-b own">✓ przeczytany</span>' : ''}${rating(c.myRating)}</div></div></div>`).join('')}</div>
-        ${rows.length > st.limit ? `<p><button id="kmore">Pokaż więcej (${rows.length - st.limit})</button></p>` : ''}`;
-      box.querySelectorAll('.kx-tile').forEach(t => t.onclick = () => App.go('komiksy', { id: t.dataset.id }));
-      const more = box.querySelector('#kmore'); if (more) more.onclick = () => { st.limit += 240; draw(); };
+          <div>${statusBadge(c.status)}${c.read ? '<span class="kx-b own">✓ przeczytany</span>' : ''}${rating(c.myRating)}</div></div></div>`,
+        { porcja: 48, klasa: 'kx-grid', przed: `<p class="kx-muted">${rows.length} pozycji · masz ${own}</p>` });
+      box.onclick = e => { const t = e.target.closest('.kx-tile'); if (t) App.go('komiksy', { id: t.dataset.id }); };
     };
-    el.querySelector('#kq').oninput = e => { st.q = e.target.value; st.limit = 120; draw(); };
-    el.querySelector('#ks').onchange = e => { st.seria = e.target.value; st.limit = 120; draw(); };
+    el.querySelector('#kq').oninput = e => { st.q = e.target.value; clearTimeout(st.t); st.t = setTimeout(draw, 180); };
+    el.querySelector('#ks').onchange = e => { st.seria = e.target.value; draw(); };
     el.querySelector('#ksort').onchange = e => { st.sort = e.target.value; draw(); };
-    el.querySelectorAll('.kx-chip').forEach(b => b.onclick = () => { st.filtr = b.dataset.f; el.querySelectorAll('.kx-chip').forEach(x => x.classList.toggle('on', x === b)); st.limit = 120; draw(); });
+    el.querySelectorAll('.kx-chip').forEach(b => b.onclick = () => { st.filtr = b.dataset.f; el.querySelectorAll('.kx-chip').forEach(x => x.classList.toggle('on', x === b)); draw(); });
     el.querySelector('#kadd').onclick = () => editComic(null, series);
     el.querySelector('#kbraki').onclick = () => App.go('komiksy', { braki: 1 });
     draw();
@@ -427,16 +427,19 @@
       if (bar) bar.style.width = (done / Math.max(1, tot) * 100).toFixed(2) + '%';
       if (txt) txt.textContent = `Przeczytane ${done.toLocaleString('pl-PL')} z ${tot.toLocaleString('pl-PL')} (${(done / Math.max(1, tot) * 100).toFixed(1)}%)`;
     };
-    el.querySelectorAll('input[type=checkbox][data-i]').forEach(cb => cb.onchange = async () => {
+    // jeden nasłuch na całą listę (delegacja) – działa też dla wierszy doczytanych później
+    el.onchange = async e => {
+      const cb = e.target.closest('input[type=checkbox][data-i]'); if (!cb) return;
       const x = MRO.list[+cb.dataset.i]; await setRead([x], cb.checked); naMiejscu([x], cb.checked);
-    });
-    el.querySelectorAll('[data-tom]').forEach(b => b.onclick = () => assignVolume(MRO.list[+b.dataset.tom], S));
-    el.querySelectorAll('[data-upto]').forEach(b => b.onclick = async () => {
+    };
+    el.onclick = async e => {
+      const bt = e.target.closest('[data-tom]'); if (bt) return assignVolume(MRO.list[+bt.dataset.tom], S);
+      const b = e.target.closest('[data-upto]'); if (!b) return;
       const to = +b.dataset.upto;
       const items = MRO.list.filter(x => x.i <= to && S.counts(x) && !S.isRead(x));
       if (!items.length) return App.ui.toast('Wszystko do tego miejsca jest już przeczytane');
       if (await App.ui.confirm(`Oznaczyć ${items.length} pozycji do tego miejsca jako przeczytane?`)) { await setRead(items, true); naMiejscu(items, true); App.ui.toast(`Oznaczono ${items.length} pozycji`); }
-    });
+    };
   }
   /* ---- filtr po postaci / evencie ---- */
   const POSTACIE = [['Spider-Man', 'spider-man|spectacular spider|web of spider|peter parker'], ['X-Men', 'x-men|x-factor|x-force|new mutants|excalibur'],
@@ -545,17 +548,19 @@
       }
       bindRows(body, S);
     } else if (cz.view === 'backlog') {
-      body.innerHTML = S.backlog.length ? `<p class="kx-muted">Pozycje przed miejscem, w którym jesteś, które nie są odznaczone. Odznacz, gdy przeczytasz.</p>${S.backlog.map(x => itemRow(x, S, idx, { sec: true })).join('')}` : '<p>Brak zaległości 👍</p>';
+      if (S.backlog.length) App.ui.lista(body, S.backlog, x => itemRow(x, S, idx, { sec: true }), { porcja: 80, przed: '<p class="kx-muted">Pozycje przed miejscem, w którym jesteś, które nie są odznaczone. Odznacz, gdy przeczytasz.</p>' });
+      else body.innerHTML = '<p>Brak zaległości 👍</p>';
       bindRows(body, S);
     } else if (cz.view === 'all') {
       if (cz.sec == null) cz.sec = nx ? nx.sec : MRO.secs[0];
       const q = norm(cz.q);
-      const rows = q ? L.filter(x => norm(x.title).includes(q)) : L.filter(x => x.sec === cz.sec);
+      const rows = q ? L.filter(x => (x._q || (x._q = norm(x.title))).includes(q)) : L.filter(x => x.sec === cz.sec);
       const PER = 150; const pages = Math.max(1, Math.ceil(rows.length / PER));
+      const ileWCz = new Map(); L.forEach(x => { if (x.typ !== 0) return; const r = ileWCz.get(x.sec) || [0, 0]; r[0]++; if (S.isRead(x)) r[1]++; ileWCz.set(x.sec, r); }); // jedno przejście zamiast 60
       if (params.goto) { const p = rows.findIndex(x => x.i === +params.goto); if (p >= 0) cz.page = Math.floor(p / PER); }
       if (cz.page >= pages) cz.page = 0;
       body.innerHTML = `
-        <div class="kx-bar"><select id="czsec">${MRO.secs.map(s => { const r = L.filter(x => x.sec === s && x.typ === 0); const d = r.filter(S.isRead).length; return `<option value="${esc(s)}" ${s === cz.sec ? 'selected' : ''}>${esc(s)} (${d}/${r.length})</option>`; }).join('')}</select>
+        <div class="kx-bar"><select id="czsec">${MRO.secs.map(s => { const r = ileWCz.get(s) || [0, 0]; return `<option value="${esc(s)}" ${s === cz.sec ? 'selected' : ''}>${esc(s)} (${r[1]}/${r[0]})</option>`; }).join('')}</select>
         <input type="search" id="czq" placeholder="Szukaj w całej kolejności…" value="${esc(cz.q)}">
         ${nx ? '<button id="czgo">Skocz do następnego</button>' : ''}</div>
         ${pages > 1 ? pager(pages) : ''}

@@ -2,6 +2,10 @@
  *  - Komputer (Chrome/Edge): kopie z datą w wybranym folderze (np. OneDrive\Marcin - apka\Kopie) – OneDrive sam je wysyła do chmury.
  *  - Telefon (APK): kopie w pamięci telefonu (Dokumenty/MojeKolekcje) + przypomnienie, żeby raz w tygodniu wysłać kopię do OneDrive.
  *  - Wszędzie: ostatnie 7 kopii także w pamięci aplikacji (ochrona przed błędną synchronizacją).
+ *  - Zdjęcia półek (moduly/polki/zdjecia.js) są tylko na urządzeniu, które je zrobiło (za duże do synchronizacji),
+ *    więc kopia odkłada je osobno: komputer – podfolder „Zdjęcia półek” w folderze kopii (OneDrive), telefon –
+ *    Dokumenty/MojeKolekcje/ZdjeciaPolek + plik „zdjecia-polek-….json” wysyłany do OneDrive razem z kopią.
+ *    Na nowym telefonie / komputerze: „Przywróć zdjęcia półek…” (plik .json albo zdjęcia .jpg).
  * Ustawienia są lokalne dla urządzenia (DB.local), nie synchronizują się.
  */
 (function () {
@@ -20,6 +24,106 @@
     const o = { mode: 'readwrite' };
     try { if ((await h.queryPermission(o)) === 'granted') return true; if (ask && (await h.requestPermission(o)) === 'granted') return true; } catch (e) {}
     return false;
+  }
+
+  /* ---- zdjęcia półek ---- */
+  const FOTO_DIR = 'Zdjęcia półek', FOTO_DIR_TEL = 'ZdjeciaPolek';
+  const slug = t => String(t || 'regal').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l').replace(/Ł/g, 'L').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'regal';
+  const plikFoto = f => `${slug(f.polka)}_${f.data || ''}_${f.id}.jpg`;
+  const idZPliku = n => { const m = /_([^_]+)\.jpe?g$/i.exec(n); return m ? m[1] : null; };
+  const b64 = dataUrl => String(dataUrl).replace(/^data:[^,]*,/, '');
+  /* Wszystkie zdjęcia półek opisane w regałach: {id, polka, data, obraz (dataURL albo null, gdy zrobione na innym urządzeniu)} */
+  async function zdjeciaPolek() {
+    const out = [];
+    for (const sh of await DB.all('shelves')) for (const f of sh.zdjecia || []) {
+      let obraz = null; try { obraz = await DB.local('polkaFoto:' + f.id); } catch (e) { }
+      out.push({ id: f.id, polka: sh.name, data: f.data, obraz: obraz || null });
+    }
+    return out;
+  }
+  async function wpiszZdjecie(id, dataUrl) {
+    if (!id || !/^data:image\//.test(dataUrl || '')) return false;
+    await DB.local('polkaFoto:' + id, dataUrl); return true;
+  }
+  const doDataUrl = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
+  /* komputer: zdjęcia do podfolderu (tylko nowe), a brakujące u siebie – z podfolderu */
+  async function zdjeciaFolder(h) {
+    const z = await zdjeciaPolek(); if (!z.length) return { zapisane: 0, wczytane: 0 };
+    const d = await h.getDirectoryHandle(FOTO_DIR, { create: true });
+    const sa = new Map();
+    for await (const [n, e] of d.entries()) if (e.kind === 'file') { const id = idZPliku(n); if (id) sa.set(id, e); }
+    let zapisane = 0, wczytane = 0;
+    for (const f of z) {
+      if (f.obraz && !sa.has(f.id)) {
+        const fh = await d.getFileHandle(plikFoto(f), { create: true });
+        const w = await fh.createWritable(); await w.write(await (await fetch(f.obraz)).blob()); await w.close(); zapisane++;
+      } else if (!f.obraz && sa.has(f.id)) {
+        if (await wpiszZdjecie(f.id, await doDataUrl(await sa.get(f.id).getFile()))) wczytane++;
+      }
+    }
+    return { zapisane, wczytane };
+  }
+  /* telefon: zdjęcia do Dokumenty/MojeKolekcje/ZdjeciaPolek (tylko nowe), brakujące u siebie – stamtąd */
+  async function zdjeciaTelefon() {
+    const z = await zdjeciaPolek(); if (!z.length) return { zapisane: 0, wczytane: 0 };
+    const { Filesystem } = window.Capacitor.Plugins;
+    const directory = (await DB.local('kopiaGdzie') || '').startsWith('Dokumenty') ? 'DOCUMENTS' : 'EXTERNAL';
+    const dir = 'MojeKolekcje/' + FOTO_DIR_TEL;
+    try { await Filesystem.mkdir({ path: dir, directory, recursive: true }); } catch (e) { /* już jest */ }
+    let sa = new Map();
+    try { const { files } = await Filesystem.readdir({ path: dir, directory }); files.map(f => typeof f === 'string' ? f : f.name).forEach(n => { const id = idZPliku(n); if (id) sa.set(id, n); }); } catch (e) { }
+    let zapisane = 0, wczytane = 0;
+    for (const f of z) {
+      if (f.obraz && !sa.has(f.id)) { await Filesystem.writeFile({ path: dir + '/' + plikFoto(f), data: b64(f.obraz), directory }); zapisane++; }
+      else if (!f.obraz && sa.has(f.id)) {
+        try { const r = await Filesystem.readFile({ path: dir + '/' + sa.get(f.id), directory }); if (await wpiszZdjecie(f.id, 'data:image/jpeg;base64,' + r.data)) wczytane++; } catch (e) { }
+      }
+    }
+    return { zapisane, wczytane };
+  }
+  /* jeden plik ze wszystkimi zdjęciami (do OneDrive przez „Udostępnij” albo pobranie) */
+  async function paczkaZdjec() {
+    const z = (await zdjeciaPolek()).filter(f => f.obraz);
+    return { app: 'moje-kolekcje-zdjecia', format: 1, exportedAt: new Date().toISOString(), zdjecia: z.map(f => ({ id: f.id, polka: f.polka, data: f.data, obraz: f.obraz })) };
+  }
+  async function wyslijZdjecia() {
+    const p = await paczkaZdjec();
+    if (!p.zdjecia.length) { App.ui.toast('Na tym urządzeniu nie ma zdjęć półek'); return false; }
+    const d = new Date(), nazwaPliku = `zdjecia-polek-${d.toISOString().slice(0, 10)}.json`, tekst = JSON.stringify(p);
+    if (native()) {
+      const { Filesystem, Share } = window.Capacitor.Plugins;
+      await Filesystem.writeFile({ path: nazwaPliku, data: tekst, directory: 'CACHE', encoding: 'utf8' });
+      const { uri } = await Filesystem.getUri({ path: nazwaPliku, directory: 'CACHE' });
+      try { await Share.share({ title: 'Zdjęcia półek', files: [uri], dialogTitle: 'Zapisz zdjęcia półek (wybierz OneDrive)' }); } catch (e) { return false; }
+    } else {
+      const file = new File([tekst], nazwaPliku, { type: 'application/json' });
+      let ok = false;
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Zdjęcia półek' }); ok = true; } catch (e) { if (e.name === 'AbortError') return false; } }
+      if (!ok) { const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = nazwaPliku; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
+    }
+    await DB.local('zdjeciaWyslane', p.zdjecia.map(f => f.id));
+    return true;
+  }
+  /* przywracanie: plik .json z paczką albo zdjęcia .jpg (nazwa kończy się _<id>.jpg) */
+  async function przywrocZdjecia(files) {
+    const znane = new Set((await zdjeciaPolek()).map(f => f.id));
+    let n = 0, obce = 0;
+    for (const f of files) {
+      if (/\.json$/i.test(f.name) || f.type === 'application/json') {
+        const p = JSON.parse(await f.text());
+        if (!p || p.app !== 'moje-kolekcje-zdjecia') throw new Error('To nie jest plik ze zdjęciami półek');
+        for (const z of p.zdjecia || []) { if (!znane.has(z.id)) { obce++; continue; } if (await wpiszZdjecie(z.id, z.obraz)) n++; }
+      } else {
+        const id = idZPliku(f.name);
+        if (!id || !znane.has(id)) { obce++; continue; }
+        if (await wpiszZdjecie(id, await doDataUrl(f))) n++;
+      }
+    }
+    return { n, obce };
+  }
+  async function noweDoWyslania() {
+    const wys = new Set((await DB.local('zdjeciaWyslane')) || []);
+    return (await zdjeciaPolek()).filter(f => f.obraz && !wys.has(f.id)).length;
   }
 
   /* ---- kopie w pamięci aplikacji (IndexedDB lokalnie) ---- */
@@ -65,13 +169,24 @@
       const dump = await DB.exportAll();
       await wewn(dump);
       let gdzie = 'w pamięci aplikacji';
-      if (native()) { if (await doTelefonu(dump, c.keep)) gdzie = 'w telefonie (' + (await DB.local('kopiaGdzie')) + ')'; }
+      let fz = null;
+      if (native()) {
+        if (await doTelefonu(dump, c.keep)) gdzie = 'w telefonie (' + (await DB.local('kopiaGdzie')) + ')';
+        try { fz = await zdjeciaTelefon(); } catch (e) { console.warn('Zdjęcia półek (telefon):', e); }
+      }
       else if (hasDir) {
         const h = await dirHandle();
         if (h) {
-          if (await permitted(h, ask)) { await doFolderu(h, dump, c.keep); gdzie = 'w folderze „' + h.name + '”'; }
+          if (await permitted(h, ask)) {
+            await doFolderu(h, dump, c.keep); gdzie = 'w folderze „' + h.name + '”';
+            try { fz = await zdjeciaFolder(h); } catch (e) { console.warn('Zdjęcia półek (folder):', e); }
+          }
           else { pokazPasek(); gdzie = null; }
         }
+      }
+      if (fz && (fz.zapisane || fz.wczytane)) {
+        if (gdzie) gdzie += ` + zdjęcia półek: ${fz.zapisane} nowych`;
+        if (fz.wczytane) App.ui.toast(`Wczytano ${fz.wczytane} zdjęć półek z kopii`, 3500);
       }
       await DB.local('kopiaOstatnia', new Date().toISOString());
       if (gdzie) await DB.local('kopiaOstatniaGdzie', gdzie);
@@ -114,6 +229,9 @@
   async function wyslij() {
     await Sync.exportFile(); // okno „Udostępnij” – wybierz OneDrive
     await DB.local('kopiaWyslana', new Date().toISOString());
+    // nowe zdjęcia półek od ostatniego wysłania – osobny plik, też do OneDrive
+    const ile = await noweDoWyslania();
+    if (ile && await App.ui.confirm(`Wysłać też zdjęcia półek do OneDrive? Nowych od ostatniego razu: ${ile}.`, { ok: 'Wyślij zdjęcia', cancel: 'Nie teraz' })) await wyslijZdjecia();
   }
 
   /* Przywrócenie stanu z kopii: rekordy z kopii wracają (z nową datą, żeby wygrały przy synchronizacji),
@@ -137,6 +255,7 @@
     const h = hasDir && !native() ? await dirHandle() : null;
     const ost = await DB.local('kopiaOstatnia'), gdzie = await DB.local('kopiaOstatniaGdzie');
     const wewnetrzne = (await DB.local('kopieWewn')) || [];
+    const zdj = await zdjeciaPolek(), doWys = native() || !hasDir ? await noweDoWyslania() : 0;
     const dt = iso => new Date(iso).toLocaleString('pl-PL', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     let pliki = [];
     if (h && await permitted(h, false)) { try { for await (const [n, e] of h.entries()) if (e.kind === 'file' && n.startsWith(PREFIX)) pliki.push(n); pliki.sort().reverse(); } catch (e) {} }
@@ -164,6 +283,15 @@
       <h2>OneDrive</h2>
       <div class="card"><p>W tej przeglądarce kopie zostają w pamięci aplikacji. Żeby mieć je w OneDrive, użyj „Wyślij kopię” i wybierz OneDrive.</p>
         <p class="row"><button id="kpWyslij">Wyślij kopię do OneDrive</button></p></div>`}
+      ${zdj.length ? `
+      <h2>Zdjęcia półek</h2>
+      <div class="card">
+        <p>Zdjęć regałów: <b>${zdj.length}</b>, na tym urządzeniu ${zdj.filter(f => f.obraz).length}${zdj.some(f => !f.obraz) ? ` (${zdj.filter(f => !f.obraz).length} zrobiono na innym urządzeniu)` : ''}.
+          Same zdjęcia nie synchronizują się (są za duże), dlatego trafiają do kopii: ${native() ? 'w telefonie do Dokumenty/MojeKolekcje/ZdjeciaPolek, a do OneDrive przez „Wyślij zdjęcia do OneDrive” (aplikacja zapyta też przy cotygodniowym wysyłaniu kopii).' : hasDir ? (h ? `do podfolderu „${esc(FOTO_DIR)}” w folderze „${esc(h.name)}” (OneDrive), przy każdej kopii – tylko nowe.` : 'do podfolderu „Zdjęcia półek” w folderze kopii – wybierz folder powyżej.') : 'przez „Wyślij zdjęcia do OneDrive”.'}</p>
+        ${doWys ? `<p class="muted">Nowych zdjęć od ostatniego wysłania: ${doWys}.</p>` : ''}
+        <p class="row"><button id="kpZdjWyslij" ${zdj.some(f => f.obraz) ? '' : 'disabled'}>Wyślij zdjęcia do OneDrive</button><label class="btn">Przywróć zdjęcia półek…<input type="file" id="kpZdjPlik" accept=".json,application/json,image/jpeg" multiple hidden></label></p>
+        <p class="muted">Po zmianie telefonu albo komputera: „Przywróć zdjęcia półek…” i wybierz z OneDrive plik „zdjecia-polek-….json” albo zdjęcia z folderu „${esc(FOTO_DIR)}”.${hasDir && !native() ? ' Na komputerze z wybranym folderem kopii brakujące zdjęcia wczytają się same przy kopii.' : ''}</p>
+      </div>` : ''}
       <h2>Przywracanie</h2>
       <div class="card">
         <p class="muted">Przywrócenie ustawia całą kolekcję dokładnie tak, jak było w kopii (na wszystkich urządzeniach, po synchronizacji). Przed przywróceniem aplikacja zapisze kopię obecnego stanu.</p>
@@ -192,12 +320,22 @@
       try { const f = await (await h.getFileHandle(b.dataset.plik)).getFile(); pytaj(JSON.parse(await f.text()), b.dataset.plik.replace(PREFIX, '').replace('.json', '').replace('_', ' ')); }
       catch (e) { App.ui.toast('Błąd pliku: ' + e.message, 4000); }
     });
+    if ($('#kpZdjWyslij')) $('#kpZdjWyslij').onclick = async () => { try { if (await wyslijZdjecia()) App.ui.toast('Zdjęcia półek wysłane'); render(el); } catch (e) { App.ui.toast(e); } };
+    if ($('#kpZdjPlik')) $('#kpZdjPlik').onchange = async e => {
+      const files = [...e.target.files]; if (!files.length) return;
+      try {
+        const r = await przywrocZdjecia(files);
+        App.ui.toast(r.n ? `Przywrócono ${r.n} zdjęć półek` + (r.obce ? ` (${r.obce} nie pasuje do żadnego regału)` : '') : 'Żadne zdjęcie nie pasuje do regałów w aplikacji', 4500);
+        render(el);
+      } catch (err) { App.ui.toast('Błąd pliku: ' + (App.ui.komunikat(err) || ''), 4500); }
+    };
     $('#kpPlik').onchange = async e => {
       const f = e.target.files[0]; if (!f) return;
       try { pytaj(JSON.parse(await f.text()), 'pliku ' + f.name); } catch (err) { App.ui.toast('Błąd pliku: ' + err.message, 4000); }
     };
   }
 
+  App.provide('kopia.zdjecia', () => ({ zdjeciaPolek, paczkaZdjec, przywrocZdjecia, wyslijZdjecia })); // też do testów
   App.registerModule({ id: 'kopie', title: 'Kopie zapasowe', icon: '💾', order: 910, render });
   window.addEventListener('load', () => setTimeout(sprawdz, 8000));
   setInterval(sprawdz, 60 * 60 * 1000);

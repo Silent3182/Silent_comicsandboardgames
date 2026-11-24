@@ -61,7 +61,7 @@
     const { format, partie } = parsuj(tekst);
     const [games, plays, players] = await Promise.all([DB.all('games', { withDeleted: false }), DB.all('plays', { withDeleted: true }), DB.all('players')]);
     const poBgg = new Map(), poTytule = new Map();
-    games.forEach(g => { if (g.bggId && !poBgg.has(g.bggId)) poBgg.set(g.bggId, g); const k = norm(g.title); if (!poTytule.has(k)) poTytule.set(k, g); });
+    games.forEach(g => { if (g.bggId && !poBgg.has(g.bggId)) poBgg.set(g.bggId, g); (window.Tytuly ? Tytuly.nazwy(g) : [g.title]).forEach(t => { const k = norm(t); if (!poTytule.has(k)) poTytule.set(k, g); }); });
     const graczPoImieniu = new Map(players.map(p => [norm(p.name), p]));
     const ja = players.find(p => p.isMe);
     const juzId = new Set(plays.map(p => p.id));

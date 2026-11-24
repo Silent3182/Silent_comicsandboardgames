@@ -72,7 +72,7 @@
     pokazGre();
     gi.oninput = () => {
       const q = gi.value.trim().toLowerCase(); gra = null; pokazGre();
-      gres.innerHTML = !q ? '' : gry.filter(g => g.title.toLowerCase().includes(q)).slice(0, 8).map(g => `<button data-g="${esc(g.id)}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="">` : '<span>🎲</span>'}<span>${esc(g.title)}</span></button>`).join('')
+      gres.innerHTML = !q ? '' : gry.filter(g => (window.Tytuly ? Tytuly.pasuje(g, q) : g.title.toLowerCase().includes(q))).slice(0, 8).map(g => `<button data-g="${esc(g.id)}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="">` : '<span>🎲</span>'}<span>${esc(g.title)}</span></button>`).join('')
         + `<div class="ks-sub" style="padding:4px 8px">Nie ma na liście? Zostaw wpisany tytuł – zapiszę grę jako „spoza kolekcji”.</div>`;
     };
     gres.onclick = e => { const b = e.target.closest('[data-g]'); if (!b) return; gra = d.gameById.get(b.dataset.g); gi.value = ''; gres.innerHTML = ''; pokazGre(); };
