@@ -93,3 +93,8 @@ Moduły gracze/licznik/wyzwania/podsumowanie (`moduly/gracze/wspolne.js` = wspó
 ## Wydawanie zmian (jeden wydawca)
 - Wątki nie scalają same: otwierają PR i zgłaszają go wątkowi „Wydawaj i testuj wszystkie zmiany”, który scala po kolei, rozwiązuje konflikty i wydaje wersję.
 - Każdy PR i każde wydanie przechodzi `node testy/test-aplikacji.js` (GitHub Actions „Testy aplikacji”; APK buduje się dopiero po zielonych testach). Nowy moduł: plik w `index.html` i `sw.js` (FILES), nowa kolekcja w `STORES` w `core/db.js` – inaczej test nie przejdzie.
+
+**Narzędzia gier** (moduł `moduly/przy-grze`, zakładka `przygrze` „Narzędzia gier”: Koszulki, Braki, Czy się pozbyć?, Import partii)
+Pola w **games**: `instrukcja` (adres), `zasady` (tekst, jedna zasada w wierszu), `sleeves: [{size, count, w?, h?, zmierzone?}]` (rozmiary z `window.SLEEVE.ROZMIARY`, `size:'wlasny'` + w/h w mm), `sleeveStatus ('none'|'partial'|'done')`, `braki: [{id, text, done, addedAt, doneAt}]`, `zostaje` (bool – wyklucza z rankingu „czy się pozbyć”), `bggPlaysPrzedImportem`.
+Rozgrywki z importu: `plays.id` = `bgs-<uuid>` (BG Stats) albo `bggplay-<id>` (BGG), `plays.source`.
+Usługi: `App.call('przygrze.sekcja', el, game)` (sekcja „Przy stole” na karcie gry), `App.call('przygrze.aparat', {tytul})` → `{size, w, h}` (pomiar karty aparatem; skala z karty płatniczej 85,6×54 mm), `App.call('przygrze.importPartii', tekst, {podglad})`.
