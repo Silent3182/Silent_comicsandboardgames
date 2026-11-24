@@ -13,15 +13,67 @@
 
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  /* ---------- Komunikaty o błędach: zamiast systemowych (angielskich) tekstów – po polsku ---------- */
+  const PL = /[ąćęłńóśźż]/i;
+  const TLUMACZ = [
+    [/AbortError|aborted|The user aborted|cancell?ed/i, null],
+    [/Failed to fetch|NetworkError|Load failed|network ?error|ERR_INTERNET|ERR_NAME|ERR_CONNECTION|timed? ?out|TimeoutError/i, 'Brak połączenia z internetem albo serwer nie odpowiada. Spróbuj ponownie za chwilę.'],
+    [/NotAllowedError|Permission denied|permission/i, 'Brak zgody na dostęp (aparat albo plik). Zezwól w ustawieniach telefonu lub przeglądarki.'],
+    [/NotFoundError|Requested device not found|could not find/i, 'Nie znaleziono urządzenia ani pliku (np. aparatu).'],
+    [/NotReadableError|Could not start video|in use/i, 'Aparat albo plik jest zajęty przez inną aplikację.'],
+    [/QuotaExceeded|quota|storage.*full|disk.*full/i, 'Brak miejsca w pamięci urządzenia. Usuń stare kopie albo zdjęcia.'],
+    [/SyntaxError|Unexpected token|Unexpected end|JSON|is not valid/i, 'Nieprawidłowy format danych (to nie jest plik z kopią aplikacji albo jest uszkodzony).'],
+    [/SecurityError|insecure|not allowed by|blocked/i, 'Przeglądarka zablokowała tę operację.'],
+    [/InvalidStateError|VersionError|database|IDB|transaction/i, 'Problem z pamięcią aplikacji. Zamknij i otwórz aplikację ponownie.'],
+    [/Script error|ChunkLoad|Loading .*failed|load script|nie można wczytać/i, 'Nie udało się wczytać części aplikacji. Sprawdź internet i odśwież.'],
+  ];
+  function tlumacz(t) {
+    if (PL.test(t)) return t; // komunikat już po polsku
+    for (const [re, pl] of TLUMACZ) if (re.test(t)) return pl;
+    // tekst wyglądający na systemowy (angielski) zamieniamy na ogólny komunikat
+    if (/\b(the|failed|is not|of undefined|error|cannot|can't|undefined|null|unexpected|invalid|denied|property|reading|function|object)\b/i.test(t)) return 'Coś poszło nie tak. Spróbuj ponownie.';
+    return t;
+  }
+  function komunikat(e) {
+    if (e == null || e === '') return null;
+    let t = typeof e === 'string' ? e : ((e.name && e.name !== 'Error' ? e.name + ': ' : '') + (e.message || String(e)));
+    if (typeof e !== 'string' && e.name === 'AbortError') return null;
+    // „Polski początek: systemowy koniec” – tłumaczymy tylko koniec
+    const i = t.indexOf(': ');
+    if (i > 0 && PL.test(t.slice(0, i)) && !PL.test(t.slice(i + 2))) {
+      const tail = tlumacz(t.slice(i + 2));
+      return tail ? t.slice(0, i) + ': ' + tail : t.slice(0, i);
+    }
+    return tlumacz(t);
+  }
+
   const ui = {
     esc,
     h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; },
     toast(msg, ms = 2500) {
+      msg = komunikat(msg);
+      if (!msg) return;
       const el = document.getElementById('toast');
       el.textContent = msg; el.classList.add('show');
       clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), ms);
     },
-    confirm(msg) { return Promise.resolve(window.confirm(msg)); },
+    /* Błąd (obiekt Error albo tekst) -> czytelny komunikat po polsku. null = nic nie pokazywać (np. anulowany wybór pliku). */
+    komunikat: (e) => komunikat(e),
+    /* Pytanie Tak/Nie w oknie aplikacji (zamiast systemowego okienka przeglądarki). */
+    confirm(msg, opt = {}) {
+      return new Promise(resolve => {
+        const dlg = document.createElement('dialog');
+        dlg.className = 'dlg dlg-pyt';
+        const usun = /^\s*(usun|usuń|skasow|wyczyś|rozłącz|przywróć)/i.test(msg);
+        dlg.innerHTML = `<form method="dialog"><p class="dlg-msg">${esc(msg)}</p><div class="dlg-btns"><button value="cancel" class="ghost">${esc(opt.cancel || 'Anuluj')}</button><button value="ok" class="${usun ? 'danger' : 'primary'}">${esc(opt.ok || (usun ? 'Tak, usuń' : 'Tak'))}</button></div></form>`;
+        if (usun && /rozłącz/i.test(msg)) dlg.querySelector('[value=ok]').textContent = opt.ok || 'Rozłącz';
+        if (usun && /przywróć/i.test(msg)) dlg.querySelector('[value=ok]').textContent = opt.ok || 'Przywróć';
+        document.body.appendChild(dlg);
+        dlg.addEventListener('close', () => { const r = dlg.returnValue === 'ok'; dlg.remove(); resolve(r); });
+        dlg.showModal();
+        dlg.querySelector('[value=ok]').focus();
+      });
+    },
     /* Okno dialogowe z formularzem. fields: [{name,label,type,value,options,step,placeholder}] -> obiekt lub null */
     form(title, fields, opt = {}) {
       return new Promise(resolve => {
@@ -102,7 +154,7 @@
     main.innerHTML = '';
     main.scrollTop = 0;
     try { await m.render(main, params, { db: DB, ui, go: App.go }); }
-    catch (e) { console.error(e); main.innerHTML = `<p class="err">Błąd modułu ${esc(m.title)}: ${esc(e.message)}</p>`; }
+    catch (e) { console.error(e); main.innerHTML = `<div class="err"><p><b>Nie udało się otworzyć zakładki „${esc(m.title)}”.</b></p><p>${esc(komunikat(e) || '')}</p><button class="primary" onclick="App.refresh()">Spróbuj ponownie</button></div>`; }
   }
 
   const App = {
@@ -126,4 +178,27 @@
     }
   };
   window.App = App;
+
+  /* ---------- Błędy nieobsłużone w modułach: zamiast milczenia/okienek systemowych – komunikat aplikacji ---------- */
+  let ostatni = '', ostatniCzas = 0;
+  function pokazBlad(e) {
+    const t = komunikat(e);
+    if (!t) return;
+    const now = Date.now();
+    if (t === ostatni && now - ostatniCzas < 4000) return; // bez powtarzania tego samego
+    ostatni = t; ostatniCzas = now;
+    (window.__bledyAplikacji = window.__bledyAplikacji || []).push(t);
+    ui.toast(t, 4500);
+  }
+  window.addEventListener('error', ev => {
+    if (!ev.error && !ev.message) return;                       // np. brak obrazka – nie przeszkadzamy
+    if (/ResizeObserver loop/.test(ev.message || '')) return;   // nieszkodliwe ostrzeżenie przeglądarki
+    pokazBlad(ev.error || ev.message);
+  });
+  window.addEventListener('unhandledrejection', ev => { pokazBlad(ev.reason); });
+  // systemowe okienko „alert” zastępujemy komunikatem aplikacji
+  window.alert = msg => ui.toast(String(msg), 4500);
+  // informacja o sieci
+  window.addEventListener('offline', () => ui.toast('Brak internetu – aplikacja działa dalej, zsynchronizuje się po powrocie sieci.', 4000));
+  window.addEventListener('online', () => ui.toast('Internet wrócił.', 2000));
 })();
