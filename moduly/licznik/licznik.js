@@ -48,8 +48,7 @@
     const last = new Map(); d.plays.forEach(p => { if ((p.date || '') > (last.get(p.gameId) || '')) last.set(p.gameId, p.date); });
     const ostatnie = [...last.entries()].sort((a, b) => b[1].localeCompare(a[1])).map(([id]) => d.gameById.get(id)).filter(Boolean).slice(0, 6);
     let gra = params.gra ? d.gameById.get(params.gra) || null : null;
-    const czestosc = new Map(); d.plays.forEach(p => p.players.forEach(x => czestosc.set(x.playerId, (czestosc.get(x.playerId) || 0) + 1)));
-    const gracze = d.players.slice().sort((a, b) => (b.isMe - a.isMe) || (czestosc.get(b.id) || 0) - (czestosc.get(a.id) || 0) || a.name.localeCompare(b.name, 'pl'));
+    const gracze = K().kolejnosc(d.players, d.plays);
     const wyb = []; const me = K().ja(d.players); if (me) wyb.push(me.id);
     const nowi = [];
     el.innerHTML = `
@@ -84,7 +83,8 @@
     };
     rysuj();
     $('#lc-sel').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; const i = wyb.indexOf(b.dataset.p); if (i >= 0) wyb.splice(i, 1); else wyb.push(b.dataset.p); rysuj(); };
-    const dodaj = () => { const n = $('#lc-new').value.trim(); if (!n) return; const ex = gracze.concat(nowi).find(p => p.name.toLowerCase() === n.toLowerCase()); const id = ex ? ex.id : 'nowy-' + DB.uid(); if (!ex) nowi.push({ id, name: n, _new: true }); if (!wyb.includes(id)) wyb.push(id); $('#lc-new').value = ''; rysuj(); };
+    // nowy gracz zapisuje się od razu – będzie podpowiadany w kolejnych grach
+    const dodaj = async () => { const n = $('#lc-new').value.trim(); if (!n) return; $('#lc-new').value = ''; const p = await K().gracz(n, d.players); if (!gracze.includes(p)) gracze.splice(me ? 1 : 0, 0, p); if (!wyb.includes(p.id)) wyb.push(p.id); rysuj(); };
     $('#lc-newb').onclick = dodaj; $('#lc-new').onkeydown = e => { if (e.key === 'Enter') dodaj(); };
     $('#lc-start').onclick = () => {
       const typed = gi.value.trim();

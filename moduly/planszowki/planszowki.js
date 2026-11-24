@@ -91,12 +91,27 @@
     }).filter(g => g.bggId && g.title);
   }
 
+  /* Dodatkowe dane z API BGG (bgg-dane.js): ranking, najlepsza liczba graczy, wiek, mechaniki, kategorie, autorzy */
+  function bggInfo(g) {
+    const d = window.BggDane && window.BggDane.get(), x = d && g.bggId && d.gry[g.bggId];
+    if (!x) return '';
+    const b = x.best, li = a => a && a.length ? esc(a.slice(0, 8).join(', ')) : '';
+    return [
+      g.bggRank ? `<dt>Ranking BGG</dt><dd>#${g.bggRank}</dd>` : '',
+      b && b[0] ? `<dt>Najlepiej na</dt><dd>${b[0] === b[1] ? b[0] : b[0] + '–' + b[1]} os.</dd>` : '',
+      g.minAge ? `<dt>Wiek</dt><dd>od ${g.minAge} lat</dd>` : '',
+      x.d && x.d.length ? `<dt>Autorzy</dt><dd>${li(x.d)}</dd>` : '',
+      x.m && x.m.length ? `<dt>Mechaniki</dt><dd>${li(x.m)}</dd>` : '',
+      x.c && x.c.length ? `<dt>Kategorie</dt><dd>${li(x.c)}</dd>` : ''
+    ].join('');
+  }
+
   /* ---------- formularz rozgrywki ---------- */
   async function editPlay(play, presetGameId) {
     const d = await load();
     play = play || { date: App.ui.today(), gameId: presetGameId, players: [] };
     const gamesSorted = d.games.filter(g => g.status !== 'wishlist').sort((a, b) => a.title.localeCompare(b.title, 'pl'));
-    const plist = d.players.slice().sort((a, b) => (b.isMe - a.isMe) || a.name.localeCompare(b.name, 'pl'));
+    const plist = window.KS ? KS.kolejnosc(d.players, d.plays) : d.players.slice().sort((a, b) => (b.isMe - a.isMe) || a.name.localeCompare(b.name, 'pl'));
     const rows = play.players.length ? play.players : [{ playerId: (plist.find(p => p.isMe) || {}).id }];
     const rowHtml = r => `<div class="pl-row">
       <input list="pl-names" class="pn" placeholder="Gracz" value="${esc(r.playerId && d.playerById.get(r.playerId) ? d.playerById.get(r.playerId).name : (r.name || ''))}">
@@ -300,6 +315,7 @@
             ${g.myRating ? `<dt>Moja ocena</dt><dd><b>${num(g.myRating)}</b>/10</dd>` : ''}
             ${g.bggRating ? `<dt>Średnia BGG</dt><dd>${num(g.bggRating.toFixed(2))}</dd>` : ''}
             ${g.weight ? `<dt>Złożoność</dt><dd>${num(g.weight)} / 5</dd>` : ''}
+            ${bggInfo(g)}
             ${g.publisher ? `<dt>Wydawca</dt><dd>${esc(g.publisher)}</dd>` : ''}
             ${g.acquiredAt ? `<dt>Kupiona</dt><dd>${App.ui.fmtDate(g.acquiredAt)}${g.pricePaid ? ' za ' + num(g.pricePaid) + ' zł' : ''}</dd>` : ''}
             ${g.bggPlays ? `<dt>Partie z BGG</dt><dd>${g.bggPlays} (zapisane wcześniej na BGG)</dd>` : ''}

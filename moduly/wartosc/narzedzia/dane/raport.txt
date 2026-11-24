@@ -1,0 +1,317 @@
+GRA	7 Wonders	155.29	p	planszeo
+GRA	7 Wonders: Babel	97.4	s	planszeo-niedost
+GRA	7 Wonders: Cities	80	s	szacunek
+GRA	7 Wonders: Leaders	88	p	planszeo
+GRA	The 7th Continent	350	s	szacunek
+GRA	The 7th Continent: What Goes Up, Must Come Down	80	s	szacunek
+GRA	Age of Civilization	97.9	p	planszeo
+GRA	Age of Empires III: The Age of Discovery	200	s	szacunek
+GRA	Age of Steam	250	s	szacunek
+GRA	Agricola	204.97	s	planszeo-inne
+GRA	Agricola: All Creatures Big and Small	87.43	s	planszeo-niedost
+GRA	Agricola: Z-Deck	40	s	szacunek
+GRA	Alchemist	60	s	szacunek
+GRA	Alhambra	175.99	s	planszeo-niedost
+GRA	Anachrony	195	p	planszeo
+GRA	Anachrony: Fractures of Time	194.96	p	planszeo
+GRA	Anachrony: Infinity Box	600	s	szacunek
+GRA	Andor: The Family Fantasy Game	120	s	szacunek
+GRA	AquaSphere	150	s	szacunek
+GRA	Archipelago	249.95	s	planszeo-niedost
+GRA	Archipelago: War & Peace	89.95	s	planszeo-niedost
+GRA	Ark Nova	189.95	p	planszeo
+GRA	AuZtralia	181.99	s	planszeo-niedost
+GRA	AuZtralia Big Z Box	150	s	szacunek
+GRA	AuZtralia: Revenge of the Old Ones	50	s	planszeo
+GRA	AuZtralia: TaZmania	89	p	planszeo
+GRA	Bajkogry: Baba Jaga	72.71	s	planszeo
+GRA	Bajkogry: Pasikonik i Mrówka	60	s	szacunek
+GRA	BANG!	59.99	p	planszeo
+GRA	BANG! A Fistful of Cards	30	s	szacunek
+GRA	BANG! Dodge City	54.9	s	planszeo-niedost
+GRA	Barbarossa	60	s	szacunek
+GRA	Bärenpark	99.99	s	planszeo-niedost
+GRA	Barrage	193.2	p	planszeo
+GRA	Barrage: The Leeghwater Project	144	p	planszeo
+GRA	Belfort	150	s	szacunek
+GRA	Beowulf: The Movie Board Game	60	s	szacunek
+GRA	Beyond the Sun	289.9	p	planszeo
+GRA	Bitoku	246.9	p	planszeo
+GRA	Blokus	129.99	p	planszeo
+GRA	Bohnanza	40.61	p	planszeo
+GRA	Bonfire	139.95	p	planszeo
+GRA	Boomtown	68.89	s	planszeo-niedost
+GRA	Boonlake	158.96	p	planszeo
+GRA	Bootleggers	150	s	szacunek
+GRA	Bootleggers: The Boardwalk	50	s	szacunek
+GRA	Brass: Birmingham	218.9	p	planszeo
+GRA	Brass: Lancashire	262.65	p	planszeo
+GRA	Brazil: Imperial	150.99	s	planszeo
+GRA	Brian Boru: High King of Ireland	123.98	p	planszeo
+GRA	Ca$h 'n Gun$	120	s	szacunek
+GRA	Carcassonne Big Box 4	200	s	szacunek
+GRA	Carcassonne: Dragon & Fairy	70	s	szacunek
+GRA	Carcassonne: Sheep & Shepherds	60	s	szacunek
+GRA	Carcassonne: Towers & Thieves	60	s	szacunek
+GRA	Cardcassonne	71.9	s	planszeo-niedost
+GRA	Carnegie	219.9	p	planszeo
+GRA	Carpe Diem	144.93	s	planszeo-niedost
+GRA	The Castles of Burgundy	115.48	s	planszeo-niedost
+GRA	Catan: Junior (English fourth edition)	104.9	s	planszeo-inne
+GRA	Caverna: The Cave Farmers	247.9	s	planszeo-niedost
+GRA	Caylus	180	s	szacunek
+GRA	Chess	15.09	p	planszeo
+GRA	Citadels	80	s	szacunek
+GRA	Citadels: The Dark City	40	s	szacunek
+GRA	Cleopatra and the Society of Architects	149	s	planszeo-niedost
+GRA	CO₂: Second Chance	200	s	szacunek
+GRA	Cockroach Poker	32.76	p	planszeo
+GRA	Cockroach Salad	37.89	s	planszeo-niedost
+GRA	Codenames	75	s	szacunek
+GRA	Coimbra	178.9	s	planszeo-niedost
+GRA	Coloretto	40	s	szacunek
+GRA	Colosseum	200	s	szacunek
+GRA	Condottiere	159.9	s	planszeo-niedost
+GRA	Cooper Island	213.9	p	planszeo
+GRA	Corx	40	s	szacunek
+GRA	La Cosa Nostra	119	p	planszeo
+GRA	Cosmolancer	40	s	szacunek
+GRA	Cthulhu: Death May Die	356.91	p	planszeo
+GRA	Cthulhu: Death May Die – Season 2 Expansion	269	s	planszeo
+GRA	Darwin's Journey	175	s	planszeo
+GRA	Dead of Winter: The Long Night	249.95	s	planszeo-niedost
+GRA	Decrypto (Polish edition)	54.95	p	planszeo
+GRA	Descent: Journeys in the Dark	300	s	szacunek
+GRA	Dig Your Way Out	150	s	szacunek
+GRA	Dixit	107.98	p	planszeo
+GRA	Dixit: Odyssey (expansion)	90	s	szacunek
+GRA	Dominant Species	179	p	planszeo
+GRA	Dominant Species: Marine	269.95	p	planszeo
+GRA	Dominion	121.11	s	planszeo-inne
+GRA	Dominoes	36.54	p	planszeo
+GRA	Drako: Dragon & Dwarves	79.45	s	planszeo-niedost
+GRA	Drawn to Adventure	100	s	szacunek
+GRA	Dune: Imperium	248.99	p	planszeo
+GRA	Dune: Imperium – Rise of Ix	176.99	s	planszeo
+GRA	Dungeon Petz	192	s	planszeo
+GRA	Egizia	150	s	szacunek
+GRA	Eleven: Football Manager Board Game	99	p	planszeo
+GRA	Emira	80	s	szacunek
+GRA	Etherfields (Polish edition)	489.99	p	planszeo
+GRA	Etherfields: Thorn Knight	100	s	szacunek
+GRA	Everdell	179.5	p	planszeo
+GRA	Fief	239.97	s	planszeo-inne
+GRA	Fief: Les Reliques	60	s	szacunek
+GRA	Flamme Rouge	150	s	szacunek
+GRA	Flick of Faith	104.5	s	planszeo
+GRA	Flix Mix	40	s	szacunek
+GRA	Fury of Dracula (Second Edition)	159.48	s	planszeo-niedost
+GRA	Galaxy Trucker	150	s	szacunek
+GRA	The Gallerist	250	s	szacunek
+GRA	Gang of Four	40	s	szacunek
+GRA	Geistertreppe	120	s	szacunek
+GRA	Geistertreppe: Flaschengeist	30	s	szacunek
+GRA	Genesis	50	s	szacunek
+GRA	GIPF	104.93	s	planszeo-niedost
+GRA	Glak	30	s	szacunek
+GRA	Glik	30	s	szacunek
+GRA	Globalny konflikt	80	s	szacunek
+GRA	Gloomhaven	899.9	p	planszeo
+GRA	Glory to Rome: Na chwałę Rzymu	80	s	szacunek
+GRA	Go	80	s	szacunek
+GRA	Goa	200	s	szacunek
+GRA	El Grande	176.45	s	planszeo-niedost
+GRA	Great Western Trail	163.47	s	planszeo-niedost
+GRA	Great Western Trail: Rails to the North	119.95	p	planszeo
+GRA	Der große Wurf	40	s	szacunek
+GRA	Hansa Teutonica	149.9	s	planszeo-niedost
+GRA	Le Havre	199.45	s	planszeo-niedost
+GRA	The Hobbit	80	s	szacunek
+GRA	In the Year of the Dragon	91.09	s	planszeo-niedost
+GRA	Incan Gold	64.76	p	planszeo
+GRA	Irish Gauge	149.9	s	planszeo
+GRA	Isle of Skye: From Chieftain to King	108.45	s	planszeo-niedost
+GRA	Isle of Skye: Journeyman	73.45	s	planszeo-niedost
+GRA	Jamaica	134.95	s	planszeo-niedost
+GRA	Jenga	70.09	p	planszeo
+GRA	Jungle Speed	142.14	p	planszeo
+GRA	Kakerlakensuppe	35	s	szacunek
+GRA	Karak	107.95	p	planszeo
+GRA	Karak: Regent	66.95	p	planszeo
+GRA	Karak: Sidhar, Kirima, Elspeth	27.49	p	planszeo
+GRA	KeyForge: Call of the Archons	95	p	planszeo
+GRA	Khôra: Rise of an Empire	69.95	p	planszeo
+GRA	King of Tokyo	130	s	szacunek
+GRA	Kingdom Rush: Rift in Time	179	s	planszeo-niedost
+GRA	Kingdom Rush: Rift in Time – Spider Goddess Expansion	120	s	szacunek
+GRA	Kingdomino Duel	39.99	p	planszeo
+GRA	Kragmortha	116.9	p	planszeo
+GRA	Kroniki zamku Avel	150	s	szacunek
+GRA	Legendary Encounters: A Predator Deck Building Game	399.9	s	planszeo
+GRA	Legendary Encounters: Alien Covenant	120	s	szacunek
+GRA	Legendary Encounters: An Alien Deck Building Game	259.9	s	planszeo-niedost
+GRA	Legendary Encounters: An Alien Deck Building Game Expansion	234.9	s	planszeo-niedost
+GRA	Liar's Dice	107	s	planszeo-inne
+GRA	Little Town (Polish edition)	94.99	p	planszeo
+GRA	Loopin' Louie	97.81	p	planszeo
+GRA	Lords of Waterdeep	136	p	planszeo
+GRA	Lords of Waterdeep: Scoundrels of Skullport	102	p	planszeo
+GRA	Lorenzo il Magnifico	308	p	planszeo
+GRA	Love Letter	40	s	szacunek
+GRA	Mafia	27.61	p	planszeo
+GRA	Magic: The Gathering	50	s	szacunek
+GRA	Mall of Horror	80	s	szacunek
+GRA	The Manhattan Project: Energy Empire	269.9	s	planszeo
+GRA	Maracaibo	219.9	p	planszeo
+GRA	Marrakech	127.99	p	planszeo
+GRA	Marvel United	108	p	planszeo
+GRA	Marvel United: Enter the Spider-Verse	136.25	p	planszeo
+GRA	Marvel United: Guardians of the Galaxy Remix	87.95	p	planszeo
+GRA	Marvel United: Rise of the Black Panther	89.95	p	planszeo
+GRA	Marvel United: Tales of Asgard	86	p	planszeo
+GRA	Marvel United: The Infinity Gauntlet	90	s	szacunek
+GRA	Master of Orion: The Board Game	112.43	s	planszeo-niedost
+GRA	Merv: The Heart of the Silk Road	232.48	s	planszeo-niedost
+GRA	Metropolys	100	s	szacunek
+GRA	Monopoly	100	s	szacunek
+GRA	Mosaic: A Story of Civilization	160	p	planszeo
+GRA	MS Batory	103.35	p	planszeo
+GRA	Munchkin	70	s	szacunek
+GRA	My First Carcassonne	90	s	szacunek
+GRA	Nations	200	s	szacunek
+GRA	Nations: Dynasties	79.95	s	planszeo-niedost
+GRA	Nations: Inspiration Promo Pack	20	s	szacunek
+GRA	The Networks: More Executives	40	s	szacunek
+GRA	The Networks: On the Air	60	s	szacunek
+GRA	The Networks: Primetime	180	s	szacunek
+GRA	The Networks: Telly Time	20	s	szacunek
+GRA	Neuroshima Hex	114.95	s	planszeo-niedost
+GRA	Neuroshima Hex!: Rok Molocha	114.95	s	planszeo-niedost
+GRA	Neuroshima: Convoy	44	s	planszeo-niedost
+GRA	Niagara	150	s	szacunek
+GRA	Nogi za pas!	60	s	szacunek
+GRA	Nottingham	40	s	szacunek
+GRA	Nyet!	40	s	szacunek
+GRA	Ooga Booga	33.95	p	planszeo
+GRA	Othello	78.99	p	planszeo
+GRA	Owczy Pęd	40	s	szacunek
+GRA	Pan tu nie stał!	43.95	p	planszeo
+GRA	Perseverance: Castaway Chronicles – Episodes 1 & 2	300	s	szacunek
+GRA	Pictomania	59.9	s	planszeo-inne
+GRA	Pokémon Trading Card Game: Battle Academy	129.9	s	planszeo-inne
+GRA	Polowanie na Robale	61.76	p	planszeo
+GRA	Power Grid	204.95	p	planszeo
+GRA	Power Grid: Benelux/Central Europe	32.9	s	planszeo-niedost
+GRA	Power Grid: The New Power Plants – Set 1	39.11	s	planszeo-niedost
+GRA	Praga Caput Regni	179.9	p	planszeo
+GRA	Princes of the Renaissance: Expansion Bundle	60	s	szacunek
+GRA	The Prodigals Club	159.9	s	planszeo
+GRA	Puerto Rico	165.83	p	planszeo
+GRA	Railroad Tycoon: The Boardgame	300	s	szacunek
+GRA	Railways of Europe	170	s	planszeo-niedost
+GRA	Ratzia	96	s	planszeo-inne
+GRA	The Red Cathedral	94.95	p	planszeo
+GRA	Red Outpost	100	s	szacunek
+GRA	Reef Route	42.95	p	planszeo
+GRA	Rheinländer	199.45	p	planszeo
+GRA	Ribbit	49.71	p	planszeo
+GRA	Risk	120	s	szacunek
+GRA	Robinson Crusoe: Adventure on the Cursed Island	123.3	p	planszeo
+GRA	Rory's Story Cubes	50	s	szacunek
+GRA	Russian Railroads	115.95	s	planszeo-niedost
+GRA	Russian Railroads: American Railroads	70	s	szacunek
+GRA	Russian Railroads: German Railroads	70	s	szacunek
+GRA	Saboteur	40	s	szacunek
+GRA	Saboteur 2	36.99	p	planszeo
+GRA	Samurai	150	s	szacunek
+GRA	Santa Maria	114.99	p	planszeo
+GRA	Santa Maria: American Kingdoms	60	s	szacunek
+GRA	Scrabble	100	s	szacunek
+GRA	Shadows over Camelot	150	s	szacunek
+GRA	Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures	170	s	planszeo-niedost
+GRA	Sherlock Holmes Consulting Detective: The Thames Murders & Other Cases	185.95	s	planszeo-niedost
+GRA	Shipyard	150	s	szacunek
+GRA	Shogun	200	s	szacunek
+GRA	Shogun: Tenno's Court	65.43	s	planszeo-niedost
+GRA	Skat	15	s	szacunek
+GRA	Slide Blast	68.16	s	planszeo-niedost
+GRA	Smartphone Inc.	127.15	p	planszeo
+GRA	Space Dealer	144.9	s	planszeo
+GRA	Spirit Island	240.99	p	planszeo
+GRA	Splendor: Marvel	197.99	p	planszeo
+GRA	Spot it!	45	s	szacunek
+GRA	Stone Age	115.99	p	planszeo
+GRA	Stronghold: Undead (Second Edition) – Kickstarter Edition	300	s	szacunek
+GRA	Tabannusi: Builders of Ur	74	p	planszeo
+GRA	Tainted Grail: The Fall of Avalon – Echoes of the Past	55	s	planszeo
+GRA	Tainted Grail: The Fall of Avalon – Niamh	84.95	p	planszeo
+GRA	Tainted Grail: Upadek Avalonu	439.9	s	planszeo
+GRA	Take 5	35	s	szacunek
+GRA	Tales & Games: The Hare & the Tortoise	89.89	s	planszeo-niedost
+GRA	Tawantinsuyu: The Inca Empire	89.95	p	planszeo
+GRA	Tekhenu: Obelisk of the Sun	188	p	planszeo
+GRA	Tekhenu: Time of Seth	131.9	p	planszeo
+GRA	Teotihuacan: City of Gods	162.43	s	planszeo-niedost
+GRA	Teotihuacan: Late Preclassic Period	129.95	p	planszeo
+GRA	Teotihuacan: Shadow of Xitle	24	s	planszeo
+GRA	Terra Mystica	220.92	s	planszeo-niedost
+GRA	Terra Mystica: 4 Town Tiles	15	s	szacunek
+GRA	Terra Mystica: Fire & Ice	139.5	s	planszeo-niedost
+GRA	Terra Mystica: Merchants of the Seas	142.43	s	planszeo-niedost
+GRA	Terra Mystica: Mini expansion	15	s	szacunek
+GRA	Terraforming Mars	180	s	szacunek
+GRA	Terraforming Mars: Hellas & Elysium	37.78	p	planszeo
+GRA	Terraforming Mars: Prelude	53.95	p	planszeo
+GRA	Terraforming Mars: Venus Next	66	p	planszeo
+GRA	That's Life!	50	s	szacunek
+GRA	Through the Ages: A New Story of Civilization	242	s	planszeo-niedost
+GRA	Tichu	31.52	s	planszeo-niedost
+GRA	Ticket to Ride	180	s	szacunek
+GRA	Timeline	37	p	planszeo
+GRA	To Court the King	60	s	szacunek
+GRA	Topito	77.7	s	planszeo-niedost
+GRA	Trajan	166.31	s	planszeo-niedost
+GRA	Trickerion: Collector's Edition	399.99	p	planszeo
+GRA	Trickerion: Dahlgaard's Gifts	91.5	p	planszeo
+GRA	Trickerion: Legends of Illusion	239	p	planszeo
+GRA	Troyes	219.67	s	planszeo-niedost
+GRA	Trzy małe świnki	87.9	s	planszeo
+GRA	Twilight Struggle	197.68	s	planszeo-niedost
+GRA	Tyrants of the Underdark	194.49	s	planszeo-niedost
+GRA	Tyrants of the Underdark: Aberrations & Undead	80	s	szacunek
+GRA	TZAAR	134.37	p	planszeo
+GRA	Tzolk'in: The Mayan Calendar	194.96	p	planszeo
+GRA	Tzolk'in: Tribes & Prophecies	98.93	s	planszeo-niedost
+GRA	Tzolk'in: Tribes & Prophecies – Ek Chuah	20	s	szacunek
+GRA	Underwater Cities	185.98	p	planszeo
+GRA	Underwater Cities: New Discoveries	159.95	p	planszeo
+GRA	Vast: The Crystal Caverns	200	s	szacunek
+GRA	Vast: The Crystal Caverns – Bonus Cards	20	s	szacunek
+GRA	Vast: The Fearsome Foes	80	s	szacunek
+GRA	Vast: The Haunted Hallways	84	s	planszeo
+GRA	Vast: The Mysterious Manor	209.9	s	planszeo-niedost
+GRA	Verflixxt nochmal	30	s	szacunek
+GRA	Vikings	100	s	szacunek
+GRA	Vindication	250	s	szacunek
+GRA	Viticulture Essential Edition	199.9	p	planszeo
+GRA	Viticulture: Moor Visitors Expansion	73	s	planszeo
+GRA	Viticulture: Visit from the Rhine Valley	64.9	s	planszeo-niedost
+GRA	Weather Machine	300	s	szacunek
+GRA	Weather Machine: Upgrade Pack	111.95	p	planszeo
+GRA	Welcome To...	66.4	s	planszeo-niedost
+GRA	Wicked Witches Way	60	s	szacunek
+GRA	Wingspan	158.99	p	planszeo
+GRA	Wiochmen 2	40	s	szacunek
+GRA	Wiochmen Rejser	40	s	szacunek
+GRA	Witch's Brew	60	s	szacunek
+GRA	Witchcraft	61	s	planszeo-niedost
+GRA	Woodcraft	238.9	p	planszeo
+GRA	World Without End	150	s	szacunek
+GRA	Wyprawa	50	s	szacunek
+GRA	Yedo: Deluxe Master Set	450	s	szacunek
+GRA	YINSH	133.18	p	planszeo
+GRA	Yspahan	120	s	szacunek
+GRA	Zombicide: Green Horde	339.86	p	planszeo
+GRA	Zooloretto	68.34	p	planszeo
+GRA	Zostań prezydentem	80	s	szacunek
+bez ceny tomu	Marvel Fresh	Diabelskie Rządy
