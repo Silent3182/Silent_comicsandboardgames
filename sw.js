@@ -1,5 +1,5 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v23';
+const VERSION = 'v24';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js', 'core/przewijanie.js', 'core/lista.js', 'core/okladki.js',

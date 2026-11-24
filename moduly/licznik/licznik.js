@@ -51,6 +51,12 @@
     const gracze = K().kolejnosc(d.players, d.plays);
     const wyb = []; const me = K().ja(d.players); if (me) wyb.push(me.id);
     const nowi = [];
+    // gra wybrana z góry (np. przytrzymanie okładki): gracze i zasady jak w ostatniej partii tej gry
+    const poprz = gra ? d.plays.filter(p => p.gameId === gra.id && (p.players || []).length).sort((a, b) => (b.date || '').localeCompare(a.date || '') || String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))[0] : null;
+    if (poprz) {
+      const ids = poprz.players.map(x => x.playerId).filter(id => gracze.some(p => p.id === id));
+      if (ids.length) { wyb.length = 0; ids.forEach(id => { if (!wyb.includes(id)) wyb.push(id); }); }
+    }
     el.innerHTML = `
       <h1>Licznik punktów</h1>
       <div class="card" style="max-width:760px">
@@ -60,10 +66,11 @@
         <div class="lc-gres" id="lc-gres"></div>
         ${ostatnie.length ? `<div class="ks-sub" style="margin-top:8px">Ostatnio grane:</div><div class="row" style="margin-top:4px">${ostatnie.map(g => `<button class="small" data-last="${esc(g.id)}">${esc(g.title)}</button>`).join('')}</div>` : ''}
         <h3 style="margin-top:18px">2. Gracze <span class="ks-sub" style="font-weight:400">(kolejność kliknięć = kolejność przy stole)</span></h3>
+        ${poprz ? `<div class="ks-sub" style="margin-bottom:6px">Zaznaczeni jak w ostatniej partii (${esc(App.ui.fmtDate(poprz.date))}) – kliknij, żeby zmienić.</div>` : ''}
         <div class="lc-sel" id="lc-sel"></div>
         <div class="row" style="margin-top:8px"><input id="lc-new" placeholder="Nowy gracz – imię" style="flex:1;min-width:160px"><button id="lc-newb">+ Dodaj</button></div>
         <h3 style="margin-top:18px">3. Zasady</h3>
-        <label class="row" style="gap:8px"><input type="checkbox" id="lc-low"> Wygrywa najmniej punktów (np. golf, Hearts)</label>
+        <label class="row" style="gap:8px"><input type="checkbox" id="lc-low"${poprz && poprz.lowWins ? ' checked' : ''}> Wygrywa najmniej punktów (np. golf, Hearts)</label>
         <p class="row" style="margin-top:18px"><button class="primary" id="lc-start">▶ Zaczynamy</button></p>
       </div>`;
     const $ = s => el.querySelector(s);
@@ -82,6 +89,7 @@
       $('#lc-sel').innerHTML = wszyscy.map(p => { const i = wyb.indexOf(p.id); return `<button class="${i >= 0 ? 'on' : ''}" data-p="${esc(p.id)}">${K().avatar(p, 30)}${esc(p.name)}${i >= 0 ? ` <span class="chip">${i + 1}</span>` : ''}</button>`; }).join('');
     };
     rysuj();
+    if (gra) { const b = $('#lc-start'); b.scrollIntoView({ block: 'center' }); }
     $('#lc-sel').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; const i = wyb.indexOf(b.dataset.p); if (i >= 0) wyb.splice(i, 1); else wyb.push(b.dataset.p); rysuj(); };
     // nowy gracz zapisuje się od razu – będzie podpowiadany w kolejnych grach
     const dodaj = async () => { const n = $('#lc-new').value.trim(); if (!n) return; $('#lc-new').value = ''; const p = await K().gracz(n, d.players); if (!gracze.includes(p)) gracze.splice(me ? 1 : 0, 0, p); if (!wyb.includes(p.id)) wyb.push(p.id); rysuj(); };
