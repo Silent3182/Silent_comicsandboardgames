@@ -1,5 +1,5 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v14';
+const VERSION = 'v15';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js',
@@ -11,6 +11,7 @@ const FILES = [
   ,'moduly/gracze/wspolne.js', 'moduly/gracze/gracze.js', 'moduly/licznik/licznik.js', 'moduly/zegar/zegar.js', 'moduly/wyzwania/wyzwania.js', 'moduly/podsumowanie/podsumowanie.js', 'moduly/skroty/skroty.js'
   ,'moduly/polki/polki.js', 'moduly/wishlista/wishlista.js', 'moduly/powiadomienia/powiadomienia.js', 'moduly/widzet/widzet.js'
   ,'moduly/kalendarz/kalendarz.js'
+  ,'moduly/przy-grze/rozmiary.js', 'moduly/przy-grze/aparat.js', 'moduly/przy-grze/import-partii.js', 'moduly/przy-grze/przy-grze.js'
   // moduły dopisują tu swoje pliki
 ];
 self.addEventListener('install', e => {

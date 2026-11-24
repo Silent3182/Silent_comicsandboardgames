@@ -5,7 +5,7 @@
   const KEY = 'startKafelki';
   const OPIS = {
     planszowki: 'Kolekcja gier z BGG', rozgrywki: 'Partie i statystyki', wieczor: 'Co dziś zagramy?', licznik: 'Liczenie punktów',
-    zegar: 'Czas na turę', gracze: 'Osoby i wyniki', wyzwania: 'Cele na rok', podsumowanie: 'Rok w liczbach',
+    zegar: 'Czas na turę', przygrze: 'Koszulki, braki, import partii', gracze: 'Osoby i wyniki', wyzwania: 'Cele na rok', podsumowanie: 'Rok w liczbach',
     komiksy: 'Tomy i serie', czytanie: 'Master Reading Order', postep: 'Ile już przeczytane', sklep: 'Skaner i „czy to mam?”',
     zakupy: 'Lista zakupów', wishlista: 'Na co poluję', wypozyczenia: 'Komu pożyczone', polki: 'Gdzie co stoi',
     wartosc: 'Ile warta kolekcja', sprzedaz: 'Ogłoszenia', skroty: 'BGA, fora, linki', kalendarz: 'Imprezy i premiery',
