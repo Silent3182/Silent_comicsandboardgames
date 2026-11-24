@@ -7,6 +7,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(WidzetPlugin.class); // widżet „Następny komiks”
+        registerPlugin(OcrPlugin.class);    // odczyt tytułów ze zdjęć półek (ML Kit)
         super.onCreate(savedInstanceState);
     }
 }

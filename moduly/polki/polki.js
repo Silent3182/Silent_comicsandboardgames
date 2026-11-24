@@ -294,7 +294,7 @@
       ${C.shelves.length ? '' : `<div class="empty">Nie masz jeszcze regałów. Dodaj swoje Kallaxy i inne regały, a potem kliknij przegródkę i wybierz, co w niej stoi.<br><br><button class="primary" id="pkNew2">+ Dodaj pierwszy regał</button></div>`}
       <div class="pk-shelves">${C.shelves.map(sh => {
         const n = [...Z.cell.entries()].filter(([k]) => k.startsWith(sh.id + '|')).reduce((a, [, x]) => a + Z.ile(x), 0);
-        return `<div class="card" data-sh="${esc(sh.id)}"><div class="pk-head"><h3>${esc(sh.name)}</h3><span class="spacer"></span><button class="ghost small" data-ed="${esc(sh.id)}" title="Edytuj">✏️</button></div>
+        return `<div class="card" data-sh="${esc(sh.id)}"><div class="pk-head"><h3>${esc(sh.name)}</h3><span class="spacer"></span>${App.has('polki.zdjecia') ? `<button class="ghost small" data-foto="${esc(sh.id)}" title="Zdjęcia regału – klikaj pudełka albo rozpoznaj tytuły">📷${(sh.zdjecia || []).length ? ' ' + sh.zdjecia.length : ''}</button>` : ''}<button class="ghost small" data-ed="${esc(sh.id)}" title="Edytuj">✏️</button></div>
           <div class="muted" style="font-size:13px">${[sh.place, sh.kind === 'kallax' ? `Kallax ${sh.cols}×${sh.rows}` : `${sh.rows} ${pl(sh.rows, 'półka', 'półki', 'półek')}${sh.cols > 1 ? ' × ' + sh.cols + ' kol.' : ''}`, n + ' ' + pl(n, 'pozycja', 'pozycje', 'pozycji')].filter(Boolean).join(' · ')}</div>
           ${siatka(sh, Z, { on: st.otw && st.otw.s === sh.id ? st.otw : null })}
           ${st.otw && st.otw.s === sh.id ? '<div id="pkCell"></div>' : ''}</div>`;
@@ -307,6 +307,7 @@
     const $ = s => el.querySelector(s);
     const nowy = async () => { if (await editShelf()) render(el); };
     $('#pkNew').onclick = nowy; if ($('#pkNew2')) $('#pkNew2').onclick = nowy;
+    el.querySelectorAll('[data-foto]').forEach(b => b.onclick = async () => { await App.call('polki.zdjecia', b.dataset.foto); render(el); });
     el.querySelectorAll('[data-ed]').forEach(b => b.onclick = async () => {
       const sh = C.byId.get(b.dataset.ed);
       const co = await App.ui.form(sh.name, [{ name: 'co', label: 'Co zrobić?', type: 'select', value: 'edit', options: [['edit', 'Zmień nazwę / rozmiar'], ['up', 'Przesuń wyżej na liście'], ['del', 'Usuń regał']] }], { ok: 'Dalej' });
@@ -375,4 +376,6 @@
   App.provide('polki.przycisk', przycisk);
   App.provide('polki.wybierz', wybierz);
   App.provide('polki.gotowe', () => ready);
+  // dla zdjęć półek (moduly/polki/zdjecia.js)
+  window.PolkiWew = { C, reload, tekst, przegrodka, css, zawartosc };
 })();
