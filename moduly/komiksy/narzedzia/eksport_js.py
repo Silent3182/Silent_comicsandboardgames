@@ -56,9 +56,18 @@ for line in open(sys.argv[3], encoding='utf-8'):
         shop.append({'id': f'zak-{SLUG[seria]}-{nr:03d}', 'title': f'{seria} {nr}: {tyt}', 'itemType': 'comic', 'series': seria,
                      'volume': nr, 'comicId': r['id'], 'publisher': 'Hachette', 'releaseDate': d.isoformat() if d else None,
                      'bought': False, 'notes': 'Prenumerata – czekam na przesyłkę' if seria in ('Thorgal', 'Marvel Origins') else ''})
+# okładki (lubimyczytac.pl), plik okladki.json obok skryptu: {id komiksu: adres}
+import os
+_ok = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'okladki.json')
+if os.path.exists(_ok):
+    OK = json.load(open(_ok, encoding='utf-8'))
+    for c in comics:
+        if OK.get(c['id']) and not c.get('image'):
+            c['image'] = OK[c['id']]
+    print('okładki:', sum(1 for c in comics if c.get('image')))
 open(out + '/dane-komiksy.js', 'w', encoding='utf-8').write(
     '/* Startowa kolekcja komiksów: zakładka MOJE KOMIKSY (zielone = mam) + listy comixxy.com (Origins, Thorgal, DC). */\n'
-    'window.KOMIKSY_WERSJA=3;\nwindow.KOMIKSY_DANE=' + json.dumps(comics, ensure_ascii=False, separators=(',', ':')) + ';\n'
+    'window.KOMIKSY_WERSJA=4;\nwindow.KOMIKSY_DANE=' + json.dumps(comics, ensure_ascii=False, separators=(',', ':')) + ';\n'
     'window.ZAKUPY_DANE=' + json.dumps(shop, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('zakupy:', len(shop))
 sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
