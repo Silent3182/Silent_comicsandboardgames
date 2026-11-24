@@ -1,6 +1,6 @@
 /* Moduł „Wieczór gier”: podajesz liczbę osób i czas, aplikacja podpowiada gry z półki.
  * Pierwszeństwo mają gry z półki wstydu (jeszcze nie grane), potem dawno nie grane i najwyżej ocenione.
- * Liczba graczy i czas: z karty gry (pola minPlayers/maxPlayers/playTime), a gdy ich brak – z dane-gracze.js (przybliżone).
+ * Liczba graczy i czas: z karty gry (pola minPlayers/maxPlayers/playTime – uzupełnia je API BGG, bgg-dane.js), a gdy ich brak – z dane-gracze.js (przybliżone).
  * Ustawienia wyboru pamiętane w localStorage (tylko na tym urządzeniu).
  */
 (function () {

@@ -1,13 +1,13 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v19';
+const VERSION = 'v21';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js',
-  'moduly/planszowki/dane-bgg.js', 'moduly/planszowki/planszowki.js'
+  'moduly/planszowki/dane-bgg.js', 'moduly/planszowki/planszowki.js', 'moduly/planszowki/bgg-dane.js'
   , 'moduly/sprzedaz/sprzedaz.js', 'moduly/sprzedaz/sprzedaz-ui.js'
   ,'moduly/komiksy/komiksy.js', 'moduly/komiksy/dane-komiksy.js', 'moduly/komiksy/dane-mro.js', 'moduly/komiksy/zapowiedzi.js'
   ,'moduly/wieczor/dane-gracze.js', 'moduly/wieczor/wieczor.js', 'moduly/wieczor/kto-zaczyna.js', 'moduly/postep/postep.js', 'moduly/kopia/kopia.js'
-  ,'moduly/sklep/skaner.js', 'moduly/sklep/sklep.js', 'moduly/sklep/zxing.min.js', 'moduly/wypozyczenia/wypozyczenia.js', 'moduly/wartosc/wartosc.js'
+  ,'moduly/sklep/skaner.js', 'moduly/sklep/sklep.js', 'moduly/sklep/zxing.min.js', 'moduly/wypozyczenia/wypozyczenia.js', 'moduly/wartosc/wyceny.js', 'moduly/wartosc/wartosc.js'
   ,'moduly/gracze/wspolne.js', 'moduly/gracze/gracze.js', 'moduly/licznik/licznik.js', 'moduly/zegar/zegar.js', 'moduly/wyzwania/wyzwania.js', 'moduly/podsumowanie/podsumowanie.js', 'moduly/skroty/skroty.js'
   ,'moduly/polki/polki.js', 'moduly/polki/zdjecia.js', 'moduly/wishlista/wishlista.js', 'moduly/powiadomienia/powiadomienia.js', 'moduly/widzet/widzet.js'
   ,'moduly/kalendarz/kalendarz.js'

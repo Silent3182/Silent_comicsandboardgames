@@ -85,12 +85,11 @@
   async function przygotuj(el) {
     const d = await K().dane();
     const cfg = Object.assign({ order: [], limit: 0, sens: 'normalna', auto: true, gameId: '' }, ls.get(CFG, {}));
-    const cz = new Map(); d.plays.forEach(p => p.players.forEach(x => cz.set(x.playerId, (cz.get(x.playerId) || 0) + 1)));
-    const gracze = d.players.slice().sort((a, b) => (b.isMe - a.isMe) || (cz.get(b.id) || 0) - (cz.get(a.id) || 0) || a.name.localeCompare(b.name, 'pl'));
+    const gracze = K().kolejnosc(d.players, d.plays);
     let ord = cfg.order.filter(id => d.playerById.has(id));
     if (!ord.length) { const me = K().ja(d.players); if (me) ord.push(me.id); }
     const nowi = [];
-    const byId = id => d.playerById.get(id) || nowi.find(p => p.id === id);
+    const byId = id => d.playerById.get(id) || gracze.find(p => p.id === id) || nowi.find(p => p.id === id);
     const gry = d.games.filter(g => !g.isExpansion && g.status !== 'wishlist').sort((a, b) => a.title.localeCompare(b.title, 'pl'));
     el.innerHTML = `
       <h1>Zegar tur</h1>
@@ -125,7 +124,8 @@
       rysuj();
     };
     $('#zg-sel').onclick = e => { const b = e.target.closest('[data-p]'); if (b) { ord.push(b.dataset.p); rysuj(); } };
-    const dodaj = () => { const n = $('#zg-new').value.trim(); if (!n) return; const ex = gracze.concat(nowi).find(p => p.name.toLowerCase() === n.toLowerCase()); const id = ex ? ex.id : 'nowy-' + DB.uid(); if (!ex) nowi.push({ id, name: n, _new: true }); if (!ord.includes(id)) ord.push(id); $('#zg-new').value = ''; rysuj(); };
+    // nowy gracz zapisuje się od razu – będzie podpowiadany w kolejnych grach
+    const dodaj = async () => { const n = $('#zg-new').value.trim(); if (!n) return; $('#zg-new').value = ''; const p = await K().gracz(n, d.players); if (!gracze.includes(p)) gracze.push(p); if (!ord.includes(p.id)) ord.push(p.id); rysuj(); };
     $('#zg-newb').onclick = dodaj; $('#zg-new').onkeydown = e => { if (e.key === 'Enter') dodaj(); };
     $('#zg-start').onclick = async () => {
       if (ord.length < 2) { App.ui.toast('Dodaj co najmniej 2 graczy'); return; }
