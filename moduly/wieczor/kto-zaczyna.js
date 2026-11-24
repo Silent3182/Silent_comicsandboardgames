@@ -31,7 +31,10 @@
     document.head.appendChild(st);
   }
 
-  function start() {
+  let otwarte = false;
+  function start(poczatkowe) {
+    if (otwarte) return;
+    otwarte = true;
     css();
     const el = document.createElement('div'); el.className = 'kz';
     el.innerHTML = `<button class="kz-x" aria-label="Zamknij">✕</button>
@@ -42,7 +45,8 @@
     let timer = null, t0 = 0, raf = null, koniec = false;
     const wolne = () => KOLORY.find(k => ![...palce.values()].some(p => p.kolor === k)) || KOLORY[palce.size % KOLORY.length];
 
-    function zamknij() { koniec = true; clearTimeout(timer); cancelAnimationFrame(raf); el.remove(); document.removeEventListener('keydown', esc); }
+    function zamknij() { koniec = true; otwarte = false; clearTimeout(timer); cancelAnimationFrame(raf); el.remove(); document.removeEventListener('keydown', esc);
+      ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach((t, i) => document.removeEventListener(t, H[i], true)); }
     const esc = e => { if (e.key === 'Escape') zamknij(); };
     document.addEventListener('keydown', esc);
     el.querySelector('.kz-x').onclick = e => { e.stopPropagation(); zamknij(); };
@@ -100,10 +104,15 @@
 
     // Dotyk (telefon, tablet, ekran dotykowy)
     const tylkoTlo = e => e.target.closest && e.target.closest('.kz-x');
-    el.addEventListener('touchstart', e => { if (tylkoTlo(e)) return; e.preventDefault(); if (koniec) return; [...e.changedTouches].forEach(t => dodaj('t' + t.identifier, t.clientX, t.clientY)); }, { passive: false });
-    el.addEventListener('touchmove', e => { e.preventDefault(); if (koniec) return; [...e.changedTouches].forEach(t => przesun('t' + t.identifier, t.clientX, t.clientY)); }, { passive: false });
-    const puszczone = e => { if (koniec) return; [...e.changedTouches].forEach(t => zabierz('t' + t.identifier)); };
-    el.addEventListener('touchend', puszczone); el.addEventListener('touchcancel', puszczone);
+    // Dotyk: nasłuch na całym dokumencie, bo palce położone na okładce (przed otwarciem ekranu) wysyłają zdarzenia do okładki
+    const H = [
+      e => { if (tylkoTlo(e)) return; e.preventDefault(); if (koniec) return; [...e.changedTouches].forEach(t => dodaj('t' + t.identifier, t.clientX, t.clientY)); },
+      e => { e.preventDefault(); if (koniec) return; [...e.changedTouches].forEach(t => przesun('t' + t.identifier, t.clientX, t.clientY)); },
+      e => { if (!tylkoTlo(e) && e.cancelable) e.preventDefault(); if (!koniec) [...e.changedTouches].forEach(t => zabierz('t' + t.identifier)); }
+    ];
+    H.push(H[2]);
+    ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach((t, i) => document.addEventListener(t, H[i], { capture: true, passive: false }));
+    if (poczatkowe && poczatkowe.length) [...poczatkowe].forEach(t => dodaj('t' + t.identifier, t.clientX, t.clientY));
     // Mysz (komputer bez dotyku): kliknięcie dodaje palec, kliknięcie w kółko je zabiera
     let nr = 0;
     el.addEventListener('mousedown', e => {
@@ -114,5 +123,23 @@
     el.addEventListener('contextmenu', e => e.preventDefault());
   }
 
-  App.provide('wieczor.ktoZaczyna', start);
+  App.provide('wieczor.ktoZaczyna', () => start());
+
+  /* Skrót: 2 lub więcej palców położonych na okładce gry (kafelek, wiersz listy, karta gry, Wieczór gier)
+   * od razu otwiera losowanie – palce zostają i liczą się jako gracze. Pojedyncze dotknięcie działa jak dotąd. */
+  const OKLADKA = '.tile .cov, .li > img, .li > .ph, .detail .cover, img.cover';
+  const naOkladce = t => { const el = t.target && t.target.closest ? t.target.closest(OKLADKA) : null; return el && !(t.target.closest('[data-bgg], button, a')) ? el : null; };
+  document.addEventListener('touchstart', e => {
+    if (otwarte || e.touches.length < 2) return;
+    if (!/^#\/(planszowki|wieczor|rozgrywki)/.test(location.hash)) return;
+    const dotk = [...e.touches];
+    const okl = dotk.map(naOkladce);
+    if (!okl[0] || okl.some(o => o !== okl[0])) return; // wszystkie palce na tej samej okładce
+    e.preventDefault();
+    start(dotk);
+  }, { capture: true, passive: false });
+  // okładki gier: bez menu „zapisz obraz” przy przytrzymaniu, żeby nie przeszkadzało w losowaniu
+  const st = document.createElement('style');
+  st.textContent = '.tile .cov img, .li > img, .detail .cover{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}';
+  document.head.appendChild(st);
 })();
