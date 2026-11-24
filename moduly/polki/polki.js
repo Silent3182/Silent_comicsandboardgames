@@ -161,7 +161,7 @@
   }
 
   /* ---------- okno „Gdzie stoi?” dla jednej rzeczy ---------- */
-  async function wybierz(itemType, itemId) {
+  async function wybierz(itemType, itemId, opt = {}) {
     css(); await ready;
     const store = itemType === 'game' ? 'games' : 'comics';
     const item = await DB.get(store, itemId);
@@ -182,7 +182,7 @@
         <label><span>Regał</span><select id="pk-s">${C.shelves.map(s => `<option value="${esc(s.id)}">${esc(s.name)}${s.place ? ' – ' + esc(s.place) : ''}</option>`).join('')}<option value="__new">+ Nowy regał…</option></select></label>
         <div class="muted" style="font-size:13px">Kliknij przegródkę (rzędy liczone od góry, kolumny od lewej).</div>
         <div id="pk-g"></div>
-        ${itemType === 'comic' && item.series ? `<label class="chk"><input type="checkbox" id="pk-ser"> <span>Cała seria „${esc(item.series)}” stoi w tym miejscu</span></label>` : ''}
+        ${itemType === 'comic' && item.series ? `<label class="chk"><input type="checkbox" id="pk-ser" ${opt.seria || (m && m.seria) ? 'checked' : ''}> <span>Cała seria „${esc(item.series)}” stoi w tym miejscu</span></label>` : ''}
         <div class="dlg-btns">${m ? '<button value="del" class="ghost danger">Usuń z półki</button>' : ''}<button value="whole" class="ghost">Cały regał (bez przegródki)</button><button value="cancel" class="primary">Zamknij</button></div></form>`;
       document.body.appendChild(dlg);
       const sel = dlg.querySelector('#pk-s'); sel.value = shId;
@@ -284,6 +284,10 @@
     css(); await reload();
     const Z = await zawartosc();
     const bezGier = Z.gry.filter(g => !g.isExpansion && !miejsce('game', g));
+    // serie komiksów, w których żaden posiadany tom nie ma miejsca
+    const serieBez = new Map();
+    Z.kom.forEach(k => { if (!k.series) return; const e = serieBez.get(k.series) || { n: 0, z: 0, id: k.id }; e.n++; if (miejsce('comic', k)) e.z++; serieBez.set(k.series, e); });
+    const bezSerii = [...serieBez.entries()].filter(([, e]) => !e.z).sort((a, b) => a[0].localeCompare(b[0], 'pl'));
     el.innerHTML = `
       <div class="pk-head"><h2 style="margin:0">Półki</h2><span class="spacer"></span><button class="primary" id="pkNew">+ Nowy regał</button></div>
       <div class="card" style="margin-top:12px"><input type="search" id="pkQ" style="width:100%" placeholder="Gdzie stoi…? Wpisz tytuł" value="${esc(st.szuk)}"><div id="pkWyn"></div></div>
@@ -296,7 +300,9 @@
           ${st.otw && st.otw.s === sh.id ? '<div id="pkCell"></div>' : ''}</div>`;
       }).join('')}</div>
       ${C.shelves.length && bezGier.length ? `<details class="card" style="margin-top:14px"><summary><b>Gry bez półki: ${bezGier.length}</b></summary>
-        <div class="list" style="margin-top:10px">${bezGier.sort((a, b) => a.title.localeCompare(b.title, 'pl')).map(g => `<div class="li" data-g="${esc(g.id)}"><div class="main"><div class="t">${esc(g.title)}</div></div><button class="small">📍 Ustaw</button></div>`).join('')}</div></details>` : ''}`;
+        <div class="list" style="margin-top:10px">${bezGier.sort((a, b) => a.title.localeCompare(b.title, 'pl')).map(g => `<div class="li" data-g="${esc(g.id)}"><div class="main"><div class="t">${esc(g.title)}</div></div><button class="small">📍 Ustaw</button></div>`).join('')}</div></details>` : ''}
+      ${C.shelves.length && bezSerii.length ? `<details class="card" style="margin-top:14px"><summary><b>Serie komiksów bez półki: ${bezSerii.length}</b></summary>
+        <div class="list" style="margin-top:10px">${bezSerii.map(([n, e]) => `<div class="li" data-ser="${esc(e.id)}"><div class="main"><div class="t">${esc(n)}</div><div class="s">${e.n} ${pl(e.n, 'tom', 'tomy', 'tomów')}</div></div><button class="small">📍 Ustaw serię</button></div>`).join('')}</div></details>` : ''}`;
 
     const $ = s => el.querySelector(s);
     const nowy = async () => { if (await editShelf()) render(el); };
@@ -316,6 +322,7 @@
       st.otw = st.otw && st.otw.s === s && st.otw.r === r && st.otw.c === c ? null : { s, r, c };
       render(el);
     }));
+    el.querySelectorAll('[data-ser]').forEach(li => li.onclick = async () => { if (await wybierz('comic', li.dataset.ser, { seria: true }) !== null) render(el); });
     el.querySelectorAll('[data-g]').forEach(li => li.onclick = async () => { if (await wybierz('game', li.dataset.g) !== null) render(el); });
 
     // szukanie „gdzie stoi”
