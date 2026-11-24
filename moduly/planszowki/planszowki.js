@@ -96,7 +96,7 @@
     const d = await load();
     play = play || { date: App.ui.today(), gameId: presetGameId, players: [] };
     const gamesSorted = d.games.filter(g => g.status !== 'wishlist').sort((a, b) => a.title.localeCompare(b.title, 'pl'));
-    const plist = d.players.slice().sort((a, b) => (b.isMe - a.isMe) || a.name.localeCompare(b.name, 'pl'));
+    const plist = window.KS ? KS.kolejnosc(d.players, d.plays) : d.players.slice().sort((a, b) => (b.isMe - a.isMe) || a.name.localeCompare(b.name, 'pl'));
     const rows = play.players.length ? play.players : [{ playerId: (plist.find(p => p.isMe) || {}).id }];
     const rowHtml = r => `<div class="pl-row">
       <input list="pl-names" class="pn" placeholder="Gracz" value="${esc(r.playerId && d.playerById.get(r.playerId) ? d.playerById.get(r.playerId).name : (r.name || ''))}">
