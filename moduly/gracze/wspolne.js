@@ -30,6 +30,24 @@
     return { games, plays, players, gameById: new Map(games.map(g => [g.id, g])), playerById: new Map(players.map(p => [p.id, p])) };
   }
 
+  /* Gracze do podpowiedzi: „ja” na górze, potem ostatnio grający (albo świeżo dodani), potem najczęściej grający. */
+  function kolejnosc(players, plays) {
+    const last = new Map(), cnt = new Map();
+    plays.forEach(p => p.players.forEach(x => { cnt.set(x.playerId, (cnt.get(x.playerId) || 0) + 1); if ((p.date || '') > (last.get(x.playerId) || '')) last.set(x.playerId, p.date || ''); }));
+    const kiedy = p => { const a = last.get(p.id) || '', b = (p.createdAt || '').slice(0, 10); return a > b ? a : (cnt.get(p.id) ? a : b); };
+    return players.slice().sort((a, b) => (!!b.isMe - !!a.isMe) || kiedy(b).localeCompare(kiedy(a)) || (cnt.get(b.id) || 0) - (cnt.get(a.id) || 0) || a.name.localeCompare(b.name, 'pl'));
+  }
+  /* Gracz o tym imieniu (bez względu na wielkość liter) albo nowy, od razu zapisany – żeby był w kolejnych grach. */
+  async function gracz(name, players) {
+    const n = String(name || '').trim(); if (!n) return null;
+    const all = players || await DB.all('players');
+    const ex = all.find(p => p.name.trim().toLowerCase() === n.toLowerCase());
+    if (ex) return ex;
+    const p = await DB.put('players', { name: n, color: kolor({ name: n }) });
+    if (players) players.push(p);
+    return p;
+  }
+
   /* Kto był wyżej w rozgrywce: 1 = a, -1 = b, 0 = remis/nie wiadomo. */
   function wynik(play, a, b) {
     const A = play.players.find(x => x.playerId === a), B = play.players.find(x => x.playerId === b);
@@ -95,5 +113,5 @@
   `;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
-  window.KS = { pl, num, kolor, avatar, ja, mojeImie, dane, wynik, h2h, odczyty, zapiszObraz, PALETA };
+  window.KS = { kolejnosc, gracz, pl, num, kolor, avatar, ja, mojeImie, dane, wynik, h2h, odczyty, zapiszObraz, PALETA };
 })();
