@@ -401,12 +401,13 @@
       el.innerHTML = `
         <div class="row" style="margin-bottom:8px"><h1 style="margin:0">Rozgrywki</h1><span class="spacer"></span>
           <select id="rok"><option value="">Cały czas</option>${years.map(y => `<option ${y === year ? 'selected' : ''}>${y}</option>`).join('')}</select>
-          ${App.has('licznik.start') ? '<button id="liczPlay">🧮 Licznik</button>' : ''}<button class="primary" id="addPlay">+ Rozgrywka</button></div>
+          ${App.has('zegar.start') ? '<button id="zegPlay">⏱️ Zegar tur</button>' : ''}${App.has('licznik.start') ? '<button id="liczPlay">🧮 Licznik</button>' : ''}<button class="primary" id="addPlay">+ Rozgrywka</button></div>
         <div class="tabs">${[['staty', 'Statystyki'], ['historia', 'Historia'], ['gracze', 'Gracze'], ['polka', 'Półka wstydu']].map(([k, v]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${v}</button>`).join('')}</div>
         <div id="out"></div>`;
       el.querySelectorAll('.tabs button').forEach(b => b.onclick = () => App.go('rozgrywki', Object.assign({ tab: b.dataset.t }, year ? { rok: year } : {})));
       el.querySelector('#rok').onchange = e => App.go('rozgrywki', Object.assign({ tab }, e.target.value ? { rok: e.target.value } : {}));
       el.querySelector('#addPlay').onclick = async () => { if (await editPlay()) App.refresh(); };
+      if (el.querySelector('#zegPlay')) el.querySelector('#zegPlay').onclick = () => App.call('zegar.start');
       if (el.querySelector('#liczPlay')) el.querySelector('#liczPlay').onclick = () => App.call('licznik.start');
       const out = el.querySelector('#out');
       const plays = d.plays.filter(p => !year || (p.date || '').startsWith(year)).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));

@@ -149,6 +149,7 @@
     el.innerHTML = '<p class="muted">Ładowanie kolekcji…</p>';
     await ensureSeed();
     if (params.id) return renderComic(el, params.id);
+    if (params.braki) return renderBraki(el);
     const all = await DB.all('comics');
     const series = [...new Set(SERIE_START.concat(all.map(c => c.series)).filter(Boolean))];
     const stats = {}; all.forEach(c => { const s = stats[c.series] = stats[c.series] || { all: 0, own: 0 }; s.all++; if (c.status === 'owned' || c.status === 'forSale') s.own++; });
@@ -159,6 +160,7 @@
         <select id="ks"><option value="">Wszystkie serie (${all.length})</option>${series.map(s => `<option value="${esc(s)}" ${s === st.seria ? 'selected' : ''}>${esc(s)}${stats[s] ? ` (${stats[s].own}/${stats[s].all})` : ''}</option>`).join('')}</select>
         <select id="ksort">${[['seria', 'Seria i numer'], ['tytul', 'Tytuł'], ['ocena', 'Moja ocena'], ['nowe', 'Ostatnio zmienione']].map(([v, l]) => `<option value="${v}" ${st.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <button class="primary" id="kadd">+ Dodaj komiks</button>
+        <button id="kbraki">🔍 Braki w seriach</button>
       </div>
       <div class="kx-chips">${[['all', 'Wszystkie'], ['owned', 'Mam'], ['missing', 'Brakuje'], ['unread', 'Mam, nieprzeczytane'], ['forSale', 'Na sprzedaż'], ['sold', 'Sprzedane'], ['rated', 'Ocenione']].map(([v, l]) => `<button class="kx-chip ${st.filtr === v ? 'on' : ''}" data-f="${v}">${l}</button>`).join('')}</div>
       <div id="klist"></div>`;
@@ -186,7 +188,49 @@
     el.querySelector('#ksort').onchange = e => { st.sort = e.target.value; draw(); };
     el.querySelectorAll('.kx-chip').forEach(b => b.onclick = () => { st.filtr = b.dataset.f; el.querySelectorAll('.kx-chip').forEach(x => x.classList.toggle('on', x === b)); st.limit = 120; draw(); });
     el.querySelector('#kadd').onclick = () => editComic(null, series);
+    el.querySelector('#kbraki').onclick = () => App.go('komiksy', { braki: 1 });
     draw();
+  }
+
+  /* ---------- braki w seriach ---------- */
+  const br = { wszystkie: false };
+  async function renderBraki(el) {
+    const all = await DB.all('comics'); const shop = (await DB.all('shoppingList')).filter(x => !x.bought);
+    const naLiscie = new Set(shop.flatMap(x => [x.comicId, x.series && x.volume != null ? x.series + '|' + x.volume : null]).filter(Boolean));
+    const mam = c => c.status === 'owned' || c.status === 'forSale';
+    const serie = new Map();
+    all.forEach(c => { const v = parseInt(c.volume, 10); if (!c.series || !(v > 0)) return; if (!serie.has(c.series)) serie.set(c.series, new Map()); const m = serie.get(c.series); const o = m.get(v); if (!o || mam(c)) m.set(v, c); });
+    const wiersze = [...serie].map(([s, m]) => {
+      const max = Math.max(...m.keys()); const nr = []; let ile = 0;
+      for (let v = 1; v <= max; v++) { const c = m.get(v); if (c && mam(c)) ile++; else nr.push({ v, c }); }
+      return { s, max, ile, nr };
+    }).filter(r => r.nr.length && (br.wszystkie || r.ile > 0)).sort((a, b) => b.ile / b.max - a.ile / a.max || a.s.localeCompare(b.s, 'pl'));
+    const zakresy = nr => { const out = []; nr.forEach(({ v }) => { const l = out[out.length - 1]; if (l && l[1] === v - 1) l[1] = v; else out.push([v, v]); }); return out.map(([a, b]) => a === b ? a : a + '–' + b).join(', '); };
+    const juz = (s, n) => n.c && naLiscie.has(n.c.id) || naLiscie.has(s + '|' + n.v);
+    el.innerHTML = `<p><a href="#/komiksy">← Komiksy</a></p><h2>Braki w seriach</h2>
+      <p class="kx-muted">Numery tomów, których nie masz (od 1 do ostatniego znanego tomu serii). Kliknij numer, żeby dodać go na listę zakupów; 🛒 = już na liście.</p>
+      <label class="chk"><input type="checkbox" id="brw" ${br.wszystkie ? 'checked' : ''}> <span>pokaż też serie, z których nie masz żadnego tomu</span></label>
+      ${wiersze.map(r => { const dod = r.nr.filter(n => !juz(r.s, n)); return `<div class="card" style="margin:10px 0">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><b>${esc(r.s)}</b><span class="kx-muted">masz ${r.ile} z ${r.max} · brakuje ${r.nr.length}: ${esc(zakresy(r.nr))}</span></div>
+        <div class="kx-prog"><div style="width:${(r.ile / r.max * 100).toFixed(1)}%"></div></div>
+        <div class="kx-chips" style="flex-wrap:wrap;overflow:visible">${r.nr.slice(0, 300).map(n => `<button class="kx-chip ${juz(r.s, n) ? 'on' : ''}" data-bs="${esc(r.s)}" data-bv="${n.v}" title="${esc(n.c ? n.c.title : 'tom ' + n.v)}">${juz(r.s, n) ? '🛒 ' : ''}${n.v}</button>`).join('')}</div>
+        ${dod.length ? `<div class="kx-btns"><button data-ball="${esc(r.s)}">🛒 Dodaj wszystkie brakujące na listę (${dod.length})</button></div>` : ''}</div>`; }).join('') || '<p>Nie masz braków w żadnej serii 🎉</p>'}`;
+    const dodaj = async (s, lista) => {
+      const recs = lista.filter(n => !juz(s, n)).map(n => ({ title: n.c ? `${s} ${n.v}: ${n.c.title}` : `${s} ${n.v}`, itemType: 'comic', series: s, volume: n.v, comicId: n.c ? n.c.id : null, publisher: n.c ? n.c.publisher || '' : '', bought: false, notes: 'Brak w serii' }));
+      if (recs.length) await DB.putMany('shoppingList', recs);
+      App.ui.toast(recs.length === 1 ? 'Dodano na listę zakupów' : `Dodano ${recs.length} pozycji na listę zakupów`); renderBraki(el);
+    };
+    el.querySelector('#brw').onchange = e => { br.wszystkie = e.target.checked; renderBraki(el); };
+    el.querySelectorAll('[data-bv]').forEach(b => b.onclick = async () => {
+      const r = wiersze.find(w => w.s === b.dataset.bs); const n = r.nr.find(k => k.v === +b.dataset.bv);
+      if (juz(r.s, n)) return App.ui.toast('Ten tom już jest na liście zakupów');
+      await dodaj(r.s, [n]);
+    });
+    el.querySelectorAll('[data-ball]').forEach(b => b.onclick = async () => {
+      const r = wiersze.find(w => w.s === b.dataset.ball); const n = r.nr.filter(k => !juz(r.s, k));
+      if (n.length > 10 && !await App.ui.confirm(`Dodać ${n.length} tomów serii ${r.s} na listę zakupów?`)) return;
+      await dodaj(r.s, n);
+    });
   }
 
   async function editComic(c, series, opt = {}) {
@@ -382,6 +426,72 @@
       if (await App.ui.confirm(`Oznaczyć ${items.length} pozycji do tego miejsca jako przeczytane?`)) { await setRead(items, true); App.refresh(); }
     });
   }
+  /* ---- filtr po postaci / evencie ---- */
+  const POSTACIE = [['Spider-Man', 'spider-man|spectacular spider|web of spider|peter parker'], ['X-Men', 'x-men|x-factor|x-force|new mutants|excalibur'],
+    ['Avengers', 'avengers'], ['Fantastyczna Czwórka', 'fantastic four|\\bff\\b'], ['Iron Man', 'iron man|tony stark'], ['Kapitan Ameryka', 'captain america|steve rogers'],
+    ['Thor', '\\bthor\\b'], ['Hulk', '\\bhulk'], ['Daredevil', 'daredevil'], ['Wolverine', 'wolverine|\\blogan\\b'], ['Deadpool', 'deadpool'],
+    ['Strażnicy Galaktyki', 'guardians of the galaxy'], ['Czarna Pantera', 'black panther'], ['Doktor Strange', 'doctor strange|dr\\. strange'],
+    ['Punisher', 'punisher'], ['Kapitan Marvel', 'captain marvel|ms\\. marvel|carol danvers'], ['Venom', 'venom'], ['Moon Knight', 'moon knight'],
+    ['Silver Surfer', 'silver surfer'], ['Czarna Wdowa', 'black widow'], ['Ant-Man', 'ant-man'], ['Hawkeye', 'hawkeye'], ['Ghost Rider', 'ghost rider'],
+    ['Thanos', 'thanos'], ['Inhumans', 'inhumans'], ['Nova', '\\bnova\\b'], ['Vision / Scarlet Witch', 'vision|scarlet witch']];
+  const pz = { p: '', q: '', ev: '', tylko: false, page: 0 };
+  function renderPostac(body, S, idx) {
+    const L = MRO.list;
+    const evs = [...new Set(L.map(x => x.ev).filter(Boolean))];
+    const wz = pz.q.trim() ? new RegExp(pz.q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : pz.p ? new RegExp((POSTACIE.find(x => x[0] === pz.p) || [])[1] || '^$', 'i') : null;
+    const aktywny = !!(wz || pz.ev);
+    let rows = aktywny ? L.filter(x => x.typ === 0 && !S.opt.wyl.includes(x.sec) && (!wz || wz.test(x.title)) && (!pz.ev || x.ev === pz.ev)) : [];
+    const ile = rows.length, czyt = rows.filter(S.isRead).length;
+    const nast = rows.find(x => !S.isRead(x) && S.counts(x));
+    if (pz.tylko) rows = rows.filter(x => !S.isRead(x));
+    const PER = 150, pages = Math.max(1, Math.ceil(rows.length / PER)); if (pz.page >= pages) pz.page = 0;
+    body.innerHTML = `
+      <p class="kx-muted">Wybierz bohatera albo event – zobaczysz tylko jego zeszyty, w kolejności Master Reading Order.</p>
+      <div class="kx-chips">${POSTACIE.map(([n]) => `<button class="kx-chip ${pz.p === n && !pz.q ? 'on' : ''}" data-pp="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+      <div class="kx-bar"><input type="search" id="pzq" placeholder="Inna postać lub seria (po angielsku, np. Silk)" value="${esc(pz.q)}">
+        <select id="pzev"><option value="">Wszystkie eventy</option>${evs.map(e => `<option ${e === pz.ev ? 'selected' : ''}>${esc(e)}</option>`).join('')}</select>
+        <label class="chk"><input type="checkbox" id="pzt" ${pz.tylko ? 'checked' : ''}> <span>tylko nieprzeczytane</span></label>
+        ${aktywny ? '<button id="pzx">Wyczyść</button>' : ''}</div>
+      ${aktywny ? `<div class="kx-prog"><div style="width:${(czyt / Math.max(1, ile) * 100).toFixed(1)}%"></div></div>
+        <p class="kx-muted">${esc([pz.q || pz.p, pz.ev].filter(Boolean).join(' · '))}: przeczytane ${czyt} z ${ile}${nast ? ` · następny: <b>${esc(nast.title)}</b> (#${nast.i + 1})` : ''}</p>
+        ${pages > 1 ? `<div class="kx-chips">${Array.from({ length: pages }, (_, i) => `<button class="kx-chip ${i === pz.page ? 'on' : ''}" data-pg="${i}">${i * PER + 1}–${Math.min(rows.length, (i + 1) * PER)}</button>`).join('')}</div>` : ''}
+        <div>${rows.slice(pz.page * PER, pz.page * PER + PER).map(x => itemRow(x, S, idx, { sec: true, upto: false })).join('') || '<p>Nic nie znalazłem.</p>'}</div>` : ''}`;
+    const go = () => renderPostac(body, S, idx);
+    body.querySelectorAll('[data-pp]').forEach(b => b.onclick = () => { pz.p = pz.p === b.dataset.pp && !pz.q ? '' : b.dataset.pp; pz.q = ''; pz.page = 0; go(); });
+    body.querySelector('#pzq').onchange = e => { pz.q = e.target.value; pz.page = 0; go(); };
+    body.querySelector('#pzev').onchange = e => { pz.ev = e.target.value; pz.page = 0; go(); };
+    body.querySelector('#pzt').onchange = e => { pz.tylko = e.target.checked; pz.page = 0; go(); };
+    const x = body.querySelector('#pzx'); if (x) x.onclick = () => { Object.assign(pz, { p: '', q: '', ev: '', page: 0 }); go(); };
+    body.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { pz.page = +b.dataset.pg; go(); });
+    bindRows(body, S);
+  }
+
+  /* ---- oś czasu czytania ---- */
+  const odm = (n, a, b, c) => n + ' ' + (n === 1 ? a : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? b : c);
+  async function renderHistoria(body, S) {
+    const comics = await DB.all('comics'); const byId = new Map(comics.map(c => [c.id, c]));
+    const byMro = new Map(MRO.list.map(x => [x.id, x]));
+    const ev = [];
+    S.ov.forEach(o => { if (o.read && o.readAt && !o.skipped) { const x = byMro.get(o.id); if (x && x.typ === 0) ev.push({ t: o.readAt, x }); } });
+    comics.forEach(c => { if (c.read && c.readAt) ev.push({ t: c.readAt, c }); });
+    ev.sort((a, b) => b.t.localeCompare(a.t));
+    const bezDaty = MRO.list.filter(x => x.typ === 0 && x.base && !S.ov.has(x.id)).length;
+    const mies = new Map(); ev.forEach(e => { const k = e.t.slice(0, 7); if (!mies.has(k)) mies.set(k, []); mies.get(k).push(e); });
+    const nazwa = k => new Date(k + '-15').toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
+    const blok = (k, list) => {
+      const tomy = new Map();
+      list.forEach(e => { (e.c ? [e.c] : S.vols(e.x).map(id => byId.get(id)).filter(Boolean)).forEach(c => tomy.set(c.id, c)); });
+      const zeszyty = list.filter(e => e.x);
+      return `<div class="card" style="margin:10px 0"><h3 style="margin:0 0 4px;text-transform:capitalize">${esc(nazwa(k))}</h3>
+        <p class="kx-muted">${zeszyty.length ? odm(zeszyty.length, 'zeszyt', 'zeszyty', 'zeszytów') + ' z kolejności' : ''}${zeszyty.length && list.length > zeszyty.length ? ' · ' : ''}${list.length > zeszyty.length ? odm(list.length - zeszyty.length, 'tom', 'tomy', 'tomów') + ' z kolekcji' : ''}</p>
+        ${tomy.size ? `<div class="kx-grid">${[...tomy.values()].map(c => `<div class="kx-tile" data-id="${esc(c.id)}">${cover(c)}<div class="kx-t"><div>${esc(c.title)}</div><div class="kx-s">${esc(c.series || '')}${c.volume != null ? ' #' + esc(c.volume) : ''}</div></div></div>`).join('')}</div>` : ''}
+        ${zeszyty.length ? `<details><summary>Zeszyty (${zeszyty.length})</summary>${zeszyty.map(e => `<div class="kx-row read"><div class="kx-main"><div class="kx-tt">${esc(e.x.title)}</div><div class="kx-muted">${App.ui.fmtDate(e.t.slice(0, 10))} · ${esc(e.x.sec)}</div></div></div>`).join('')}</details>` : ''}</div>`;
+    };
+    body.innerHTML = `<p class="kx-muted">Co czytałeś miesiąc po miesiącu – zeszyty odznaczone w kolejności i tomy oznaczone jako przeczytane, z okładkami tomów.${bezDaty ? ` ${bezDaty.toLocaleString('pl-PL')} pozycji przeczytanych wcześniej (z arkusza) nie ma daty, więc ich tu nie ma.` : ''}</p>
+      ${mies.size ? [...mies].map(([k, l]) => blok(k, l)).join('') : '<p>Jeszcze nic nie odznaczyłeś w aplikacji. Każde „✓ Przeczytane” trafi tutaj.</p>'}`;
+    body.querySelectorAll('.kx-tile').forEach(t => t.onclick = () => App.go('komiksy', { id: t.dataset.id }));
+  }
+
   async function renderCzytanie(el, params) {
     css();
     el.innerHTML = '<p class="muted">Ładowanie kolejności czytania…</p>';
@@ -391,7 +501,7 @@
     const L = MRO.list;
     const tot = L.filter(S.counts).length; const done = L.filter(x => S.counts(x) && S.isRead(x)).length;
     const nx = S.next;
-    const tabs = [['next', 'Następne'], ['backlog', `Zaległe (${S.backlog.length})`], ['all', 'Cała lista'], ['opcje', 'Ustawienia i aktualizacja']];
+    const tabs = [['next', 'Następne'], ['backlog', `Zaległe (${S.backlog.length})`], ['all', 'Cała lista'], ['postac', 'Postać / event'], ['historia', 'Oś czasu'], ['opcje', 'Ustawienia i aktualizacja']];
     el.innerHTML = `
       <h2>Master Reading Order</h2>
       <div class="kx-prog"><div style="width:${(done / Math.max(1, tot) * 100).toFixed(2)}%"></div></div>
@@ -445,6 +555,10 @@
       body.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { cz.page = +b.dataset.p; App.refresh(); });
       if (nx) body.querySelector('#czgo').onclick = () => { cz.sec = nx.sec; cz.q = ''; App.go('czytanie', { v: 'all', goto: nx.i }); };
       bindRows(body, S);
+    } else if (cz.view === 'postac') {
+      renderPostac(body, S, idx);
+    } else if (cz.view === 'historia') {
+      renderHistoria(body, S);
     } else {
       renderOpcje(body, S);
     }

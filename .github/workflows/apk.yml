@@ -28,6 +28,26 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      # Maven Central często odpowiada 429 (za dużo zapytań z serwerów GitHuba) – bierzemy biblioteki
+      # z kopii Google (ta sama zawartość) i zapamiętujemy pobrane między budowami.
+      - name: Kopia Maven Central i pamięć Gradle
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/mirror.gradle <<'EOF2'
+          def MIRROR = 'https://maven-central.storage-download.googleapis.com/maven2/'
+          def swap = { repos -> repos.configureEach { r -> if (r instanceof MavenArtifactRepository && r.url.toString().contains('repo.maven.apache.org')) r.url = MIRROR } }
+          beforeSettings { s -> swap(s.pluginManagement.repositories) }
+          settingsEvaluated { s -> swap(s.dependencyResolutionManagement.repositories) }
+          allprojects { swap(buildscript.repositories); swap(repositories) }
+          EOF2
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-capacitor6-${{ hashFiles('.github/workflows/apk.yml') }}
+          restore-keys: gradle-capacitor6-
+
       - name: Przygotuj projekt Capacitor
         run: |
           mkdir -p build/www
