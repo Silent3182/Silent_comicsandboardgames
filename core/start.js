@@ -9,7 +9,7 @@
     komiksy: 'Tomy i serie', czytanie: 'Master Reading Order', postep: 'Ile już przeczytane', sklep: 'Skaner i „czy to mam?”',
     zakupy: 'Lista zakupów', wishlista: 'Na co poluję', wypozyczenia: 'Komu pożyczone', polki: 'Gdzie co stoi',
     wartosc: 'Ile warta kolekcja', sprzedaz: 'Ogłoszenia', skroty: 'BGA, fora, linki', kalendarz: 'Imprezy i premiery',
-    koszulki: 'Koszulki na karty', sleeve: 'Koszulki na karty', sleeves: 'Koszulki na karty', udostepnianie: 'Pokaż kolekcję innym',
+    koszulki: 'Koszulki na karty', sleeve: 'Koszulki na karty', sleeves: 'Koszulki na karty', udostepnianie: 'Pokaż kolekcję innym', udostepnij: 'Pokaż kolekcję innym', impreza: 'Goście wybierają grę', asystent: 'Zapytaj głosem',
     powiadomienia: 'Przypomnienia', kopie: 'Kopie zapasowe', ustawienia: 'Synchronizacja i wygląd'
   };
   let edit = false;

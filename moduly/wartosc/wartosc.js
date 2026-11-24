@@ -154,5 +154,6 @@
     }
   }
 
+  App.provide('wartosc.dane', data); // historia cen liczy z tego stan kolekcji
   App.registerModule({ id: 'wartosc', title: 'Wartość kolekcji', icon: '💎', order: 45, render });
 })();

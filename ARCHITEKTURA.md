@@ -90,6 +90,16 @@ Moduły gracze/licznik/wyzwania/podsumowanie (`moduly/gracze/wspolne.js` = wspó
 - **plays** z licznika punktów mają `lowWins: true`, gdy wygrywa najmniej punktów.
 - **comics**: `readAt` (data odznaczenia „przeczytane”) – liczone w wyzwaniach i podsumowaniu roku.
 
+**priceHistory** – historia cen (moduł `moduly/historia`, zakładka 📈 Historia cen)
+`itemType ('game'|'comic'|'kolekcja'), itemId, title, kind ('zakup'|'wycena'|'ogloszenie'|'sprzedaz'|'rynek'|'snap'), price, date ('RRRR-MM-DD'), platform?, note?, manual?`
+Wpisy zbierają się same po zmianach w games/comics/listings/ustawieniach (id wyliczane z treści, np. `ph-zakup-<id>-<data>`, więc dwa urządzenia nie dublują). `snap-RRRR-MM-DD` = stan kolekcji dnia (`value`, `paid`, `count`), liczony usługą `App.call('wartosc.dane')` z modułu wartości.
+
+Asystent głosowy (`moduly/asystent`): polecenia po polsku (Web Speech API w przeglądarce, wtyczka `@capacitor-community/speech-recognition` w APK, zawsze też pole tekstowe). „Brass Silent 145 Andrzej 130” → podgląd rozgrywki do potwierdzenia, zwycięzca z punktów. Ksywki graczy w ustawieniu `asystentAliasy = {ksywka: playerId}` („silent” = gracz `isMe`). `App.call('asystent.wykonaj', tekst)`.
+
+Udostępnianie (`moduly/udostepnij` + strona `kolekcja.html`): link tylko do odczytu. Dozwolone pola: tytuł, rok, bggId, dodatek, opcjonalnie ocena/partie/na sprzedaż/pożyczona/okładka, komiksy jako seria + numery. Nigdy: notatki, ceny, kody, półki, gracze, osoby z wypożyczeń, tokeny. `#k=` = spis skompresowany w linku (deflate-raw + base64url), `#g=` = sekretny Gist (token z uprawnieniem Gists w `DB.local('udostepnijToken')` albo token synchronizacji). Ustawienie `udostepnij`.
+
+Tryb imprezy (`moduly/impreza` + strona gościa `impreza.html#t=<kanał>`): goście dołączają przez kod QR; wiadomości przez ntfy.sh (losowy kanał `mk…`, tylko imiona, kolory, wyniki, tytuł gry). Stan w localStorage `impreza.stan`; na koniec zapis do plays albo przekazanie do `licznik.stan`.
+
 ## Komunikaty i błędy
 - Pytania Tak/Nie: `await App.ui.confirm('Usunąć…?')` – okno aplikacji, nie systemowe. Nie używaj `alert/confirm/prompt` przeglądarki (test to sprawdza).
 - Błędy pokazuj przez `App.ui.toast(e)` albo `App.ui.toast('Nie udało się: ' + e.message)` – toast sam zamienia systemowe (angielskie) teksty na polskie. Tekst do wstawienia w stronę: `App.ui.komunikat(e)` (zwraca `null` dla anulowania, np. zamkniętego wyboru pliku).
