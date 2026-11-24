@@ -67,7 +67,7 @@
     const opis = [`${i.min === i.max ? i.min : i.min + '–' + i.max} os.`, i.czas ? `~${i.czas} min` : '', g.weight ? 'złożoność ' + num(g.weight) : '', g._plays ? `${g._plays}× zagrana` : ''].filter(Boolean).join(' · ');
     return `<div class="li wz-li ${wylosowana ? 'wz-los' : ''}" data-id="${esc(g.id)}">${cover(g)}<div class="main"><div class="t">${esc(g.title)}</div>
       <div class="s">${opis}${i.zrodlo === 'niepewne' ? ' <span class="chip" title="Dane przybliżone, mogą się różnić – popraw w karcie gry">?</span>' : ''}</div>
-      ${r.why.length ? `<div class="s">${r.why.join(' · ')}</div>` : ''}</div></div>`;
+      ${r.why.length ? `<div class="s">${r.why.join(' · ')}</div>` : ''}${App.has('polki.html') ? `<div class="s">${App.call('polki.html', 'game', g)}</div>` : ''}</div></div>`;
   }
 
   function css() {
@@ -89,6 +89,7 @@
   let wylosowana = null;
   async function render(el) {
     css();
+    if (App.has('polki.gotowe')) await App.call('polki.gotowe');
     const s = load();
     const polka = await dane();
     const kz = () => el.querySelectorAll('[data-kz]').forEach(b => b.onclick = () => App.call('wieczor.ktoZaczyna'));
@@ -128,7 +129,7 @@
       const top = wyniki.slice(0, 8); const min = Math.min(...top.map(r => r.pkt));
       const wagi = top.map(r => r.pkt - min + 5); let x = Math.random() * wagi.reduce((a, b) => a + b, 0);
       let pick = top[0]; for (let i = 0; i < top.length; i++) { x -= wagi[i]; if (x <= 0) { pick = top[i]; break; } }
-      wylosowana = pick.g.id; render(el); App.ui.toast('🎲 ' + pick.g.title);
+      wylosowana = pick.g.id; render(el); const gdzie = App.has('polki.tekst') ? App.call('polki.tekst', 'game', pick.g) : ''; App.ui.toast('🎲 ' + pick.g.title + (gdzie ? ' – 📍 ' + gdzie : ''), gdzie ? 5000 : 2500);
     };
     el.querySelectorAll('.wz-li').forEach(r => r.onclick = () => App.go('planszowki', { gra: r.dataset.id }));
     el.querySelectorAll('[data-uzup]').forEach(b => b.onclick = async () => {

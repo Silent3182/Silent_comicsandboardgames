@@ -3,7 +3,7 @@ name: Zbuduj APK (Android)
 on:
   push:
     branches: [main]
-    paths-ignore: ['README.md', 'ARCHITEKTURA.md', 'moduly/**/README.md']
+    paths-ignore: ['README.md', 'ARCHITEKTURA.md', 'moduly/**/README.md', 'android-native/README.md']
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
           { "appId": "pl.silent.mojekolekcje", "appName": "Moje kolekcje", "webDir": "www",
             "android": { "allowMixedContent": false } }
           EOF
-          npm install --no-audit --no-fund @capacitor/core@6.2.0 @capacitor/cli@6.2.0 @capacitor/android@6.2.0 @capacitor/filesystem@6.0.2 @capacitor/share@6.0.3
+          npm install --no-audit --no-fund @capacitor/core@6.2.0 @capacitor/cli@6.2.0 @capacitor/android@6.2.0 @capacitor/filesystem@6.0.2 @capacitor/share@6.0.3 @capacitor/local-notifications@6.1.3
           npx cap add android
           npx cap sync android
 
@@ -51,6 +51,17 @@ jobs:
           grep -q 'android.permission.CAMERA' AndroidManifest.xml || sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#&\n    <uses-permission android:name="android.permission.CAMERA" />#' AndroidManifest.xml
           grep -q 'android.permission.CAMERA' AndroidManifest.xml || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n</manifest>#' AndroidManifest.xml
           grep -n 'permission' AndroidManifest.xml
+
+      - name: Widżet „Następny komiks” i powiadomienia (android-native/)
+        run: |
+          APP=build/android/app/src/main
+          PKG=$APP/java/pl/silent/mojekolekcje
+          mkdir -p $PKG
+          cp android-native/java/*.java $PKG/
+          cp -r android-native/res/. $APP/res/
+          grep -q 'WidzetCzytanie' $APP/AndroidManifest.xml || sed -i 's#</application>#    <receiver android:name=".WidzetCzytanie" android:exported="false" android:label="@string/wz_nazwa">\n            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>\n            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widzet_czytanie" />\n        </receiver>\n    </application>#' $APP/AndroidManifest.xml
+          grep -q 'POST_NOTIFICATIONS' $APP/AndroidManifest.xml || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n</manifest>#' $APP/AndroidManifest.xml
+          cat $APP/AndroidManifest.xml
 
       - name: Ikona aplikacji
         run: |
@@ -97,6 +108,7 @@ jobs:
           path: moje-kolekcje.apk
 
       - name: Wydanie z plikiem APK
+        if: github.ref == 'refs/heads/main'   # z innych gałęzi tylko próbna budowa (plik w Artifacts)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.1.${{ github.run_number }}

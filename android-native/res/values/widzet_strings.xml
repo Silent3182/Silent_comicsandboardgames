@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wz_nazwa">Następny komiks</string>
+    <string name="wz_opis">Następny komiks z Master Reading Order i przycisk „Przeczytane”</string>
+    <string name="wz_naglowek">📖 Następny do przeczytania</string>
+    <string name="wz_ladowanie">Otwórz aplikację, żeby wczytać kolejkę</string>
+    <string name="wz_ok">✓ Przeczytane</string>
+    <string name="wz_cofnij">↶</string>
+</resources>

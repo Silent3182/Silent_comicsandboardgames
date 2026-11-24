@@ -125,7 +125,7 @@
         // wybór gry: najpierw kolekcja, potem (z internetem) gry spoza kolekcji z BGG
         const gi = dlg.querySelector('#pl-game'), gres = dlg.querySelector('#pl-gres');
         let tmr = null, seq = 0;
-        const pick = g => { picked = g; gi.value = g.title; gres.innerHTML = ''; };
+        const pick = g => { picked = g; gi.value = g.title; seq++; clearTimeout(tmr); gres.innerHTML = App.has('polki.html') ? App.call('polki.html', 'game', g) : ''; /* gdzie stoi gra */ };
         const row = (g, i, src) => `<button type="button" class="pl-gopt" data-src="${src}" data-i="${i}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="ph">🎲</span>'}<span><b>${esc(g.title)}</b><small>${[g.year, src === 'bgg' ? 'spoza kolekcji · BGG' : (g.status !== 'owned' ? STATUS[g.status] : '')].filter(Boolean).join(' · ')}</small></span></button>`;
         let local = [], online = [];
         const draw = (note) => {
@@ -311,6 +311,7 @@
             <button id="edit">Edytuj</button>
             <button id="sell">💰 Wystaw na sprzedaż</button>
             ${App.has('wypozyczenia.przycisk') ? '<button id="lend">🤝 Pożycz</button>' : ''}
+            ${App.has('polki.przycisk') && g.status !== 'wishlist' && g.status !== 'played' ? '<button id="shelf">📍 Półka</button>' : ''}
             ${g.bggId ? `<a class="btn" href="https://boardgamegeek.com/boardgame/${g.bggId}" target="_blank" rel="noopener">Otwórz BGG ↗</a>` : ''}
             <button id="del" class="danger ghost">Usuń</button>
           </p>
@@ -335,6 +336,7 @@
     $('#edit').onclick = async () => { if (await editGame(g)) App.refresh(); };
     $('#sell').onclick = () => App.call('sprzedaz.wystaw', { itemType: 'game', itemId: id });
     if ($('#lend')) App.call('wypozyczenia.przycisk', $('#lend'), 'game', id);
+    if ($('#shelf')) App.call('polki.przycisk', $('#shelf'), 'game', id);
     $('#del').onclick = async () => {
       if (!await App.ui.confirm(`Usunąć „${g.title}” z kolekcji?${ps.length ? ' Rozgrywki tej gry zostaną w statystykach.' : ''}\n\nJeśli grę sprzedałeś, lepiej zmień jej status na „sprzedana” (Edytuj).`)) return;
       await DB.remove('games', id); App.ui.toast('Usunięto'); App.go('planszowki');
