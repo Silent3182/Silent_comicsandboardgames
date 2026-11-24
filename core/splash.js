@@ -4,7 +4,11 @@
 (function () {
   const el = document.getElementById('splash');
   if (!el) return;
-  const T0 = 2000;                       // ile ms od włączenia ma być widoczny
+  // ile ms od włączenia ma być widoczny: z Ustawień › Wygląd (localStorage „wyglad”.splash, sekundy), domyślnie 2 s
+  let sek = 2;
+  try { const v = JSON.parse(localStorage.getItem('wyglad') || '{}').splash; if (v != null && !isNaN(Number(v))) sek = Number(v); } catch (e) {}
+  if (sek <= 0 && !/zostan/.test(location.search)) { el.remove(); return; }   // wyłączony
+  const T0 = sek * 1000;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 

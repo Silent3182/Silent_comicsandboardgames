@@ -333,6 +333,7 @@ html[data-ikony="kolor"] #nav button:not(.active) .ico svg.ic { opacity: .82; }
 
 /* ---------- Ekran startowy (core/splash.js) ---------- */
 #splash { position: fixed; inset: 0; z-index: 1000; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0d1117; color: #fff; transition: opacity .55s ease, transform .55s ease; cursor: pointer; }
+html[data-splash="0"] #splash { display: none; }
 #splash.out { opacity: 0; transform: scale(1.06); pointer-events: none; }
 /* Wariant A: ściana okładek z kolekcji */
 #splash .sp-wall { position: absolute; inset: -35% -40%; display: flex; justify-content: center; gap: 10px; transform: rotate(-12deg); }

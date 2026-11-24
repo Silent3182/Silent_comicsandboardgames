@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css">
 <script>/* Wygląd z Ustawień (core/wyglad.js): styl ikon i motyw, ustawiane przed narysowaniem strony */
-try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;}catch(e){document.documentElement.dataset.ikony='kolor';}</script>
+try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;if(w.splash==='0')h.dataset.splash='0';}catch(e){document.documentElement.dataset.ikony='kolor';}</script>
 </head>
 <body>
 <!-- Ekran startowy (core/splash.js): znika po 2 s -->
