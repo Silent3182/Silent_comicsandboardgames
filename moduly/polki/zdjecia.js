@@ -246,7 +246,7 @@
       const q = dlg.querySelector('#pkf-q'), l = dlg.querySelector('#pkf-l');
       const draw = () => {
         const f = nz(q.value);
-        const pas = x => !f || nz(x.t).includes(f);
+        const pas = x => !f || nz(x.t).includes(f) || (x.typ === 'game' && window.Tytuly && Tytuly.pasuje(x.t.replace(/ \(dodatek\)$/, ''), q.value));
         const sek = [];
         if (!f && tuIds.size) sek.push(['Już w tej przegródce', gry.concat(tomy).filter(x => tuIds.has(x.id))]);
         sek.push(['Gry', gry.filter(x => pas(x) && (f || (!x.exp && !x.gdzie))).sort((a, b) => a.t.localeCompare(b.t, 'pl')).slice(0, f ? 40 : 25)]);
@@ -281,7 +281,7 @@
     // kandydaci: gry (cały tytuł i część przed dwukropkiem), tomy („seria numer” i tytuł)
     const kand = [];
     const dodaj = (typ, id, t, klucz) => { const k = nz(klucz); if (k.length >= 3 && !juz.has(typ + '|' + id)) kand.push({ typ, id, t, k, b: bigramy(k) }); };
-    Z.gry.forEach(g => { dodaj('game', g.id, g.title, g.title); const p = g.title.split(/[:–]/)[0]; if (p.length >= 4 && p !== g.title) dodaj('game', g.id, g.title, p); if (g.plTitle) dodaj('game', g.id, g.title, g.plTitle); });
+    Z.gry.forEach(g => { dodaj('game', g.id, g.title, g.title); const p = g.title.split(/[:–]/)[0]; if (p.length >= 4 && p !== g.title) dodaj('game', g.id, g.title, p); (window.Tytuly ? Tytuly.pl(g) : [g.plTitle].filter(Boolean)).forEach(n => { dodaj('game', g.id, g.title, n); const pp = n.split(/[:–]/)[0]; if (pp.length >= 4 && pp !== n) dodaj('game', g.id, g.title, pp); }); });
     Z.kom.forEach(k => { const t = (k.series ? k.series + (k.volume != null ? ' ' + k.volume : '') : '') + (k.title ? ' – ' + k.title : ''); if (k.series && k.volume != null) dodaj('comic', k.id, t, k.series + ' ' + k.volume); if (k.title && k.title.length >= 5) dodaj('comic', k.id, t, k.title); });
     const naj = new Map(); // item -> podpowiedź
     for (const o of teksty) {

@@ -116,7 +116,7 @@
   }
   async function znajdz(g) {
     if (g.ceny && g.ceny.url) { const { html } = await get(g.ceny.url); return Object.assign({ url: g.ceny.url }, czytajStrone(html)); }
-    const pytania = [...new Set([g.title, g.title.split(/[:–-]/)[0].trim(), g.plTitle].filter(Boolean))];
+    const pytania = [...new Set([g.title, g.title.split(/[:–-]/)[0].trim(), g.plTitle].concat(window.Tytuly ? Tytuly.pl(g) : []).filter(Boolean))];
     for (const q of pytania) {
       const r = await get(PLANSZEO + '/szukaj?q=' + encodeURIComponent(q));
       let kand = [];

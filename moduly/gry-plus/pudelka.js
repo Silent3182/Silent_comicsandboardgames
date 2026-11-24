@@ -66,7 +66,7 @@
     const wKomorce = new Map();
     gry.forEach(g => { const p = g.polka; if (p && p.s && p.r) { const k = p.s + '|' + p.r + '|' + p.c; if (!wKomorce.has(k)) wKomorce.set(k, []); wKomorce.get(k).push(g); } });
     let lista = st.tylko === 'bez' ? gry.filter(g => G.wymiary(g).szac) : st.tylko === 'nie' ? nie : gry;
-    if (st.q) lista = lista.filter(g => g.title.toLowerCase().includes(st.q.toLowerCase()));
+    if (st.q) lista = lista.filter(g => window.Tytuly ? Tytuly.pasuje(g, st.q) : g.title.toLowerCase().includes(st.q.toLowerCase()));
     lista = lista.slice().sort((a, b) => a.title.localeCompare(b.title, 'pl'));
     el.innerHTML = `
       <h1>Pudełka i Kallax</h1>
