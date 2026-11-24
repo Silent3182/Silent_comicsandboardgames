@@ -62,6 +62,17 @@ Pola dodatkowe (moduły `sklep`, `wartosc`): w **games**, **comics** i **shoppin
 
 Usługi: `App.call('sklep.skanuj')` (skaner → „czy mam?”), `App.call('wypozyczenia.pozycz', {itemType,itemId})`, `App.call('wypozyczenia.przycisk', button, itemType, itemId)`, `App.call('komiksy.seed')` (wczytuje startowe komiksy).
 
+**shelves** – regały (moduł `moduly/polki`)
+`name, kind ('kallax'|'regal'), rows, cols, place, notes, cells: {'r-c': 'nazwa przegródki'}, order`
+Miejsce rzeczy: pole `polka = {s: id regału, r: rząd od góry, c: kolumna od lewej}` w **games** i **comics**; całe serie komiksów w ustawieniu `polkiSerii = {seria: {s,r,c}}`.
+Usługi: `App.call('polki.tekst', itemType, item)` (synchronicznie, np. „Kallax salon · rząd 2, kol. 3”), `App.call('polki.html', …)`, `App.call('polki.przycisk', button, itemType, itemId)`, `App.call('polki.wybierz', itemType, itemId)`.
+
+Lista życzeń (moduł `moduly/wishlista`): gry w **games** ze statusem `wishlist`, pola `wishPriority` (1–5 jak BGG), `plTitle`, `cenaDocelowa`, `ceny = {data, min, max, sklepy, url, hist}`, `promo`. Ceny z planszeo.pl sprawdza telefon (APK) co 3 dni.
+
+Powiadomienia (moduł `moduly/powiadomienia`): APK – @capacitor/local-notifications (premiery z shoppingList, terminy z loans); przeglądarka – przy otwarciu. `App.call('powiadomienia.teraz', tytuł, treść, {go})`.
+
+Widżet Androida (moduł `moduly/widzet` + natywny kod w `android-native/`, wtyczka Capacitor `Widzet`): kolejka MRO na ekranie telefonu i „✓ Przeczytane”.
+
 **listings** – ogłoszenia sprzedaży (wątek sprzedaży)
 `itemType ('game'|'comic'), itemId, platform ('olx'|'facebook'|'vinted'|'allegro'), condition, price, shipping, title, text, status ('draft'|'active'|'sold'), soldAt, soldPrice`
 Do pozycji: `const item = await DB.get(itemType==='game'?'games':'comics', itemId)`. Okładka: `item.image || item.thumb`.
