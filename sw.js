@@ -1,5 +1,5 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v12';
+const VERSION = 'v13';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/wyglad.js', 'core/splash.js',
@@ -10,6 +10,7 @@ const FILES = [
   ,'moduly/sklep/skaner.js', 'moduly/sklep/sklep.js', 'moduly/sklep/zxing.min.js', 'moduly/wypozyczenia/wypozyczenia.js', 'moduly/wartosc/wartosc.js'
   ,'moduly/gracze/wspolne.js', 'moduly/gracze/gracze.js', 'moduly/licznik/licznik.js', 'moduly/wyzwania/wyzwania.js', 'moduly/podsumowanie/podsumowanie.js', 'moduly/skroty/skroty.js'
   ,'moduly/polki/polki.js', 'moduly/wishlista/wishlista.js', 'moduly/powiadomienia/powiadomienia.js', 'moduly/widzet/widzet.js'
+  ,'moduly/historia/historia.js', 'moduly/udostepnij/udostepnij.js', 'moduly/impreza/impreza.js', 'moduly/asystent/asystent.js', 'kolekcja.html', 'impreza.html'
   // moduły dopisują tu swoje pliki
 ];
 self.addEventListener('install', e => {

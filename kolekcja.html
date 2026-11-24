@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Kolekcja – podgląd</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#f5f3ee;--surface:#fff;--surface2:#efece5;--text:#1a1f26;--muted:#5d6673;--line:#e2ddd2;--accent:#1f3f68;--accent-soft:#e5ecf6;--on-accent:#fff;--accent-2:#d98a14;--ok:#2c7a47;--ok-soft:#d3ebc2;--radius:14px;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#12161b;--surface:#1b2129;--surface2:#242c36;--text:#ebe8e1;--muted:#9ea7b2;--line:#2f3843;--accent:#8fb6e8;--accent-soft:#23344a;--on-accent:#0f1620;--accent-2:#f0b45a;--ok:#6cc890;--ok-soft:#22402c;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--accent);color:var(--on-accent);padding:22px 16px 18px}
+header .w,main{max-width:980px;margin:0 auto}
+header small{opacity:.8;text-transform:uppercase;letter-spacing:.08em;font-size:12px}
+header h1{margin:2px 0 4px;font-size:26px}
+header p{margin:0;opacity:.85;font-size:14px}
+main{padding:14px 16px 120px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.tabs button{border:0;background:none;padding:10px 14px;color:var(--muted);font:inherit;border-bottom:3px solid transparent;cursor:pointer}
+.tabs button.on{color:var(--text);font-weight:700;border-color:var(--accent)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:3}
+input,select,button{font:inherit;color:var(--text)}
+input[type=search]{flex:1 1 220px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+select{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);min-height:58px}
+.li:last-child{border-bottom:0}
+.li img,.li .ph{width:44px;height:44px;object-fit:contain;border-radius:8px;background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.li .m{flex:1;min-width:0}
+.li .t{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.li .s{color:var(--muted);font-size:13px}
+.li a{color:inherit}
+.b{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:650;margin-left:4px;vertical-align:1px}
+.b.sale{background:var(--accent-2);color:#241a05}.b.exp{background:var(--surface2);color:var(--muted)}.b.lent{background:var(--surface2);color:var(--muted)}.b.wish{background:var(--accent);color:var(--on-accent)}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.chk input{width:20px;height:20px}
+.li.want{background:var(--ok-soft)}
+.ser{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px}
+.ser h3{margin:0 0 4px;font-size:16px}
+.ser .n{color:var(--muted);font-size:13px}
+.ser .v{font-variant-numeric:tabular-nums;margin-top:6px;word-break:break-word}
+.ser ul{margin:6px 0 0;padding-left:18px}
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:none;z-index:5}
+.foot .w{max-width:980px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 16px;cursor:pointer;min-height:44px}
+.btn.p{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.muted{color:var(--muted)}
+.err{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-top:20px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.stat b{font-size:20px;display:block}
+.stat span{color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<header><div class="w"><small>Tylko do odczytu</small><h1 id="nm">Kolekcja</h1><p id="sub">Wczytywanie…</p></div></header>
+<main id="m"></main>
+<div class="foot" id="foot"><div class="w"><span id="fn"></span><span style="flex:1"></span><button class="btn" id="fx">Wyczyść</button><button class="btn p" id="fs">Poproś o pożyczenie</button></div></div>
+<script>
+/* Podgląd kolekcji „Moje kolekcje” dla znajomych. Dane: #k=<spis skompresowany w linku> albo #g=<id sekretnego Gista>.
+ * Strona niczego nie zapisuje na serwerze; wszystko z danych jest wstawiane jako tekst (bez HTML z zewnątrz). */
+(function () {
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const $ = s => document.querySelector(s);
+  const m = $('#m');
+  const chce = new Set();
+  let D = null, tab = 'gry';
+
+  function blad(t) { $('#sub').textContent = ''; m.innerHTML = `<div class="err"><b>Nie mogę otworzyć tej kolekcji.</b><p class="muted">${esc(t)}</p></div>`; }
+  const z64 = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+  async function wczytaj() {
+    const h = new URLSearchParams(location.hash.slice(1));
+    if (h.get('k')) {
+      const k = h.get('k'), bytes = z64(k.slice(1));
+      let txt;
+      if (k[0] === 'z') {
+        if (!window.DecompressionStream) throw new Error('Ta przeglądarka jest za stara – otwórz link w aktualnym Chrome, Edge, Firefox albo Safari.');
+        txt = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+      } else txt = new TextDecoder().decode(bytes);
+      return JSON.parse(txt);
+    }
+    if (h.get('g')) {
+      const id = h.get('g'); if (!/^[0-9a-f]{5,64}$/i.test(id)) throw new Error('Nieprawidłowy link.');
+      const r = await fetch('https://api.github.com/gists/' + id, { headers: { Accept: 'application/vnd.github+json' } });
+      if (r.status === 404) throw new Error('Właściciel wyłączył ten link albo jest on nieaktualny.');
+      if (!r.ok) throw new Error('Serwer nie odpowiada (' + r.status + '). Spróbuj za chwilę.');
+      const g = await r.json(), f = g.files && g.files['kolekcja.json'];
+      if (!f) throw new Error('Pusty spis.');
+      if (f.truncated) { const r2 = await fetch(f.raw_url); return r2.json(); }
+      return JSON.parse(f.content);
+    }
+    throw new Error('Link jest niepełny – poproś o niego jeszcze raz.');
+  }
+
+  function gry() {
+    const q = ($('#q') && $('#q').value || '').toLowerCase().trim();
+    const fl = $('#f') ? $('#f').value : 'all', so = $('#s') ? $('#s').value : 'az';
+    let g = D.g.map((x, i) => ({ i, t: x[0], y: x[1], b: x[2], f: x[3], r: x[4], p: x[5], img: x[6] }));
+    if (q) g = g.filter(x => x.t.toLowerCase().includes(q));
+    if (fl === 'base') g = g.filter(x => !(x.f & 1) && !(x.f & 4)); else if (fl === 'exp') g = g.filter(x => x.f & 1); else if (fl === 'sale') g = g.filter(x => x.f & 2); else if (fl === 'wish') g = g.filter(x => x.f & 4); else if (fl === 'avail') g = g.filter(x => !(x.f & 8) && !(x.f & 4));
+    if (so === 'r') g.sort((a, b) => b.r - a.r || a.t.localeCompare(b.t, 'pl')); else if (so === 'p') g.sort((a, b) => b.p - a.p || a.t.localeCompare(b.t, 'pl')); else if (so === 'y') g.sort((a, b) => b.y - a.y);
+    $('#lst').innerHTML = g.length ? g.map(x => {
+      const img = x.img && /^https:\/\//.test(x.img) ? `<img src="${esc(x.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ph">🎲</div>';
+      const tt = x.b ? `<a href="https://boardgamegeek.com/boardgame/${+x.b}" target="_blank" rel="noopener noreferrer">${esc(x.t)}</a>` : esc(x.t);
+      const s = [x.y || '', D.o.oceny && x.r ? '★ ' + x.r : '', D.o.partie && x.p ? x.p + ' ' + (x.p === 1 ? 'partia' : x.p % 10 >= 2 && x.p % 10 <= 4 && (x.p % 100 < 10 || x.p % 100 >= 20) ? 'partie' : 'partii') : ''].filter(Boolean).join(' · ');
+      const wish = x.f & 4;
+      return `<div class="li ${chce.has('g' + x.i) ? 'want' : ''}">${img}<div class="m"><div class="t">${tt}${x.f & 1 ? '<span class="b exp">dodatek</span>' : ''}${x.f & 2 ? '<span class="b sale">na sprzedaż</span>' : ''}${x.f & 8 ? '<span class="b lent">teraz pożyczona</span>' : ''}${wish ? '<span class="b wish">chcę mieć</span>' : ''}</div><div class="s">${s}</div></div>${wish ? '' : `<label class="chk"><input type="checkbox" data-w="g${x.i}" ${chce.has('g' + x.i) ? 'checked' : ''}>pożycz</label>`}</div>`;
+    }).join('') : '<p class="muted" style="padding:14px">Nic nie znaleziono.</p>';
+  }
+  function komiksy() {
+    const q = ($('#q') && $('#q').value || '').toLowerCase().trim();
+    const k = D.k.filter(s => !q || s[0].toLowerCase().includes(q) || s[2].some(t => t.toLowerCase().includes(q)));
+    $('#lst').innerHTML = k.length ? k.map((s, i) => {
+      const ile = (s[1] ? s[1].split(',').reduce((a, r) => { const [p, z] = r.split('-').map(Number); return a + (z ? z - p + 1 : 1); }, 0) : 0) + s[2].length;
+      const idx = D.k.indexOf(s);
+      return `<div class="ser"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1;min-width:0"><h3>${esc(s[0])}</h3><div class="n">${ile} ${ile === 1 ? 'tom' : ile % 10 >= 2 && ile % 10 <= 4 && (ile % 100 < 10 || ile % 100 >= 20) ? 'tomy' : 'tomów'}</div></div><label class="chk"><input type="checkbox" data-w="k${idx}" ${chce.has('k' + idx) ? 'checked' : ''}>pożycz</label></div>
+        ${s[1] ? `<div class="v">Tomy: ${esc(s[1].replace(/,/g, ', '))}</div>` : ''}
+        ${s[2].length ? `<ul>${s[2].filter(t => !q || t.toLowerCase().includes(q) || s[0].toLowerCase().includes(q)).slice(0, 300).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>`;
+    }).join('') : '<p class="muted">Nic nie znaleziono.</p>';
+  }
+  function rysuj() {
+    const ileG = D.g.filter(x => !(x[3] & 1) && !(x[3] & 4)).length, ileD = D.g.filter(x => x[3] & 1).length;
+    m.innerHTML = `<div class="stats"><div class="stat"><b>${ileG}</b><span>gier</span></div><div class="stat"><b>${ileD}</b><span>dodatków</span></div>${D.k.length ? `<div class="stat"><b>${D.k.length}</b><span>serii komiksów</span></div>` : ''}</div>
+      ${D.k.length ? `<div class="tabs"><button data-t="gry" class="${tab === 'gry' ? 'on' : ''}">Planszówki</button><button data-t="kom" class="${tab === 'kom' ? 'on' : ''}">Komiksy</button></div>` : ''}
+      <div class="bar"><input type="search" id="q" placeholder="Szukaj…">${tab === 'gry' ? `<select id="f"><option value="all">Wszystko</option><option value="base">Tylko gry</option><option value="exp">Tylko dodatki</option><option value="avail">Dostępne do pożyczenia</option>${D.g.some(x => x[3] & 2) ? '<option value="sale">Na sprzedaż</option>' : ''}${D.g.some(x => x[3] & 4) ? '<option value="wish">Lista życzeń</option>' : ''}</select>
+        <select id="s"><option value="az">A–Z</option>${D.o.oceny ? '<option value="r">Najwyżej oceniane</option>' : ''}${D.o.partie ? '<option value="p">Najczęściej grane</option>' : ''}<option value="y">Najnowsze</option></select>` : ''}</div>
+      <div id="lst" class="${tab === 'gry' ? 'list' : ''}"></div>
+      <p class="muted" style="font-size:12.5px;margin-top:16px">Stan na ${esc(new Date(D.d).toLocaleDateString('pl-PL'))}. Zaznacz „pożycz” przy tym, co Cię interesuje, i wyślij prośbę.</p>`;
+    m.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; rysuj(); });
+    const odsw = () => tab === 'gry' ? gry() : komiksy();
+    m.querySelector('#q').oninput = odsw;
+    m.querySelectorAll('select').forEach(s => s.onchange = odsw);
+    odsw();
+  }
+  document.addEventListener('change', e => {
+    const w = e.target.dataset && e.target.dataset.w; if (!w) return;
+    if (e.target.checked) chce.add(w); else chce.delete(w);
+    const li = e.target.closest('.li'); if (li) li.classList.toggle('want', e.target.checked);
+    stopka();
+  });
+  function wybrane() { return [...chce].map(w => w[0] === 'g' ? D.g[+w.slice(1)][0] : D.k[+w.slice(1)][0] + ' (komiksy)'); }
+  function stopka() { const n = chce.size; $('#foot').style.display = n ? 'block' : 'none'; $('#fn').textContent = n === 1 ? '1 pozycja' : n + (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? ' pozycje' : ' pozycji'); }
+  $('#fx').onclick = () => { chce.clear(); stopka(); rysuj(); };
+  $('#fs').onclick = async () => {
+    const t = 'Cześć! Widziałem Twoją kolekcję – czy mogę pożyczyć:\n' + wybrane().map(x => '• ' + x).join('\n') + '\nDzięki!';
+    if (navigator.share) { try { await navigator.share({ text: t }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(t); $('#fs').textContent = 'Skopiowano – wklej w wiadomości'; setTimeout(() => $('#fs').textContent = 'Poproś o pożyczenie', 3000); }
+    catch (e) { location.href = 'sms:?&body=' + encodeURIComponent(t); }
+  };
+  wczytaj().then(d => {
+    if (!d || d.v !== 1 || !Array.isArray(d.g)) throw new Error('Nieznany format spisu.');
+    d.k = Array.isArray(d.k) ? d.k : []; d.o = d.o || {};
+    D = d; document.title = d.n; $('#nm').textContent = d.n;
+    $('#sub').textContent = 'Planszówki' + (d.k.length ? ' i komiksy' : '') + ' · stan na ' + new Date(d.d).toLocaleDateString('pl-PL');
+    rysuj();
+  }).catch(e => blad(e.message || String(e)));
+  window.addEventListener('hashchange', () => location.reload());
+})();
+</script>
+</body>
+</html>
