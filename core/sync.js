@@ -35,7 +35,7 @@
       setStatus('Zsynchronizowano ' + new Date().toLocaleTimeString('pl-PL'));
       if (changed) App.refresh();
       return changed;
-    } catch (e) { console.error(e); setStatus('Błąd synchronizacji: ' + e.message); }
+    } catch (e) { console.error(e); setStatus('Błąd synchronizacji: ' + App.ui.komunikat(e)); }
     finally { busy = false; }
   }
 
@@ -92,7 +92,7 @@
         return changed;
       }
       throw new Error('GitHub: nie udało się zapisać po 3 próbach');
-    } catch (e) { console.error(e); setStatus('Błąd synchronizacji: ' + e.message); throw e; }
+    } catch (e) { console.error(e); setStatus('Błąd synchronizacji: ' + App.ui.komunikat(e)); throw e; }
     finally { ghBusy = false; setTimeout(() => { suppress = false; }, 100); }
   }
   async function syncAll(ask) {

@@ -65,3 +65,12 @@ Usługi: `App.call('sklep.skanuj')` (skaner → „czy mam?”), `App.call('wypo
 **listings** – ogłoszenia sprzedaży (wątek sprzedaży)
 `itemType ('game'|'comic'), itemId, platform ('olx'|'facebook'|'vinted'|'allegro'), condition, price, shipping, title, text, status ('draft'|'active'|'sold'), soldAt, soldPrice`
 Do pozycji: `const item = await DB.get(itemType==='game'?'games':'comics', itemId)`. Okładka: `item.image || item.thumb`.
+
+## Komunikaty i błędy
+- Pytania Tak/Nie: `await App.ui.confirm('Usunąć…?')` – okno aplikacji, nie systemowe. Nie używaj `alert/confirm/prompt` przeglądarki (test to sprawdza).
+- Błędy pokazuj przez `App.ui.toast(e)` albo `App.ui.toast('Nie udało się: ' + e.message)` – toast sam zamienia systemowe (angielskie) teksty na polskie. Tekst do wstawienia w stronę: `App.ui.komunikat(e)` (zwraca `null` dla anulowania, np. zamkniętego wyboru pliku).
+- Nieobsłużone wyjątki i odrzucone obietnice łapie `core/app.js` i pokazuje komunikat; zakładka, która się wywróci, dostaje komunikat z „Spróbuj ponownie”.
+
+## Wydawanie zmian (jeden wydawca)
+- Wątki nie scalają same: otwierają PR i zgłaszają go wątkowi „Wydawaj i testuj wszystkie zmiany”, który scala po kolei, rozwiązuje konflikty i wydaje wersję.
+- Każdy PR i każde wydanie przechodzi `node testy/test-aplikacji.js` (GitHub Actions „Testy aplikacji”; APK buduje się dopiero po zielonych testach). Nowy moduł: plik w `index.html` i `sw.js` (FILES), nowa kolekcja w `STORES` w `core/db.js` – inaczej test nie przejdzie.

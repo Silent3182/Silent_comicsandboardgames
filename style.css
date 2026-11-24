@@ -370,3 +370,10 @@ html[data-ikony="kolor"] #nav button:not(.active) .ico svg.ic { opacity: .82; }
 .wy-n b { color: var(--muted); margin-right: 2px; }
 .wy-opt.on .wy-n b { color: inherit; }
 .wy-hint { font-size: 13px; margin: 10px 0 0; }
+
+/* ---------- Komunikaty aplikacji (core/app.js: ui.confirm, błędy zakładek) ---------- */
+dialog.dlg-pyt { width: min(420px, 94vw); }
+dialog.dlg-pyt .dlg-msg { font-size: 16px; line-height: 1.45; color: var(--text); white-space: pre-line; }
+dialog.dlg-pyt .dlg-btns { border-top: 0; padding-top: 4px; }
+div.err { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+div.err p { color: var(--text); }

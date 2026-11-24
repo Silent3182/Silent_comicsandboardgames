@@ -10,7 +10,11 @@ permissions:
   contents: write
 
 jobs:
+  testy:
+    uses: ./.github/workflows/testy.yml
+
   apk:
+    needs: testy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +81,8 @@ jobs:
           }
           EOF2
           sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/; s/versionName \"1.0\"/versionName \"0.1.${{ github.run_number }}\"/" app/build.gradle
-          ./gradlew assembleDebug --no-daemon -q
+          # Maven czasem odpowiada 429 (za dużo zapytań) – ponów do 3 razy
+          for i in 1 2 3; do ./gradlew assembleDebug --no-daemon -q && break; [ $i = 3 ] && exit 1; echo "Ponawiam budowanie ($i)…"; sleep $((i*45)); done
           cp app/build/outputs/apk/debug/app-debug.apk ../../moje-kolekcje.apk
           # kontrola: APK musi mieć podpis z klucza w repo
           unzip -p ../../moje-kolekcje.apk 'META-INF/*.RSA' > /tmp/c.rsa

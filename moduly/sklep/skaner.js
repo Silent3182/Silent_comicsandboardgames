@@ -150,7 +150,7 @@
         const f = e.target.files[0]; if (!f) return;
         msg.textContent = 'Szukam kodu na zdjęciu…';
         try { const c = await decodeImage(f); if (c) return finish(c); msg.textContent = 'Nie widzę kodu na zdjęciu. Zrób zdjęcie bliżej, tylko samego kodu.'; }
-        catch (err) { msg.textContent = 'Nie udało się odczytać zdjęcia: ' + err.message; }
+        catch (err) { msg.textContent = 'Nie udało się odczytać zdjęcia: ' + App.ui.komunikat(err); }
       };
 
       (async () => {
@@ -179,7 +179,7 @@
         msg.textContent = 'Nakieruj kod kreskowy w ramkę';
         const det = await nativeDetector();
         let Z = null;
-        if (!det) { try { Z = await loadZXing(); } catch (e) { msg.textContent = e.message + ' – wpisz kod ręcznie.'; return; } }
+        if (!det) { try { Z = await loadZXing(); } catch (e) { msg.textContent = App.ui.komunikat(e) + ' – wpisz kod ręcznie.'; return; } }
         let last = null, hits = 0;
         const grab = () => {
           // środek obrazu (tam jest ramka) – szybciej i pewniej
