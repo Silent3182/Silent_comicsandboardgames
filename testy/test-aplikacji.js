@@ -189,6 +189,44 @@ async function main() {
       });
       ok(!sc.brak && sc.tenSam && sc.zielony && sc.zapisany && sc.przed[0] === sc.po[0] && sc.przed[1] === sc.po[1] && (sc.przed[0] + sc.przed[1]) > 0,
         'Do czytania: odznaczenie przeczytanego zostaje w miejscu (bez przewijania na górę) i zapisuje się', JSON.stringify(sc));
+      // Wydajność: długie listy doczytują się porcjami (komiksy, planszówki), a nie rysują wszystkiego naraz
+      const dz = await page.evaluate(async () => {
+        App.go('komiksy'); for (let k = 0; k < 20 && !document.querySelector('#klist .kx-tile'); k++) await new Promise(r => setTimeout(r, 300));
+        const n1 = document.querySelectorAll('#klist .kx-tile').length, wsz = (await DB.all('comics')).length;
+        const kon = document.querySelector('#klist .lista-dalej'); kon.scrollIntoView(); await new Promise(r => setTimeout(r, 800));
+        const n2 = document.querySelectorAll('#klist .kx-tile').length;
+        App.go('planszowki'); for (let k = 0; k < 20 && !document.querySelector('#out [data-id]'); k++) await new Promise(r => setTimeout(r, 300));
+        const g1 = document.querySelectorAll('#out [data-id]').length;
+        return { n1, n2, wsz, g1 };
+      });
+      ok(dz.n1 > 0 && dz.n1 < dz.wsz && dz.n2 > dz.n1 && dz.g1 > 0 && dz.g1 <= 80, `doczytywanie list: komiksy ${dz.n1} → ${dz.n2} z ${dz.wsz} po przewinięciu, planszówki ${dz.g1} na start`, JSON.stringify(dz));
+      // Polskie tytuły gier: słownik, dodatki, własne wpisy, wyszukiwarka
+      const pt = await page.evaluate(async () => {
+        const T = window.Tytuly;
+        const a = T.pasuje({ title: 'Ticket to Ride' }, 'wsiasc do pociagu'), b = T.pl('7 Wonders: Leaders').includes('7 Cudów Świata: Leaders');
+        await T.ustaw('Gra Testowa XYZ', ['Moja Gra Próbna']);
+        const c = T.pasuje({ title: 'Gra Testowa XYZ' }, 'probna'); await T.ustaw('Gra Testowa XYZ', null);
+        const d = !T.pasuje({ title: 'Gra Testowa XYZ' }, 'probna');
+        localStorage.setItem('pl.filter', 'all'); localStorage.setItem('pl.q', 'na skrzydłach');
+        App.go('planszowki'); await new Promise(r => setTimeout(r, 1200));
+        const e = [...document.querySelectorAll('#out [data-id]')].map(x => x.innerText).join(' | ');
+        localStorage.setItem('pl.q', ''); localStorage.setItem('pl.filter', 'base');
+        return { a, b, c, d, e };
+      });
+      ok(pt.a && pt.b && pt.c && pt.d && /Wingspan/.test(pt.e), 'polskie tytuły: „Wsiąść do pociągu” = Ticket to Ride, dodatki, własne wpisy, wyszukiwarka („na skrzydłach” → Wingspan)', JSON.stringify(pt));
+      // Kopia zdjęć półek: paczka do OneDrive i przywrócenie na „nowym” urządzeniu
+      const zp = await page.evaluate(async () => {
+        const img = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==';
+        const sh = await DB.put('shelves', { name: 'Kallax test', kind: 'kallax', rows: 1, cols: 1, cells: {}, zdjecia: [{ id: 'fototest1', data: '2026-11-24', cel: null, zn: [] }] });
+        await DB.local('polkaFoto:fototest1', img);
+        const K = App.call('kopia.zdjecia'); const p = await K.paczkaZdjec();
+        await DB.local('polkaFoto:fototest1', null);
+        const r = await K.przywrocZdjecia([new File([JSON.stringify(p)], 'zdjecia-polek-2026-11-24.json', { type: 'application/json' })]);
+        const back = await DB.local('polkaFoto:fototest1');
+        await DB.remove('shelves', sh.id); await DB.local('polkaFoto:fototest1', null);
+        return { w: p.zdjecia.length, n: r.n, ok: back === img };
+      });
+      ok(zp.w === 1 && zp.n === 1 && zp.ok, 'kopia zdjęć półek: plik do OneDrive i przywrócenie zdjęcia', JSON.stringify(zp));
       ok(!errs.length, 'bez błędów w konsoli', errs.join('\n      '));
       await ctx.close();
     }

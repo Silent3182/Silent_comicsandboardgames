@@ -41,7 +41,7 @@
 
   /* ---------- dopasowanie gry ---------- */
   function ocenGre(q, g) {
-    const tytuly = [g.title, g.plTitle].filter(Boolean).map(norm);
+    const tytuly = (window.Tytuly ? Tytuly.nazwy(g) : [g.title, g.plTitle]).filter(Boolean).map(norm); // także polskie nazwy (moduly/tytuly)
     let best = 0;
     for (const t of tytuly) {
       if (!t) continue;

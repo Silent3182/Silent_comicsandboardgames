@@ -61,7 +61,7 @@
       const st = g.status === 'sold' ? 'sold' : g.status === 'wishlist' ? 'list' : 'own';
       out.push({ type: 'game', id: g.id, rec: g, title: g.title, sub: [g.isExpansion ? 'dodatek' : 'gra planszowa', g.year].filter(Boolean).join(' · '),
         st, stLab: { own: g.status === 'forSale' ? 'mam · na sprzedaż' : 'mam', sold: 'sprzedana', list: 'chcę mieć' }[st],
-        barcode: g.barcode, thumb: g.thumb || g.image, loan: loanBy.get('game:' + g.id), text: g.title });
+        barcode: g.barcode, thumb: g.thumb || g.image, loan: loanBy.get('game:' + g.id), text: window.Tytuly ? Tytuly.nazwy(g).join(' ') : g.title });
     });
     comics.forEach(c => {
       const st = c.status === 'sold' ? 'sold' : c.status === 'missing' ? 'no' : 'own';

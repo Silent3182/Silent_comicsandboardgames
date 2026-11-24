@@ -331,7 +331,7 @@
     const szukaj = () => {
       st.szuk = $('#pkQ').value; const f = st.szuk.trim().toLowerCase();
       if (f.length < 2) { wyn.innerHTML = ''; return; }
-      const g = Z.gry.filter(x => x.title.toLowerCase().includes(f)).slice(0, 12).map(x => ({ t: x.title, typ: 'game', it: x }));
+      const g = Z.gry.filter(x => window.Tytuly ? Tytuly.pasuje(x, f) : x.title.toLowerCase().includes(f)).slice(0, 12).map(x => ({ t: x.title, typ: 'game', it: x }));
       const k = Z.kom.filter(x => ((x.title || '') + ' ' + (x.series || '')).toLowerCase().includes(f)).slice(0, 12).map(x => ({ t: (x.series ? x.series + (x.volume != null ? ' ' + x.volume : '') + ' – ' : '') + (x.title || ''), typ: 'comic', it: x }));
       const all = g.concat(k);
       wyn.innerHTML = all.length ? `<div class="list" style="margin-top:10px">${all.map((x, i) => `<div class="li" data-i="${i}"><div class="main"><div class="t">${esc(x.t)}</div><div class="s">${html(x.typ, x.it) || '<span class="muted">nie wiadomo, gdzie stoi – kliknij, żeby zapisać</span>'}</div></div></div>`).join('')}</div>` : '<p class="muted">Nic nie znaleziono.</p>';
