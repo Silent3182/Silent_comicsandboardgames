@@ -99,6 +99,10 @@
         return recs.length;
       };
       const ile = await seed('comics', window.KOMIKSY_DANE);
+      // okładki ze startowych danych także dla tomów, które użytkownik już zmieniał (o ile nie ma własnej)
+      const zOkl = new Map((window.KOMIKSY_DANE || []).filter(c => c.image).map(c => [c.id, c.image]));
+      const dopisz = (await DB.all('comics')).filter(c => c.updatedAt !== OLD && !c.image && !c.thumb && zOkl.has(c.id)).map(c => Object.assign({}, c, { image: zOkl.get(c.id) }));
+      if (dopisz.length) await DB.putMany('comics', dopisz);
       await seed('shoppingList', window.ZAKUPY_DANE);
       await DB.setting('komiksyImport', { data: new Date().toISOString(), ile, wersja: ver });
     })();
