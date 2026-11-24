@@ -71,12 +71,13 @@
   }
   function statusBadge(s) { const cl = { owned: 'own', missing: 'miss', forSale: 'sale', sold: 'sold' }[s] || ''; return `<span class="kx-b ${cl}">${STATUS[s] || s}</span>`; }
   function rating(r) { return r ? `<span class="kx-b">★ ${r}/10</span>` : ''; }
-  function resizeImage(file, max = 420) {
+  // okładka ze zdjęcia: dłuższy bok 320 px, JPEG 0.7 – ok. 15–25 KB, żeby synchronizacja się nie rozrastała
+  function resizeImage(file, max = 320, q = 0.7) {
     return new Promise((res, rej) => {
       const img = new Image(); const url = URL.createObjectURL(file);
       img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)); const cv = document.createElement('canvas');
         cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-        URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', 0.8)); };
+        URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', q)); };
       img.onerror = () => rej(new Error('To nie jest obrazek')); img.src = url;
     });
   }
@@ -227,7 +228,8 @@
       <p><a href="#/komiksy">← Komiksy</a></p>
       <div class="kx-det">
         <div>${cover(c, true)}
-          <div class="kx-btns"><label class="btn" style="cursor:pointer;padding:6px 10px;border:1px solid #c8cfd8;border-radius:8px;font-size:13px">📷 Zdjęcie / plik<input type="file" accept="image/*" id="kimg" hidden></label>
+          <div class="kx-btns"><label class="btn" style="cursor:pointer;padding:6px 10px;border:1px solid #c8cfd8;border-radius:8px;font-size:13px">📷 Zrób zdjęcie<input type="file" accept="image/*" capture="environment" class="kimg" hidden></label>
+          <label class="btn" style="cursor:pointer;padding:6px 10px;border:1px solid #c8cfd8;border-radius:8px;font-size:13px">🖼 Z galerii / pliku<input type="file" accept="image/*" class="kimg" hidden></label>
           <a target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(c.title + ' ' + (c.publisher || '') + ' okładka')}" style="font-size:13px">🔎 Szukaj okładki</a></div>
           <p class="kx-muted">Znalezioną okładkę: prawy klik / przytrzymaj → „Kopiuj adres obrazu” i wklej w „Edytuj”, albo zapisz i wybierz plik.</p>
         </div>
@@ -269,8 +271,8 @@
       App.ui.toast('Dodano do listy zakupów');
     };
     $('#kdel').onclick = async () => { if (await App.ui.confirm(`Usunąć „${c.title}” z kolekcji?`)) { await DB.remove('comics', c.id); App.go('komiksy'); } };
-    $('#kimg').onchange = async e => { const f = e.target.files[0]; if (!f) return;
-      try { await save({ image: await resizeImage(f), thumb: null }); App.ui.toast('Okładka zapisana'); } catch (err) { App.ui.toast(err.message); } };
+    el.querySelectorAll('.kimg').forEach(inp => inp.onchange = async e => { const f = e.target.files[0]; if (!f) return;
+      try { const img = await resizeImage(f); await save({ image: img, thumb: null }); App.ui.toast(`Okładka zapisana (${Math.round(img.length * 0.75 / 1024)} KB)`); } catch (err) { App.ui.toast(err.message); } });
   }
 
   /* ---------- zakładka CZYTANIE (Master Reading Order) ---------- */
