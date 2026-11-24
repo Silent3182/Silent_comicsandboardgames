@@ -87,6 +87,8 @@ jobs:
           cp android-native/java/*.java $PKG/
           cp -r android-native/res/. $APP/res/
           grep -q 'WidzetCzytanie' $APP/AndroidManifest.xml || sed -i 's#</application>#    <receiver android:name=".WidzetCzytanie" android:exported="false" android:label="@string/wz_nazwa">\n            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>\n            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widzet_czytanie" />\n        </receiver>\n    </application>#' $APP/AndroidManifest.xml
+          # ML Kit (odczyt tytułów ze zdjęć półek, OcrPlugin.java) – model łaciński wbudowany w APK, działa bez internetu
+          grep -q 'mlkit:text-recognition' build/android/app/build.gradle || printf '\ndependencies {\n    implementation "com.google.mlkit:text-recognition:16.0.1"\n}\n' >> build/android/app/build.gradle
           grep -q 'POST_NOTIFICATIONS' $APP/AndroidManifest.xml || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n</manifest>#' $APP/AndroidManifest.xml
           cat $APP/AndroidManifest.xml
 
