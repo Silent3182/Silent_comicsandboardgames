@@ -347,6 +347,7 @@
       const pozycje = x.gry.map(g => ({ typ: 'game', id: g.id, t: g.title })).concat([...x.serie.entries()].map(([n, ile]) => ({ typ: 'serie', id: n, t: `📚 ${n}${ile ? ` (${ile} ${pl(ile, 'tom', 'tomy', 'tomów')})` : ''}` })), x.tomy.map(k => ({ typ: 'comic', id: k.id, t: (k.series ? k.series + (k.volume != null ? ' ' + k.volume : '') + ' – ' : '') + (k.title || '') })));
       box.innerHTML = `<div style="margin-top:12px"><div class="pk-head"><b>${esc(przegrodka(sh, r, c))}</b><span class="spacer"></span><button class="small ghost" id="pkName">🏷 Nazwij</button><button class="small primary" id="pkAdd">+ Dodaj tutaj</button></div>
         ${pozycje.length ? `<div class="list" style="margin-top:8px">${pozycje.map((p, i) => `<div class="li" data-p="${i}" style="min-height:44px"><div class="main"><div class="t">${esc(p.t)}</div></div><button class="ghost small" data-rm="${i}" title="Zdejmij z półki">✕</button></div>`).join('')}</div>` : '<p class="muted">Pusto. Kliknij „+ Dodaj tutaj”.</p>'}</div>`;
+      if (App.has('pudelka.przegroda')) App.call('pudelka.przegroda', box.firstElementChild, x.gry); // zajętość przegródki (moduł Pudełka i Kallax)
       box.querySelector('#pkAdd').onclick = async () => { await dodajDo(sh, r, c, Z); render(el); };
       box.querySelector('#pkName').onclick = async () => {
         const o = await App.ui.form('Nazwa przegródki', [{ name: 'n', label: 'Np. „Euro ciężkie”, „Imprezówki”, „WKKM 1–60”', value: nazwa }]);

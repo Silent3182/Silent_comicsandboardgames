@@ -1,5 +1,5 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v18';
+const VERSION = 'v19';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js',
@@ -13,6 +13,7 @@ const FILES = [
   ,'moduly/kalendarz/kalendarz.js'
   ,'moduly/przy-grze/rozmiary.js', 'moduly/przy-grze/aparat.js', 'moduly/przy-grze/import-partii.js', 'moduly/przy-grze/przy-grze.js'
   ,'moduly/historia/historia.js', 'moduly/udostepnij/udostepnij.js', 'moduly/asystent/asystent.js', 'kolekcja.html'
+  ,'moduly/gry-plus/dane-gry.js', 'moduly/gry-plus/wspolne.js', 'moduly/gry-plus/rekomendacje.js', 'moduly/gry-plus/dodatki.js', 'moduly/gry-plus/kampanie.js', 'moduly/gry-plus/wymiana.js', 'moduly/gry-plus/przypomnienia.js', 'moduly/gry-plus/pudelka.js', 'moduly/gry-plus/ciemny-stol.js'
   // moduły dopisują tu swoje pliki
 ];
 self.addEventListener('install', e => {

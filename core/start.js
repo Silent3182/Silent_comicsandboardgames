@@ -10,6 +10,8 @@
     zakupy: 'Lista zakupów', wishlista: 'Na co poluję', wypozyczenia: 'Komu pożyczone', polki: 'Gdzie co stoi',
     wartosc: 'Ile warta kolekcja', sprzedaz: 'Ogłoszenia', skroty: 'BGA, fora, linki', kalendarz: 'Imprezy i premiery',
     koszulki: 'Koszulki na karty', sleeve: 'Koszulki na karty', sleeves: 'Koszulki na karty', udostepnianie: 'Pokaż kolekcję innym', udostepnij: 'Pokaż kolekcję innym', asystent: 'Zapytaj głosem',
+    rekomendacje: 'Podpowiedzi z Twoich ocen', mechaniki: 'Jakie gry masz i grasz', dodatki: 'Grane i brakujące', kampanie: 'Scenariusz, drużyna, naklejki',
+    wymiana: 'Lista na forum', przypomnienia: 'Rocznice i zapomniane gry', pudelka: 'Czy zmieści się w Kallaxie?',
     powiadomienia: 'Przypomnienia', kopie: 'Kopie zapasowe', ustawienia: 'Synchronizacja i wygląd'
   };
   let edit = false;
@@ -62,6 +64,10 @@
     // drobna informacja na żywo: następny komiks do przeczytania
     if (!edit && App.has && App.has('komiksy.nastepny')) {
       try { const nx = await App.call('komiksy.nastepny'); const s = el.querySelector('[data-info="czytanie"]'); if (nx && s) s.textContent = 'Dalej: ' + nx.title; } catch (e) {}
+    }
+    // moduły z funkcją info() podają krótką informację na żywo pod nazwą kafelka
+    if (!edit) for (const m of shown) if (typeof m.info === 'function') {
+      try { const t = await m.info(); const s = el.querySelector(`[data-info="${m.id}"]`); if (t && s) s.textContent = t; } catch (e) {}
     }
   }
   App.registerModule({ id: 'start', title: 'Start', icon: '🏠', order: 1, render });

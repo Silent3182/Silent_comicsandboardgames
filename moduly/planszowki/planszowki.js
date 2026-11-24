@@ -318,6 +318,7 @@
         </div>
       </div>
       <div id="przyGrze"></div>
+      <div id="grPlus"></div>
       <h2>Statystyki</h2>
       <div class="stats">
         <div class="stat"><div class="v">${ps.length}</div><div class="l">${pl(ps.length, 'rozgrywka', 'rozgrywki', 'rozgrywek')} w aplikacji</div></div>
@@ -338,6 +339,7 @@
     $('#sell').onclick = () => App.call('sprzedaz.wystaw', { itemType: 'game', itemId: id });
     if ($('#lend')) App.call('wypozyczenia.przycisk', $('#lend'), 'game', id);
     if ($('#shelf')) App.call('polki.przycisk', $('#shelf'), 'game', id);
+    if (App.has('grplus.sekcja')) App.call('grplus.sekcja', $('#grPlus'), g); // dodatki, mechaniki, pudełko, wymiana, kampanie
     if (App.has('przygrze.sekcja') && g.status !== 'played') App.call('przygrze.sekcja', $('#przyGrze'), g); // instrukcja, koszulki, braki
     $('#del').onclick = async () => {
       if (!await App.ui.confirm(`Usunąć „${g.title}” z kolekcji?${ps.length ? ' Rozgrywki tej gry zostaną w statystykach.' : ''}\n\nJeśli grę sprzedałeś, lepiej zmień jej status na „sprzedana” (Edytuj).`)) return;

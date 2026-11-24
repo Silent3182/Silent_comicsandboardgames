@@ -112,3 +112,12 @@ Udostępnianie (`moduly/udostepnij` + strona `kolekcja.html`): link tylko do odc
 Pola w **games**: `instrukcja` (adres), `zasady` (tekst, jedna zasada w wierszu), `sleeves: [{size, count, w?, h?, zmierzone?}]` (rozmiary z `window.SLEEVE.ROZMIARY`, `size:'wlasny'` + w/h w mm), `sleeveStatus ('none'|'partial'|'done')`, `braki: [{id, text, done, addedAt, doneAt}]`, `zostaje` (bool – wyklucza z rankingu „czy się pozbyć”), `bggPlaysPrzedImportem`.
 Rozgrywki z importu: `plays.id` = `bgs-<uuid>` (BG Stats) albo `bggplay-<id>` (BGG), `plays.source`.
 Usługi: `App.call('przygrze.sekcja', el, game)` (sekcja „Przy stole” na karcie gry), `App.call('przygrze.aparat', {tytul})` → `{size, w, h}` (pomiar karty aparatem; skala z karty płatniczej 85,6×54 mm), `App.call('przygrze.importPartii', tekst, {podglad})`.
+
+## Gry – dodatki do kolekcji (moduły `moduly/gry-plus`, od 2026-11-24)
+- `dane-gry.js` = `window.GRY_DANE`: mechaniki, kategorie, autorzy, liczba graczy i czas dla gier z kolekcji (klucz = bggId), gra bazowa dodatków (`baza`), lista dodatków gier (`dodatki`), 2000 najlepszych gier BGG jako kandydaci do podpowiedzi (`kand`). Źródło: publiczny zestaw danych BGG z TidyTuesday (stan ze stycznia 2022) – BGG blokuje API bez klucza. Generuje `narzedzia/przygotuj.py`.
+- `wspolne.js` = `window.GP` (info o grze, partie = aplikacja + bggPlays, gra bazowa dodatku, wymiary pudełek i Kallax, style `gp-*`).
+- Zakładki: `rekomendacje` (Co kupić?), `mechaniki` (Mechaniki i autorzy), `dodatki`, `kampanie`, `wymiana` (Wymienię), `przypomnienia` (Dawno nie grane), `pudelka` (Pudełka i Kallax). `ciemny-stol.js` – przycisk 🌙 w licznik/zegar.
+- Nowa kolekcja **campaigns**: `gameId, title, name, status ('trwa'|'skonczona'|'porzucona'), scenario, players [{playerId, name, character}], stickers, unlocked, notes, startedAt, log [{id, date, scenario, result, notes}]`. Rozgrywki zapisane z kampanii mają `campaignId`.
+- Nowe pola **games**: `baseGameId` (gra bazowa dodatku wybrana ręcznie), `expPlayed`, `pudelko {w,l,h,zrodlo}` (cm), `wymiana`, `wymianaCena`, `wymianaUwagi`. Ustawienia: `rekoUkryte` (bggId), `wymianaTekst`.
+- Usługi: `App.call('grplus.sekcja', el, gra)` (sekcja w karcie gry), `pudelka.edytuj`, `pudelka.przegroda` (zajętość w Półkach), `wymiana.przelacz`, `kampanie.nowa`.
+- Kafelki Start: moduł może mieć `info()` (async, krótki tekst pod nazwą kafelka) – `core/start.js` je wywołuje.
