@@ -117,20 +117,30 @@
    * (NAV_MAIN) i przyciskiem „Więcej” z resztą. Krótkie podpisy na telefon: NAV_SHORT. */
   const NAV_MAIN = ['start', 'planszowki', 'komiksy', 'czytanie'];
   const NAV_SHORT = { czytanie: 'Czytanie', planszowki: 'Gry', ustawienia: 'Ustawienia', start: 'Start' };
+  // Działy menu: porządkują ~40 funkcji w bocznym menu, w „Więcej” i na Starcie. Moduł spoza listy trafia do „Inne”.
+  const GRUPY = [
+    { id: 'gry', title: 'Gry planszowe', ids: ['planszowki', 'dodatki', 'rozgrywki', 'wieczor', 'licznik', 'zegar', 'przygrze', 'kampanie', 'przypomnienia', 'gracze', 'wyzwania', 'mechaniki', 'kalendarz'] },
+    { id: 'komiksy', title: 'Komiksy', ids: ['komiksy', 'czytanie', 'postep'] },
+    { id: 'zakupy', title: 'Zakupy i sprzedaż', ids: ['sklep', 'zakupy', 'wishlista', 'rekomendacje', 'historia-cen', 'sprzedaz', 'wymiana', 'wypozyczenia'] },
+    { id: 'kolekcja', title: 'Kolekcja', ids: ['polki', 'pudelka', 'wartosc', 'podsumowanie', 'udostepnij', 'udostepnianie'] },
+    { id: 'aplikacja', title: 'Aplikacja', ids: ['asystent', 'skroty', 'ustawienia', 'powiadomienia', 'kopie'] }
+  ];
+  const grupa = id => (GRUPY.find(g => g.ids.includes(id)) || { id: 'inne', title: 'Inne' });
+  // moduły ułożone działami (kolejność działów jak w GRUPY, w dziale według order); Start zawsze pierwszy
+  function wDzialach(list) {
+    const idx = m => m.id === 'start' ? -1 : (() => { const i = GRUPY.findIndex(g => g.ids.includes(m.id)); return i < 0 ? GRUPY.length : i; })();
+    return list.slice().sort((a, b) => idx(a) - idx(b) || (a.order || 100) - (b.order || 100));
+  }
   function renderNav() {
     const nav = document.getElementById('nav');
     const isMain = m => NAV_MAIN.includes(m.id);
-    let lastGroup = null;
-    const btn = (m, inSheet) => {
-      const group = Math.floor((m.order || 100) / 100);
-      const sep = !inSheet && lastGroup !== null && group !== lastGroup ? '<div class="sep bottom"></div>' : '';
-      if (!inSheet) lastGroup = group;
-      return `${sep}<button data-id="${m.id}" class="${current && current.id === m.id ? 'active' : ''} ${isMain(m) ? 'pri' : 'sec'}"><span class="ico">${window.ikona ? window.ikona(m.id, m.icon) : (m.icon || '•')}</span><span class="lab">${esc(m.title)}</span><span class="lab-s">${esc(NAV_SHORT[m.id] || m.title)}</span></button>`;
-    };
-    const rest = modules.filter(m => !isMain(m));
+    const btn = (m) => `<button data-id="${m.id}" class="${current && current.id === m.id ? 'active' : ''} ${isMain(m) ? 'pri' : 'sec'}"><span class="ico">${window.ikona ? window.ikona(m.id, m.icon) : (m.icon || '•')}</span><span class="lab">${esc(m.title)}</span><span class="lab-s">${esc(NAV_SHORT[m.id] || m.title)}</span></button>`;
+    // nagłówek działu przed pierwszym modułem z nowego działu (pri na telefonie i tak jest w dolnym pasku)
+    const zNaglowkami = (list, cls) => { let last = null; return list.map(m => { const g = m.id === 'start' ? null : grupa(m.id); const h = g && g.id !== last ? `<div class="${cls}">${esc(g.title)}</div>` : ''; if (g) last = g.id; return h + btn(m); }).join(''); };
+    const all = wDzialach(modules), rest = all.filter(m => !isMain(m));
     nav.innerHTML = `<div class="brand"><img src="icons/icon-192.png" alt="">Moje kolekcje</div>`
-      + modules.map(m => btn(m)).join('')
-      + (rest.length ? `<button class="more ${current && !isMain(current) ? 'active' : ''}" aria-label="Więcej"><span class="ico">${window.ikona ? window.ikona('wiecej', '☰') : '☰'}</span><span class="lab-s">Więcej</span></button><div class="more-sheet">${rest.map(m => btn(m, true)).join('')}</div>` : '');
+      + zNaglowkami(all, 'nav-h')
+      + (rest.length ? `<button class="more ${current && !isMain(current) ? 'active' : ''}" aria-label="Więcej"><span class="ico">${window.ikona ? window.ikona('wiecej', '☰') : '☰'}</span><span class="lab-s">Więcej</span></button><div class="more-sheet">${zNaglowkami(rest, 'ms-h')}</div>` : '');
     nav.classList.remove('open');
     nav.querySelectorAll('button[data-id]').forEach(b => b.onclick = () => { nav.classList.remove('open'); App.go(b.dataset.id); });
     const more = nav.querySelector('.more');
@@ -160,6 +170,9 @@
   const App = {
     ui,
     modules,
+    grupy: GRUPY,
+    grupa,
+    wDzialach,
     registerModule(m) { modules.push(m); modules.sort((a, b) => (a.order || 100) - (b.order || 100)); if (App._started) renderNav(); },
     go(id, params) {
       const q = params ? '?' + new URLSearchParams(params).toString() : '';

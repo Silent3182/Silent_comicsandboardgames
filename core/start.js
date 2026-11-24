@@ -24,6 +24,13 @@
     const all = mods.slice().sort((a, b) => pos(a.id) - pos(b.id) || (a.order || 100) - (b.order || 100));
     return { c, shown: all.filter(m => !c.hidden.includes(m.id)), hidden: all.filter(m => c.hidden.includes(m.id)) };
   }
+  // kafelki w działach (Gry planszowe, Komiksy, …) z App.grupy; w dziale kolejność użytkownika
+  const gr = id => App.grupa ? App.grupa(id) : { id: 'all', title: '' };
+  function dzialy(list) {
+    const out = [];
+    (App.grupy || []).concat([{ id: 'inne', title: 'Inne' }]).forEach(g => { const ms = list.filter(m => gr(m.id).id === g.id); if (ms.length) out.push([g, ms]); });
+    return App.grupy ? out : [[{ title: '' }, list]];
+  }
   const ico = m => window.ikona ? window.ikona(m.id, `<span class="st-emo">${m.icon || '•'}</span>`) : `<span class="st-emo">${m.icon || '•'}</span>`;
   function tile(m, i, n, ukryty) {
     const ctl = !edit ? '' : ukryty
@@ -38,8 +45,8 @@
     el.innerHTML = `
       <div class="st-head"><div><small>Moje kolekcje</small><h1>Kolekcja Marcina</h1></div>
         <button id="stEdit" class="${edit ? 'primary' : ''}">${edit ? '✓ Gotowe' : 'Edytuj kafelki'}</button></div>
-      ${edit ? '<p class="muted st-hint">Strzałki zmieniają kolejność, ✕ ukrywa kafelek. Ukryte kafelki są na dole, dotknij, aby dodać z powrotem.</p>' : ''}
-      <div class="st-grid">${shown.map((m, i) => tile(m, i, shown.length)).join('')}</div>
+      ${edit ? '<p class="muted st-hint">Strzałki zmieniają kolejność w dziale, ✕ ukrywa kafelek. Ukryte kafelki są na dole, dotknij, aby dodać z powrotem.</p>' : ''}
+      ${dzialy(shown).map(([g, ms]) => `<h3 class="st-sub">${esc(g.title)}</h3><div class="st-grid">${ms.map((m, i) => tile(m, i, ms.length)).join('')}</div>`).join('')}
       ${edit && hidden.length ? `<h3 class="st-sub">Ukryte kafelki</h3><div class="st-grid st-off">${hidden.map(m => tile(m, 0, 0, true)).join('')}</div>` : ''}
       ${edit ? '<p class="row" style="margin-top:14px"><button id="stReset" class="ghost">Przywróć domyślny układ</button></p>' : ''}
       ${!edit && hidden.length ? `<p class="muted st-hint">Ukryte: ${hidden.length}. Dodasz je przyciskiem „Edytuj kafelki”.</p>` : ''}`;
@@ -52,7 +59,8 @@
         const cc = cfg(); cc.order = lista().shown.map(m => m.id).concat(lista().hidden.map(m => m.id));
         if (e.target.closest('.st-del')) cc.hidden = cc.hidden.concat(id);
         else if (e.target.closest('.st-mv')) {
-          const vis = cc.order.filter(x => !cc.hidden.includes(x)), i = vis.indexOf(id), j = i + Number(e.target.closest('.st-mv').dataset.d);
+          const vis = cc.order.filter(x => !cc.hidden.includes(x)), i = vis.indexOf(id), d = Number(e.target.closest('.st-mv').dataset.d);
+          let j = i + d; while (j >= 0 && j < vis.length && gr(vis[j]).id !== gr(id).id) j += d;   // sąsiad z tego samego działu
           if (j < 0 || j >= vis.length || e.target.closest('.st-mv').hasAttribute('data-off')) return;
           [vis[i], vis[j]] = [vis[j], vis[i]]; cc.order = vis.concat(cc.order.filter(x => cc.hidden.includes(x)));
         } else if (cc.hidden.includes(id)) cc.hidden = cc.hidden.filter(x => x !== id);

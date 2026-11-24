@@ -1,8 +1,8 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v22';
+const VERSION = 'v23';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
-  'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js', 'core/lista.js', 'core/okladki.js',
+  'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js', 'core/przewijanie.js', 'core/lista.js', 'core/okladki.js',
   'moduly/planszowki/dane-bgg.js', 'moduly/tytuly/dane-tytuly.js', 'moduly/tytuly/tytuly.js', 'moduly/planszowki/planszowki.js', 'moduly/planszowki/bgg-dane.js'
   , 'moduly/sprzedaz/sprzedaz.js', 'moduly/sprzedaz/sprzedaz-ui.js'
   ,'moduly/komiksy/komiksy.js', 'moduly/komiksy/dane-komiksy.js', 'moduly/komiksy/dane-mro.js', 'moduly/komiksy/zapowiedzi.js'
