@@ -59,7 +59,7 @@ function testPliki() {
   const wf = read('.github/workflows/apk.yml');
   ok(wf.includes('android-build/klucz.keystore') && wf.includes('Zły podpis APK') && fs.existsSync(path.join(ROOT, 'android-build/klucz.keystore')), 'APK podpisywane stałym kluczem z repo (z kontrolą podpisu)');
   try { JSON.parse(read('manifest.webmanifest')); ok(true, 'manifest.webmanifest to poprawny JSON'); } catch (e) { ok(false, 'manifest.webmanifest to poprawny JSON', e.message); }
-  if (fs.existsSync(path.join(ROOT, 'zapowiedzi.json'))) { try { JSON.parse(read('zapowiedzi.json')); ok(true, 'zapowiedzi.json to poprawny JSON'); } catch (e) { ok(false, 'zapowiedzi.json to poprawny JSON', e.message); } }
+  for (const f of fs.readdirSync(ROOT).filter(f => f.endsWith('.json'))) { try { JSON.parse(read(f)); ok(true, f + ' to poprawny JSON'); } catch (e) { ok(false, f + ' to poprawny JSON', e.message); } }
 }
 
 /* ---------- serwer ---------- */
