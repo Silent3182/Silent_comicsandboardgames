@@ -65,3 +65,11 @@ Usługi: `App.call('sklep.skanuj')` (skaner → „czy mam?”), `App.call('wypo
 **listings** – ogłoszenia sprzedaży (wątek sprzedaży)
 `itemType ('game'|'comic'), itemId, platform ('olx'|'facebook'|'vinted'|'allegro'), condition, price, shipping, title, text, status ('draft'|'active'|'sold'), soldAt, soldPrice`
 Do pozycji: `const item = await DB.get(itemType==='game'?'games':'comics', itemId)`. Okładka: `item.image || item.thumb`.
+
+**challenges** – wyzwania (moduł `moduly/wyzwania`)
+`title, type ('nxn'|'plays'|'distinct'|'shelf'|'game'|'wins'|'read'|'sold'), target, gameId, period ('month'|'year'|'custom'), from, to, archived`
+
+Moduły gracze/licznik/wyzwania/podsumowanie (`moduly/gracze/wspolne.js` = wspólne pomocniki `window.KS`):
+- **players** ma też `photo` (dataURL 160×160 JPEG) i `color`. Usługi: `App.call('gracze.avatar', player, size)`, `App.call('licznik.start', gameId)`, `App.call('wyzwania.lista')`.
+- **plays** z licznika punktów mają `lowWins: true`, gdy wygrywa najmniej punktów.
+- **comics**: `readAt` (data odznaczenia „przeczytane”) – liczone w wyzwaniach i podsumowaniu roku.
