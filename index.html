@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css">
 <script>/* Wygląd z Ustawień (core/wyglad.js): styl ikon i motyw, ustawiane przed narysowaniem strony */
-try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;}catch(e){document.documentElement.dataset.ikony='kolor';}</script>
+try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;if(w.splash==='0')h.dataset.splash='0';}catch(e){document.documentElement.dataset.ikony='kolor';}</script>
 </head>
 <body>
 <!-- Ekran startowy (core/splash.js): znika po 2 s -->
@@ -30,6 +30,7 @@ try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentEl
 <script src="core/db.js"></script>
 <script src="core/app.js"></script>
 <script src="core/sync.js"></script>
+<script src="core/start.js"></script>
 <!-- Moduły (każdy wątek dopisuje swój plik poniżej) -->
 <script src="moduly/planszowki/dane-bgg.js"></script>
 <script src="moduly/planszowki/planszowki.js"></script>
@@ -55,10 +56,27 @@ try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentEl
 <script src="moduly/wyzwania/wyzwania.js"></script>
 <script src="moduly/podsumowanie/podsumowanie.js"></script>
 <script src="moduly/polki/polki.js"></script>
+<script src="moduly/polki/zdjecia.js"></script>
 <script src="moduly/wishlista/wishlista.js"></script>
 <script src="moduly/powiadomienia/powiadomienia.js"></script>
 <script src="moduly/widzet/widzet.js"></script>
 <script src="moduly/kalendarz/kalendarz.js"></script>
+<script src="moduly/przy-grze/rozmiary.js"></script>
+<script src="moduly/przy-grze/aparat.js"></script>
+<script src="moduly/przy-grze/import-partii.js"></script>
+<script src="moduly/przy-grze/przy-grze.js"></script>
+<script src="moduly/historia/historia.js"></script>
+<script src="moduly/udostepnij/udostepnij.js"></script>
+<script src="moduly/asystent/asystent.js"></script>
+<script src="moduly/gry-plus/dane-gry.js"></script>
+<script src="moduly/gry-plus/wspolne.js"></script>
+<script src="moduly/gry-plus/rekomendacje.js"></script>
+<script src="moduly/gry-plus/dodatki.js"></script>
+<script src="moduly/gry-plus/kampanie.js"></script>
+<script src="moduly/gry-plus/wymiana.js"></script>
+<script src="moduly/gry-plus/przypomnienia.js"></script>
+<script src="moduly/gry-plus/pudelka.js"></script>
+<script src="moduly/gry-plus/ciemny-stol.js"></script>
 <!-- /Moduły -->
 <script src="core/wyglad.js"></script>
 <script src="core/splash.js"></script>

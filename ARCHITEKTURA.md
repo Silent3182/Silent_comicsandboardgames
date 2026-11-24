@@ -90,6 +90,15 @@ Moduły gracze/licznik/wyzwania/podsumowanie (`moduly/gracze/wspolne.js` = wspó
 - **plays** z licznika punktów mają `lowWins: true`, gdy wygrywa najmniej punktów.
 - **comics**: `readAt` (data odznaczenia „przeczytane”) – liczone w wyzwaniach i podsumowaniu roku.
 
+**priceHistory** – historia cen (moduł `moduly/historia`, zakładka 📈 Historia cen)
+`itemType ('game'|'comic'|'kolekcja'), itemId, title, kind ('zakup'|'wycena'|'ogloszenie'|'sprzedaz'|'rynek'|'snap'), price, date ('RRRR-MM-DD'), platform?, note?, manual?`
+Wpisy zbierają się same po zmianach w games/comics/listings/ustawieniach (id wyliczane z treści, np. `ph-zakup-<id>-<data>`, więc dwa urządzenia nie dublują). `snap-RRRR-MM-DD` = stan kolekcji dnia (`value`, `paid`, `count`), liczony usługą `App.call('wartosc.dane')` z modułu wartości.
+
+Asystent głosowy (`moduly/asystent`): polecenia po polsku (Web Speech API w przeglądarce, wtyczka `@capacitor-community/speech-recognition` w APK, zawsze też pole tekstowe). „Brass Silent 145 Andrzej 130” → podgląd rozgrywki do potwierdzenia, zwycięzca z punktów. Ksywki graczy w ustawieniu `asystentAliasy = {ksywka: playerId}` („silent” = gracz `isMe`). `App.call('asystent.wykonaj', tekst)`.
+
+Udostępnianie (`moduly/udostepnij` + strona `kolekcja.html`): link tylko do odczytu. Dozwolone pola: tytuł, rok, bggId, dodatek, opcjonalnie ocena/partie/na sprzedaż/pożyczona/okładka, komiksy jako seria + numery. Nigdy: notatki, ceny, kody, półki, gracze, osoby z wypożyczeń, tokeny. `#k=` = spis skompresowany w linku (deflate-raw + base64url), `#g=` = sekretny Gist (token z uprawnieniem Gists w `DB.local('udostepnijToken')` albo token synchronizacji). Ustawienie `udostepnij`.
+
+
 ## Komunikaty i błędy
 - Pytania Tak/Nie: `await App.ui.confirm('Usunąć…?')` – okno aplikacji, nie systemowe. Nie używaj `alert/confirm/prompt` przeglądarki (test to sprawdza).
 - Błędy pokazuj przez `App.ui.toast(e)` albo `App.ui.toast('Nie udało się: ' + e.message)` – toast sam zamienia systemowe (angielskie) teksty na polskie. Tekst do wstawienia w stronę: `App.ui.komunikat(e)` (zwraca `null` dla anulowania, np. zamkniętego wyboru pliku).
@@ -98,3 +107,17 @@ Moduły gracze/licznik/wyzwania/podsumowanie (`moduly/gracze/wspolne.js` = wspó
 ## Wydawanie zmian (jeden wydawca)
 - Wątki nie scalają same: otwierają PR i zgłaszają go wątkowi „Wydawaj i testuj wszystkie zmiany”, który scala po kolei, rozwiązuje konflikty i wydaje wersję.
 - Każdy PR i każde wydanie przechodzi `node testy/test-aplikacji.js` (GitHub Actions „Testy aplikacji”; APK buduje się dopiero po zielonych testach). Nowy moduł: plik w `index.html` i `sw.js` (FILES), nowa kolekcja w `STORES` w `core/db.js` – inaczej test nie przejdzie.
+
+**Narzędzia gier** (moduł `moduly/przy-grze`, zakładka `przygrze` „Narzędzia gier”: Koszulki, Braki, Czy się pozbyć?, Import partii)
+Pola w **games**: `instrukcja` (adres), `zasady` (tekst, jedna zasada w wierszu), `sleeves: [{size, count, w?, h?, zmierzone?}]` (rozmiary z `window.SLEEVE.ROZMIARY`, `size:'wlasny'` + w/h w mm), `sleeveStatus ('none'|'partial'|'done')`, `braki: [{id, text, done, addedAt, doneAt}]`, `zostaje` (bool – wyklucza z rankingu „czy się pozbyć”), `bggPlaysPrzedImportem`.
+Rozgrywki z importu: `plays.id` = `bgs-<uuid>` (BG Stats) albo `bggplay-<id>` (BGG), `plays.source`.
+Usługi: `App.call('przygrze.sekcja', el, game)` (sekcja „Przy stole” na karcie gry), `App.call('przygrze.aparat', {tytul})` → `{size, w, h}` (pomiar karty aparatem; skala z karty płatniczej 85,6×54 mm), `App.call('przygrze.importPartii', tekst, {podglad})`.
+
+## Gry – dodatki do kolekcji (moduły `moduly/gry-plus`, od 2026-11-24)
+- `dane-gry.js` = `window.GRY_DANE`: mechaniki, kategorie, autorzy, liczba graczy i czas dla gier z kolekcji (klucz = bggId), gra bazowa dodatków (`baza`), lista dodatków gier (`dodatki`), 2000 najlepszych gier BGG jako kandydaci do podpowiedzi (`kand`). Źródło: publiczny zestaw danych BGG z TidyTuesday (stan ze stycznia 2022) – BGG blokuje API bez klucza. Generuje `narzedzia/przygotuj.py`.
+- `wspolne.js` = `window.GP` (info o grze, partie = aplikacja + bggPlays, gra bazowa dodatku, wymiary pudełek i Kallax, style `gp-*`).
+- Zakładki: `rekomendacje` (Co kupić?), `mechaniki` (Mechaniki i autorzy), `dodatki`, `kampanie`, `wymiana` (Wymienię), `przypomnienia` (Dawno nie grane), `pudelka` (Pudełka i Kallax). `ciemny-stol.js` – przycisk 🌙 w licznik/zegar.
+- Nowa kolekcja **campaigns**: `gameId, title, name, status ('trwa'|'skonczona'|'porzucona'), scenario, players [{playerId, name, character}], stickers, unlocked, notes, startedAt, log [{id, date, scenario, result, notes}]`. Rozgrywki zapisane z kampanii mają `campaignId`.
+- Nowe pola **games**: `baseGameId` (gra bazowa dodatku wybrana ręcznie), `expPlayed`, `pudelko {w,l,h,zrodlo}` (cm), `wymiana`, `wymianaCena`, `wymianaUwagi`. Ustawienia: `rekoUkryte` (bggId), `wymianaTekst`.
+- Usługi: `App.call('grplus.sekcja', el, gra)` (sekcja w karcie gry), `pudelka.edytuj`, `pudelka.przegroda` (zajętość w Półkach), `wymiana.przelacz`, `kampanie.nowa`.
+- Kafelki Start: moduł może mieć `info()` (async, krótki tekst pod nazwą kafelka) – `core/start.js` je wywołuje.

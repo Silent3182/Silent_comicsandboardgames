@@ -115,8 +115,8 @@
 
   /* Nawigacja: na komputerze boczny pasek, na telefonie dolny pasek z 4 głównymi zakładkami
    * (NAV_MAIN) i przyciskiem „Więcej” z resztą. Krótkie podpisy na telefon: NAV_SHORT. */
-  const NAV_MAIN = ['planszowki', 'rozgrywki', 'komiksy', 'czytanie'];
-  const NAV_SHORT = { czytanie: 'Czytanie', planszowki: 'Gry', ustawienia: 'Ustawienia' };
+  const NAV_MAIN = ['start', 'planszowki', 'komiksy', 'czytanie'];
+  const NAV_SHORT = { czytanie: 'Czytanie', planszowki: 'Gry', ustawienia: 'Ustawienia', start: 'Start' };
   function renderNav() {
     const nav = document.getElementById('nav');
     const isMain = m => NAV_MAIN.includes(m.id);

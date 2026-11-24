@@ -174,6 +174,21 @@ async function main() {
       await page.evaluate(() => App.go('czytanie')); await page.waitForTimeout(3000);
       const c = await page.evaluate(async () => ({ comics: (await DB.all('comics')).length, mro: window.MRO_DANE ? MRO_DANE.p.length : 0, games: (await DB.all('games')).length }));
       ok(c.comics > 100 && c.mro > 1000 && c.games > 100, `dane startowe: ${c.games} gier, ${c.comics} komiksów, ${c.mro} pozycji MRO`, JSON.stringify(c));
+      // Do czytania: odznaczenie „przeczytane” nie przewija listy na górę
+      await page.evaluate(() => App.go('czytanie', { v: 'all' })); await page.waitForTimeout(3000);
+      const sc = await page.evaluate(async () => {
+        for (let k = 0; k < 20 && !document.querySelector('#czbody .kx-row[data-i]'); k++) await new Promise(r => setTimeout(r, 500));
+        const rows = [...document.querySelectorAll('#czbody .kx-row[data-i]')]; const row = rows[Math.min(60, rows.length - 1)];
+        if (!row) return { brak: true, html: (document.getElementById('czbody') || document.body).innerText.slice(0, 200) };
+        const bylo = row.classList.contains('read');
+        row.scrollIntoView({ block: 'center' }); await new Promise(r => setTimeout(r, 300));
+        const main = document.getElementById('main'), przed = [window.scrollY, main.scrollTop], i = row.dataset.i;
+        row.querySelector('input[type=checkbox]').click(); await new Promise(r => setTimeout(r, 1200));
+        const po = [window.scrollY, main.scrollTop], r2 = document.querySelector(`#czbody .kx-row[data-i="${i}"]`);
+        return { przed, po, tenSam: r2 === row, zielony: r2 && r2.classList.contains('read') !== bylo, zapisany: !!(await DB.all('readingOrder')).find(o => o.read === !bylo && o.order === +i + 1) };
+      });
+      ok(!sc.brak && sc.tenSam && sc.zielony && sc.zapisany && sc.przed[0] === sc.po[0] && sc.przed[1] === sc.po[1] && (sc.przed[0] + sc.przed[1]) > 0,
+        'Do czytania: odznaczenie przeczytanego zostaje w miejscu (bez przewijania na górę) i zapisuje się', JSON.stringify(sc));
       ok(!errs.length, 'bez błędów w konsoli', errs.join('\n      '));
       await ctx.close();
     }

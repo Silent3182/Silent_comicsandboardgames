@@ -415,15 +415,27 @@
       ${opts.upto ? `<button class="ghost" data-upto="${x.i}" title="Oznacz wszystko do tego miejsca jako przeczytane">⤒</button>` : ''}</div>`;
   }
   function bindRows(el, S) {
+    // odznaczanie bez przerysowania listy – lista zostaje w tym samym miejscu (prośba Anety)
+    const naMiejscu = (items, read) => {
+      const t = read ? new Date().toISOString() : null;
+      items.forEach(x => {
+        S.ov.set(x.id, Object.assign({}, S.ov.get(x.id) || {}, { id: x.id, read, readAt: t }));
+        document.querySelectorAll(`.kx-row[data-i="${x.i}"]`).forEach(r => { r.classList.toggle('read', read); const c = r.querySelector('input[type=checkbox]'); if (c) c.checked = read; });
+      });
+      const L = MRO.list, tot = L.filter(S.counts).length, done = L.filter(x => S.counts(x) && S.isRead(x)).length;
+      const bar = document.getElementById('czprog'), txt = document.getElementById('czprogt');
+      if (bar) bar.style.width = (done / Math.max(1, tot) * 100).toFixed(2) + '%';
+      if (txt) txt.textContent = `Przeczytane ${done.toLocaleString('pl-PL')} z ${tot.toLocaleString('pl-PL')} (${(done / Math.max(1, tot) * 100).toFixed(1)}%)`;
+    };
     el.querySelectorAll('input[type=checkbox][data-i]').forEach(cb => cb.onchange = async () => {
-      const x = MRO.list[+cb.dataset.i]; await setRead([x], cb.checked); App.refresh();
+      const x = MRO.list[+cb.dataset.i]; await setRead([x], cb.checked); naMiejscu([x], cb.checked);
     });
     el.querySelectorAll('[data-tom]').forEach(b => b.onclick = () => assignVolume(MRO.list[+b.dataset.tom], S));
     el.querySelectorAll('[data-upto]').forEach(b => b.onclick = async () => {
       const to = +b.dataset.upto;
       const items = MRO.list.filter(x => x.i <= to && S.counts(x) && !S.isRead(x));
       if (!items.length) return App.ui.toast('Wszystko do tego miejsca jest już przeczytane');
-      if (await App.ui.confirm(`Oznaczyć ${items.length} pozycji do tego miejsca jako przeczytane?`)) { await setRead(items, true); App.refresh(); }
+      if (await App.ui.confirm(`Oznaczyć ${items.length} pozycji do tego miejsca jako przeczytane?`)) { await setRead(items, true); naMiejscu(items, true); App.ui.toast(`Oznaczono ${items.length} pozycji`); }
     });
   }
   /* ---- filtr po postaci / evencie ---- */
@@ -504,8 +516,8 @@
     const tabs = [['next', 'Następne'], ['backlog', `Zaległe (${S.backlog.length})`], ['all', 'Cała lista'], ['postac', 'Postać / event'], ['historia', 'Oś czasu'], ['opcje', 'Ustawienia i aktualizacja']];
     el.innerHTML = `
       <h2>Master Reading Order</h2>
-      <div class="kx-prog"><div style="width:${(done / Math.max(1, tot) * 100).toFixed(2)}%"></div></div>
-      <p class="kx-muted">Przeczytane ${done.toLocaleString('pl-PL')} z ${tot.toLocaleString('pl-PL')} (${(done / Math.max(1, tot) * 100).toFixed(1)}%)</p>
+      <div class="kx-prog"><div id="czprog" style="width:${(done / Math.max(1, tot) * 100).toFixed(2)}%"></div></div>
+      <p class="kx-muted" id="czprogt">Przeczytane ${done.toLocaleString('pl-PL')} z ${tot.toLocaleString('pl-PL')} (${(done / Math.max(1, tot) * 100).toFixed(1)}%)</p>
       <div class="kx-chips">${tabs.map(([v, l]) => `<button class="kx-chip ${cz.view === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div>
       <div id="czbody"></div>`;
     el.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { cz.view = b.dataset.v; App.refresh(); });
