@@ -137,7 +137,7 @@
     if (document.getElementById('bgg-css')) return;
     const st = document.createElement('style'); st.id = 'bgg-css';
     st.textContent = '.bgg-logo{margin:18px 0 6px;text-align:center}.bgg-logo a{display:inline-block;padding:4px 10px;border-radius:10px;background:#fff;line-height:0}'
-      + '.bgg-logo img{height:40px;width:auto;display:block}';
+      + '.bgg-logo img{height:44px;width:auto;display:block}';
     document.head.appendChild(st);
   }
 
@@ -178,6 +178,10 @@
   }
   if (!hook()) document.addEventListener('DOMContentLoaded', hook);
 
-  window.BggDane = { odswiez, zastosuj, uzupelnij, logo, get: () => dane };
+  // dane z pamięci urządzenia (bez sieci) – karta gry czeka na nie, zanim pokaże mechaniki itd.
+  let wczyt = null;
+  const gotowe = () => wczyt || (wczyt = (async () => { if (!dane) { dane = await DB.local('bggDane').catch(() => null) || null; if (dane) wzbogac(dane); } return dane; })());
+
+  window.BggDane = { odswiez, zastosuj, uzupelnij, logo, gotowe, get: () => dane };
   window.addEventListener('load', () => setTimeout(() => odswiez(false).then(r => { if (r.n && App.refresh) App.refresh(); }).catch(() => {}), 1500));
 })();

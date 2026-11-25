@@ -152,7 +152,8 @@ def main(plik='bgg.json', user='Silent82'):
             pass
     # Zasady BGG: jak najmniej zapytań. Szczegóły gier pobieramy codziennie tylko dla nowych pozycji,
     # a wszystkie odświeżamy raz w tygodniu (w poniedziałek) albo na żądanie (BGG_PELNE=1).
-    ids = [k['id'] for k in kol]
+    # szczegóły tylko dla gier posiadanych, chcianych, zamówionych i na wymianę (bez „miałem kiedyś” i samych ocen)
+    ids = [k['id'] for k in kol if k['own'] or k['wish'] or k['pre'] or k['trade']]
     stare_gry = stare.get('gry') or {}
     pelne = os.environ.get('BGG_PELNE') == '1' or datetime.now(timezone.utc).weekday() == 0 or not stare_gry
     nowe = ids if pelne else [i for i in ids if str(i) not in stare_gry]

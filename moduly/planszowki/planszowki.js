@@ -104,8 +104,8 @@
       b && b[0] ? `<dt>Najlepiej na</dt><dd>${b[0] === b[1] ? b[0] : b[0] + '–' + b[1]} os.</dd>` : '',
       g.minAge ? `<dt>Wiek</dt><dd>od ${g.minAge} lat</dd>` : '',
       x.d && x.d.length ? `<dt>Autorzy</dt><dd>${li(x.d)}</dd>` : '',
-      x.m && x.m.length ? `<dt>Mechaniki</dt><dd>${li(x.m)}</dd>` : '',
-      x.c && x.c.length ? `<dt>Kategorie</dt><dd>${li(x.c)}</dd>` : ''
+      x.m && x.m.length ? `<dt>Mechaniki</dt><dd>${li(window.GP ? x.m.map(GP.mechNazwa) : x.m)}</dd>` : '',
+      x.c && x.c.length ? `<dt>Kategorie</dt><dd>${li(window.GP ? x.c.map(GP.katNazwa) : x.c)}</dd>` : ''
     ].join('');
   }
 
@@ -432,6 +432,7 @@
     async render(el, params) {
       const n = await importBgg(false);
       if (n) App.ui.toast(`Zaimportowano ${n} pozycji z BGG (Silent82)`, 4000);
+      if (window.BggDane) await window.BggDane.gotowe();
       if (params.gra) return renderGame(el, params.gra);
       return renderList(el);
     }

@@ -87,7 +87,8 @@
   /* ---------- wszystkie okładki kolekcji ---------- */
   async function adresy() {
     const out = new Set();
-    const dodaj = x => { [x.thumb, x.image].forEach(u => { if (zewn(u)) out.add(u); }); };
+    // bez oryginałów z BGG (…__original…, często po kilka MB) – zapamiętują się dopiero po otwarciu karty gry
+    const dodaj = x => { [x.thumb, x.image].forEach(u => { if (zewn(u) && !/__original\//.test(u)) out.add(u); }); };
     (await DB.all('games')).forEach(dodaj);
     (await DB.all('comics')).forEach(dodaj);
     return [...out];
