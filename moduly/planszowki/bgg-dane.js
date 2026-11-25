@@ -1,5 +1,5 @@
 /* Dane z oficjalnego API BoardGameGeek (plik bgg.json, odświeżany raz dziennie przez GitHub Actions – .github/workflows/bgg.yml).
- * Klucz API BGG jest tylko w sekrecie repozytorium (BGG_TOKEN), aplikacja go nie zna: czyta gotowy plik bgg.json z GitHub Pages.
+ * Klucz API BGG jest tylko w sekrecie repozytorium (MOJA_KOLEKCJA), aplikacja go nie zna: czyta gotowy plik bgg.json z GitHub Pages.
  *
  * Co robi z danymi:
  *  - uzupełnia karty gier: pełna okładka, liczba graczy, czas gry, wiek, ciężar, ocena BGG, partie i Twoja ocena z BGG,
@@ -126,6 +126,21 @@
     return trwa;
   }
 
+  /* Logo „Powered by BGG” z linkiem do BoardGameGeek – wymagane przez zasady API BGG dla aplikacji, które z niego korzystają.
+     Pokazujemy je tam, gdzie są dane z BGG: lista gier, karta gry, Ustawienia. */
+  function logo() {
+    css();
+    return '<p class="bgg-logo"><a href="https://boardgamegeek.com/" target="_blank" rel="noopener" title="Dane o grach: BoardGameGeek">'
+      + '<img src="icons/powered-by-bgg.png" alt="Powered by BGG" width="136" height="40"></a></p>';
+  }
+  function css() {
+    if (document.getElementById('bgg-css')) return;
+    const st = document.createElement('style'); st.id = 'bgg-css';
+    st.textContent = '.bgg-logo{margin:18px 0 6px;text-align:center}.bgg-logo a{display:inline-block;padding:4px 10px;border-radius:10px;background:#fff;line-height:0}'
+      + '.bgg-logo img{height:40px;width:auto;display:block}';
+    document.head.appendChild(st);
+  }
+
   /* Karta w Ustawieniach */
   function karta() {
     const d = dane;
@@ -133,10 +148,11 @@
     return `<h2>Dane z BoardGameGeek</h2>
       <div class="card bgg-karta">
         <p>${d ? `Kolekcja <b>${App.ui.esc(d.user || 'Silent82')}</b> z API BGG · ${ile} ${ile === 1 ? 'gra' : (ile % 10 >= 2 && ile % 10 <= 4 && (ile % 100 < 10 || ile % 100 >= 20)) ? 'gry' : 'gier'} · stan z ${App.ui.fmtDate(String(d.pobrano).slice(0, 10))}.`
-          : 'Brak danych z API BGG. Pojawią się, gdy klucz BGG zostanie dodany jako sekret <b>BGG_TOKEN</b> w repozytorium aplikacji (odświeżanie raz dziennie).'}</p>
+          : 'Brak danych z API BGG. Pojawią się, gdy klucz BGG zostanie dodany jako sekret <b>MOJA_KOLEKCJA</b> w repozytorium aplikacji (odświeżanie raz dziennie).'}</p>
         <p class="muted" style="font-size:13px">Uzupełnia okładki, liczbę graczy, czas, mechaniki i dodatki oraz dodaje nowe gry z kolekcji BGG. Pola zmienione ręcznie w aplikacji zostają.</p>
         <p class="row"><button id="bggOdsw">Odśwież dane z BGG</button></p>
         <p class="muted" id="bggStan"></p>
+        ${logo()}
       </div>`;
   }
   function hook() {
@@ -162,6 +178,6 @@
   }
   if (!hook()) document.addEventListener('DOMContentLoaded', hook);
 
-  window.BggDane = { odswiez, zastosuj, uzupelnij, get: () => dane };
+  window.BggDane = { odswiez, zastosuj, uzupelnij, logo, get: () => dane };
   window.addEventListener('load', () => setTimeout(() => odswiez(false).then(r => { if (r.n && App.refresh) App.refresh(); }).catch(() => {}), 1500));
 })();

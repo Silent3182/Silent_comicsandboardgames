@@ -2,7 +2,8 @@
 """Pobiera kolekcję Silent82 i szczegóły gier z oficjalnego API BoardGameGeek (XML API2) do pliku bgg.json.
 
 API BGG wymaga klucza aplikacji (token z https://boardgamegeek.com/applications). Klucz bierzemy ze zmiennej
-środowiskowej BGG_TOKEN (w GitHub Actions: sekret repozytorium BGG_TOKEN) – nigdy nie trafia do repozytorium.
+środowiskowej BGG_TOKEN (w GitHub Actions: sekret repozytorium MOJA_KOLEKCJA) – nigdy nie trafia do repozytorium.
+Zgodnie z https://boardgamegeek.com/using_the_xml_api: zapytania tylko z serwera, wynik zapisany w pliku, jak najmniej zapytań.
 Uruchamia go raz dziennie GitHub Actions (.github/workflows/bgg.yml); ręcznie:
     BGG_TOKEN=... python3 pobierz_bgg.py ../../../bgg.json [Silent82]
 
@@ -143,13 +144,22 @@ def main(plik='bgg.json', user='Silent82'):
     print('Pozycji w kolekcji:', len(kol))
     if not kol:
         raise SystemExit('BGG zwróciło pustą kolekcję – nie nadpisuję pliku.')
-    gry = szczegoly([k['id'] for k in kol], token)
     stare = {}
     if os.path.exists(plik):
         try:
             stare = json.load(open(plik, encoding='utf-8'))
         except ValueError:
             pass
+    # Zasady BGG: jak najmniej zapytań. Szczegóły gier pobieramy codziennie tylko dla nowych pozycji,
+    # a wszystkie odświeżamy raz w tygodniu (w poniedziałek) albo na żądanie (BGG_PELNE=1).
+    ids = [k['id'] for k in kol]
+    stare_gry = stare.get('gry') or {}
+    pelne = os.environ.get('BGG_PELNE') == '1' or datetime.now(timezone.utc).weekday() == 0 or not stare_gry
+    nowe = ids if pelne else [i for i in ids if str(i) not in stare_gry]
+    print('Szczegóły:', 'wszystkie' if pelne else f'tylko nowe ({len(nowe)})')
+    gry = szczegoly(nowe, token) if nowe else {}
+    if not pelne:
+        gry = {**{str(i): stare_gry[str(i)] for i in ids if str(i) in stare_gry}, **gry}
     # „pobrano” zmieniamy tylko wtedy, gdy dane naprawdę się zmieniły – aplikacja po tej dacie wie, że ma coś nowego
     if stare.get('kolekcja') == kol and stare.get('gry') == gry:
         print('Bez zmian.'); return

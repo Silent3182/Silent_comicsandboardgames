@@ -91,6 +91,9 @@
     }).filter(g => g.bggId && g.title);
   }
 
+  /* Logo „Powered by BGG” z linkiem do BGG – wymóg zasad API BGG (https://boardgamegeek.com/using_the_xml_api) */
+  const bggLogo = () => window.BggDane ? window.BggDane.logo() : '';
+
   /* Dodatkowe dane z API BGG (bgg-dane.js): ranking, najlepsza liczba graczy, wiek, mechaniki, kategorie, autorzy */
   function bggInfo(g) {
     const d = window.BggDane && window.BggDane.get(), x = d && g.bggId && d.gry[g.bggId];
@@ -241,7 +244,7 @@
         <button id="dir" title="Odwróć kolejność">${dir === '1' ? '↓' : '↑'}</button>
         <span class="seg"><button data-v="grid" class="${view === 'grid' ? 'on' : ''}" title="Kafelki">▦</button><button data-v="list" class="${view === 'list' ? 'on' : ''}" title="Lista">☰</button></span>
       </div>
-      <div id="out"></div>`;
+      <div id="out"></div>${bggLogo()}`;
     const $ = s => el.querySelector(s);
     function draw() {
       const ql = q.toLowerCase();
@@ -371,7 +374,7 @@
         ${st.map(s => `<tr><td>${esc(s.name)}</td><td class="n">${s.plays}</td><td class="n">${s.wins}</td><td class="n">${Math.round(s.wins / s.plays * 100)}%</td><td class="n">${s.best != null ? num(s.best) : ''}</td></tr>`).join('')}
       </tbody></table></div>` : ''}
       <h2>Rozgrywki</h2>
-      <div id="plays">${playsList(ps, d, false)}</div>`;
+      <div id="plays">${playsList(ps, d, false)}</div>${bggLogo()}`;
     const $ = s => el.querySelector(s);
     $('#play').onclick = async () => { if (await editPlay(null, id)) App.refresh(); };
     if ($('#licz')) $('#licz').onclick = () => App.call('licznik.start', id);
