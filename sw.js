@@ -1,15 +1,15 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v25';
+const VERSION = 'v31';
 const FILES = [
-  './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
+  './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/powered-by-bgg.png', 'icons/icon-maskable-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js', 'core/przewijanie.js', 'core/lista.js', 'core/okladki.js',
-  'moduly/planszowki/dane-bgg.js', 'moduly/tytuly/dane-tytuly.js', 'moduly/tytuly/tytuly.js', 'moduly/planszowki/planszowki.js', 'moduly/planszowki/bgg-dane.js'
+  'moduly/planszowki/dane-bgg.js', 'moduly/tytuly/dane-tytuly.js', 'moduly/tytuly/tytuly.js', 'moduly/planszowki/planszowki.js', 'moduly/planszowki/bgg-dane.js', 'moduly/planszowki/szukaj-gier.js'
   , 'moduly/sprzedaz/sprzedaz.js', 'moduly/sprzedaz/sprzedaz-ui.js'
   ,'moduly/komiksy/komiksy.js', 'moduly/komiksy/dane-komiksy.js', 'moduly/komiksy/dane-mro.js', 'moduly/komiksy/zapowiedzi.js'
   ,'moduly/wieczor/dane-gracze.js', 'moduly/wieczor/wieczor.js', 'moduly/wieczor/kto-zaczyna.js', 'moduly/postep/postep.js', 'moduly/kopia/kopia.js'
   ,'moduly/sklep/skaner.js', 'moduly/sklep/sklep.js', 'moduly/sklep/zxing.min.js', 'moduly/wypozyczenia/wypozyczenia.js', 'moduly/wartosc/wyceny.js', 'moduly/wartosc/wartosc.js'
   ,'moduly/gracze/wspolne.js', 'moduly/gracze/gracze.js', 'moduly/licznik/licznik.js', 'moduly/zegar/zegar.js', 'moduly/wyzwania/wyzwania.js', 'moduly/podsumowanie/podsumowanie.js', 'moduly/skroty/skroty.js'
-  ,'moduly/polki/polki.js', 'moduly/polki/zdjecia.js', 'moduly/wishlista/wishlista.js', 'moduly/powiadomienia/powiadomienia.js', 'moduly/widzet/widzet.js'
+  ,'moduly/polki/polki.js', 'moduly/polki/zdjecia.js', 'moduly/polki/uklad.js', 'moduly/wishlista/wishlista.js', 'moduly/powiadomienia/powiadomienia.js', 'moduly/widzet/widzet.js'
   ,'moduly/kalendarz/kalendarz.js'
   ,'moduly/przy-grze/rozmiary.js', 'moduly/przy-grze/aparat.js', 'moduly/przy-grze/import-partii.js', 'moduly/przy-grze/przy-grze.js'
   ,'moduly/historia/historia.js', 'moduly/udostepnij/udostepnij.js', 'moduly/asystent/asystent.js', 'kolekcja.html'

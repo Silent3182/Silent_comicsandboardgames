@@ -256,7 +256,30 @@
         rows.sort((a, b) => a.t.localeCompare(b.t, 'pl'));
         const set = zazn[zak.v];
         list.innerHTML = rows.slice(0, 300).map(x => `<label><input type="checkbox" data-id="${esc(x.id)}" ${set.has(x.id) ? 'checked' : ''}> <span>${esc(x.t)}</span>${x.gdzie ? `<small>📍 ${esc(x.gdzie)}</small>` : ''}</label>`).join('') + (rows.length > 300 ? `<p class="muted" style="padding:8px">…i ${rows.length - 300} więcej – zawęź wyszukiwanie.</p>` : '') || '<p class="muted" style="padding:8px">Nic nie znaleziono.</p>';
+        if (zak.v === 'gry') szukajBgg(q.value.trim());
       };
+      // gra, której nie ma w aplikacji: wyszukaj na BGG (szukaj-gier.js), dodaj do kolekcji i od razu zaznacz do postawienia
+      let sgT = null, sgSeq = 0, sgHits = [];
+      const szukajBgg = f => {
+        clearTimeout(sgT); const my = ++sgSeq;
+        if (!window.SzukajGier || f.length < 3) return;
+        sgT = setTimeout(async () => {
+          const znane = new Set(Z.gry.map(g => g.bggId).filter(Boolean));
+          const hits = (await SzukajGier.szukaj(f, { limit: 10 }).catch(() => [])).filter(h => !znane.has(h.bggId)).slice(0, 6);
+          if (my !== sgSeq || zak.v !== 'gry') return;
+          sgHits = hits; list.querySelectorAll('.pk-bgg').forEach(x => x.remove());
+          if (hits.length) list.insertAdjacentHTML('beforeend', `<div class="pk-bgg" style="margin-top:8px;font-size:13px;color:var(--muted)">Nie masz w aplikacji – dodaj z BGG do kolekcji:</div>`
+            + hits.map((h, i) => `<div class="pk-bgg row" style="gap:8px;padding:4px 0"><span style="flex:1">${esc(h.title)}${h.year ? ' (' + h.year + ')' : ''}</span><button type="button" class="small" data-sgi="${i}">+ Dodaj</button></div>`).join(''));
+        }, 400);
+      };
+      list.addEventListener('click', async e => {
+        const b = e.target.closest('[data-sgi]'); if (!b) return;
+        e.preventDefault(); b.disabled = true;
+        const g = await SzukajGier.dodaj(sgHits[+b.dataset.sgi], 'owned');
+        if (!Z.gry.some(x => x.id === g.id)) Z.gry.push(g);
+        zazn.gry.add(g.id); q.value = g.title; draw();
+        App.ui.toast(`Dodano „${g.title}” do kolekcji – zaznaczona do postawienia`);
+      });
       list.addEventListener('change', e => { const i = e.target.closest('input[data-id]'); if (!i) return; const set = zazn[zak.v]; i.checked ? set.add(i.dataset.id) : set.delete(i.dataset.id); });
       dlg.querySelectorAll('.pk-tabs button').forEach(b => b.onclick = () => { zak.v = b.dataset.v; dlg.querySelectorAll('.pk-tabs button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
       q.oninput = draw; bez.onchange = draw; draw();
@@ -288,9 +311,15 @@
     const serieBez = new Map();
     Z.kom.forEach(k => { if (!k.series) return; const e = serieBez.get(k.series) || { n: 0, z: 0, id: k.id }; e.n++; if (miejsce('comic', k)) e.z++; serieBez.set(k.series, e); });
     const bezSerii = [...serieBez.entries()].filter(([, e]) => !e.z).sort((a, b) => a[0].localeCompare(b[0], 'pl'));
+    const raport = await DB.setting('polkiUkladRaport').catch(() => null);
     el.innerHTML = `
       <div class="pk-head"><h2 style="margin:0">Półki</h2><span class="spacer"></span><button class="primary" id="pkNew">+ Nowy regał</button></div>
       <div class="card" style="margin-top:12px"><input type="search" id="pkQ" style="width:100%" placeholder="Gdzie stoi…? Wpisz tytuł" value="${esc(st.szuk)}"><div id="pkWyn"></div></div>
+      ${raport ? `<details class="card" style="margin-top:12px" id="pkRap"><summary><b>📷 Rozmieszczenie ze zdjęć półek</b> <span class="muted">(${esc(raport.wersja)}): ${raport.ustawione} ${pl(raport.ustawione, 'gra', 'gry', 'gier')} na miejscach, ${raport.dodane.length} ${pl(raport.dodane.length, 'nowa', 'nowe', 'nowych')} w kolekcji</span></summary>
+        ${raport.dodane.length ? `<p style="margin:10px 0 4px"><b>Dodane do kolekcji:</b> ${raport.dodane.map(esc).join(', ')}</p>` : ''}
+        ${raport.zLista.length ? `<p style="margin:6px 0"><b>Przeniesione z listy życzeń do kolekcji:</b> ${raport.zLista.map(esc).join(', ')}</p>` : ''}
+        ${raport.juzMialy ? `<p class="muted" style="margin:6px 0">${raport.juzMialy} ${pl(raport.juzMialy, 'gra miała', 'gry miały', 'gier miało')} już zapisane miejsce – zostawiono je bez zmian.</p>` : ''}
+        <button class="small ghost" id="pkRapZn">Postaw jeszcze raz gry bez miejsca</button></details>` : ''}
       ${C.shelves.length ? '' : `<div class="empty">Nie masz jeszcze regałów. Dodaj swoje Kallaxy i inne regały, a potem kliknij przegródkę i wybierz, co w niej stoi.<br><br><button class="primary" id="pkNew2">+ Dodaj pierwszy regał</button></div>`}
       <div class="pk-shelves">${C.shelves.map(sh => {
         const n = [...Z.cell.entries()].filter(([k]) => k.startsWith(sh.id + '|')).reduce((a, [, x]) => a + Z.ile(x), 0);
@@ -306,7 +335,8 @@
 
     const $ = s => el.querySelector(s);
     const nowy = async () => { if (await editShelf()) render(el); };
-    $('#pkNew').onclick = nowy; if ($('#pkNew2')) $('#pkNew2').onclick = nowy;
+    $('#pkNew').onclick = nowy;
+    if ($('#pkRapZn')) $('#pkRapZn').onclick = async () => { if (!App.has('polki.uklad')) return; const przed = raport ? raport.ustawione : 0; const r = await App.call('polki.uklad', true); if (r) { const n = r.ustawione - przed; App.ui.toast(n ? `📍 Ustawiono ${n} ${pl(n, 'grę', 'gry', 'gier')}` : 'Wszystkie gry ze zdjęć mają już miejsce'); } render(el); }; if ($('#pkNew2')) $('#pkNew2').onclick = nowy;
     el.querySelectorAll('[data-foto]').forEach(b => b.onclick = async () => { await App.call('polki.zdjecia', b.dataset.foto); render(el); });
     el.querySelectorAll('[data-ed]').forEach(b => b.onclick = async () => {
       const sh = C.byId.get(b.dataset.ed);

@@ -2,7 +2,8 @@
 """Pobiera kolekcję Silent82 i szczegóły gier z oficjalnego API BoardGameGeek (XML API2) do pliku bgg.json.
 
 API BGG wymaga klucza aplikacji (token z https://boardgamegeek.com/applications). Klucz bierzemy ze zmiennej
-środowiskowej BGG_TOKEN (w GitHub Actions: sekret repozytorium BGG_TOKEN) – nigdy nie trafia do repozytorium.
+środowiskowej BGG_TOKEN (w GitHub Actions: sekret repozytorium MOJA_KOLEKCJA) – nigdy nie trafia do repozytorium.
+Zgodnie z https://boardgamegeek.com/using_the_xml_api: zapytania tylko z serwera, wynik zapisany w pliku, jak najmniej zapytań.
 Uruchamia go raz dziennie GitHub Actions (.github/workflows/bgg.yml); ręcznie:
     BGG_TOKEN=... python3 pobierz_bgg.py ../../../bgg.json [Silent82]
 
@@ -13,7 +14,7 @@ Wynik (bgg.json):
                           "wiek", "w" (ciężar), "r" (średnia ocen), "rank", "m" (mechaniki), "c" (kategorie),
                           "d" (autorzy), "wyd" (wydawcy), "baza": [id gier bazowych], "dod": [[id, nazwa] dodatków] } } }
 """
-import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
+import csv, html, io, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
@@ -134,22 +135,72 @@ def szczegoly(ids, token):
     return gry
 
 
+def indeks_gier(plik, token, min_ocen=20):
+    """Lista gier z BGG do wyszukiwarki w aplikacji (bgg-gry.json) z oficjalnego zrzutu rankingów BGG (CSV).
+    Jedno pobranie tygodniowo zamiast tysięcy zapytań. Strona z linkiem do zrzutu wymaga zalogowania na BGG – jeśli
+    token nie wystarcza, zostaje dotychczasowy plik (można go odświeżyć ręcznie: zip_do_indeksu na pobranym pliku)."""
+    req = urllib.request.Request('https://boardgamegeek.com/data_dumps/bg_ranks',
+                                 headers={'Authorization': 'Bearer ' + token, 'User-Agent': 'moje-kolekcje (prywatna aplikacja)'})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        strona = r.read().decode('utf-8', 'replace')
+    m = re.search(r'https://geek-export-stats\.s3\.amazonaws\.com/[^"\'<> ]+?\.zip[^"\'<> ]*', strona)
+    if not m:
+        print('Strona zrzutu rankingów BGG niedostępna z kluczem API – zostaje dotychczasowa lista gier.'); return
+    with urllib.request.urlopen(html.unescape(m.group(0)), timeout=300) as r:
+        zip_do_indeksu(r.read(), plik, min_ocen)
+
+
+def zip_do_indeksu(dane_zip, plik, min_ocen=20):
+    """Zrzut rankingów BGG (zip z CSV) -> bgg-gry.json: {"pobrano", "gry": [[id, nazwa, rok, ranking, liczba_ocen, dodatek], ...]}
+    tylko pozycje z co najmniej min_ocen ocenami, posortowane od najpopularniejszych."""
+    z = zipfile.ZipFile(io.BytesIO(dane_zip))
+    nazwa = next(n for n in z.namelist() if n.endswith('.csv'))
+    gry = []
+    with z.open(nazwa) as f:
+        for w in csv.DictReader(io.TextIOWrapper(f, encoding='utf-8')):
+            oc = num(w.get('usersrated')) or 0
+            if oc < min_ocen:
+                continue
+            gry.append([int(w['id']), w['name'], num(w.get('yearpublished')), num(w.get('rank')), oc, 1 if w.get('is_expansion') == '1' else 0])
+    gry.sort(key=lambda g: -g[4])
+    with open(plik, 'w', encoding='utf-8') as f:
+        json.dump({'pobrano': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'), 'gry': gry}, f, ensure_ascii=False, separators=(',', ':'))
+    print('Zapisano', plik, '–', len(gry), 'gier do wyszukiwarki')
+
+
 def main(plik='bgg.json', user='Silent82'):
     token = os.environ.get('BGG_TOKEN', '').strip()
     if not token:
         print('Brak klucza BGG_TOKEN – pomijam (dodaj sekret w Settings › Secrets and variables › Actions).')
         return
+    # lista wszystkich gier BGG do wyszukiwarki: raz w tygodniu (albo gdy jej brak / pełne odświeżenie)
+    plik_gry = os.path.join(os.path.dirname(os.path.abspath(plik)), 'bgg-gry.json')
+    if os.environ.get('BGG_PELNE') == '1' or datetime.now(timezone.utc).weekday() == 0 or not os.path.exists(plik_gry):
+        try:
+            indeks_gier(plik_gry, token)
+        except Exception as e:   # lista do wyszukiwarki to dodatek – błąd nie zatrzymuje pobierania kolekcji
+            print('Lista gier BGG nie wyszła:', e)
     kol = kolekcja(user, token)
     print('Pozycji w kolekcji:', len(kol))
     if not kol:
         raise SystemExit('BGG zwróciło pustą kolekcję – nie nadpisuję pliku.')
-    gry = szczegoly([k['id'] for k in kol], token)
     stare = {}
     if os.path.exists(plik):
         try:
             stare = json.load(open(plik, encoding='utf-8'))
         except ValueError:
             pass
+    # Zasady BGG: jak najmniej zapytań. Szczegóły gier pobieramy codziennie tylko dla nowych pozycji,
+    # a wszystkie odświeżamy raz w tygodniu (w poniedziałek) albo na żądanie (BGG_PELNE=1).
+    # szczegóły tylko dla gier posiadanych, chcianych, zamówionych i na wymianę (bez „miałem kiedyś” i samych ocen)
+    ids = [k['id'] for k in kol if k['own'] or k['wish'] or k['pre'] or k['trade']]
+    stare_gry = stare.get('gry') or {}
+    pelne = os.environ.get('BGG_PELNE') == '1' or datetime.now(timezone.utc).weekday() == 0 or not stare_gry
+    nowe = ids if pelne else [i for i in ids if str(i) not in stare_gry]
+    print('Szczegóły:', 'wszystkie' if pelne else f'tylko nowe ({len(nowe)})')
+    gry = szczegoly(nowe, token) if nowe else {}
+    if not pelne:
+        gry = {**{str(i): stare_gry[str(i)] for i in ids if str(i) in stare_gry}, **gry}
     # „pobrano” zmieniamy tylko wtedy, gdy dane naprawdę się zmieniły – aplikacja po tej dacie wie, że ma coś nowego
     if stare.get('kolekcja') == kol and stare.get('gry') == gry:
         print('Bez zmian.'); return
@@ -160,4 +211,7 @@ def main(plik='bgg.json', user='Silent82'):
 
 
 if __name__ == '__main__':
-    main(*sys.argv[1:3])
+    if len(sys.argv) > 2 and sys.argv[1] == '--zip':   # ręcznie: python3 pobierz_bgg.py --zip boardgames_ranks.zip bgg-gry.json
+        zip_do_indeksu(open(sys.argv[2], 'rb').read(), sys.argv[3] if len(sys.argv) > 3 else 'bgg-gry.json')
+    else:
+        main(*sys.argv[1:3])

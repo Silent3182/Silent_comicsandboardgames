@@ -189,6 +189,44 @@ async function main() {
       });
       ok(!sc.brak && sc.tenSam && sc.zielony && sc.zapisany && sc.przed[0] === sc.po[0] && sc.przed[1] === sc.po[1] && (sc.przed[0] + sc.przed[1]) > 0,
         'Do czytania: odznaczenie przeczytanego zostaje w miejscu (bez przewijania na górę) i zapisuje się', JSON.stringify(sc));
+      // Do czytania: przeczytane poza kolejnością i „⏳ czekam na PL” nie przesuwają „następnego”
+      const pk = await page.evaluate(async () => {
+        App.ui.confirm = async () => true;
+        const wait = async f => { for (let k = 0; k < 30 && !f(); k++) await new Promise(r => setTimeout(r, 300)); };
+        const nast = async () => (await App.call('komiksy.mro')).S.next.i;
+        const n0 = await nast();
+        const { list, S } = await App.call('komiksy.mro');
+        const dalej = list.filter(x => x.i > n0 + 30 && S.counts(x) && !S.isRead(x))[0];
+        // 1) ptaszek przy pozycji dalej w kolejności = poza kolejnością
+        App.go('czytanie', { v: 'all', goto: dalej.i }); await wait(() => document.querySelector(`#czbody .kx-row[data-i="${dalej.i}"] input`));
+        const cb = document.querySelector(`#czbody .kx-row[data-i="${dalej.i}"] input[type=checkbox]`);
+        if (!cb) return { brakWiersza: dalej.i };
+        cb.click(); await new Promise(r => setTimeout(r, 800));
+        const n1 = await nast();
+        // 2) ⏳ przy „następnym” – następny przeskakuje dziurę, a ona nie trafia do zaległych
+        App.go('czytanie', { v: 'next' }); await wait(() => document.getElementById('czwait'));
+        document.getElementById('czwait').click(); await new Promise(r => setTimeout(r, 1200));
+        const st2 = (await App.call('komiksy.mro')).S;
+        const n2 = st2.next.i, czekaOk = st2.czekam.some(x => x.i === n0) && !st2.backlog.some(x => x.i === n0);
+        // 3) stare dane: zwykły ptaszek dalej (bez znacznika) przesuwa miejsce; „↩ Tak, nie przesuwaj mnie” cofa na poprzednie miejsce
+        const daleko = list.filter(x => x.i > n0 + 60 && S.counts(x) && !S.isRead(x))[0];
+        await DB.put('readingOrder', { id: daleko.id, order: daleko.i + 1, part: daleko.sec, title: daleko.title, read: true, readAt: new Date().toISOString() });
+        const n3 = await nast();
+        App.go('czytanie', { v: 'next' }); await wait(() => document.getElementById('czwroc'));
+        const btn = document.getElementById('czwroc'); if (btn) btn.click(); await new Promise(r => setTimeout(r, 1500));
+        const n4 = await nast();
+        // 4) ⏭ pominięte na stałe przy następnym: następny idzie dalej, pozycja nie jest ani zaległa, ani „czeka”
+        App.go('czytanie', { v: 'all', goto: n4 }); await wait(() => document.querySelector(`#czbody [data-wiecej="${n4}"]`));
+        const bp = document.querySelector(`#czbody [data-wiecej="${n4}"]`); if (bp) bp.click(); await wait(() => document.querySelector('dialog [data-m="pomin"]'));
+        const mp = document.querySelector('dialog [data-m="pomin"]'); if (mp) mp.click(); await new Promise(r => setTimeout(r, 1000));
+        const st5 = (await App.call('komiksy.mro')).S, n5 = st5.next.i;
+        const pomOk = !!bp && n5 > n4 && !st5.backlog.some(x => x.i === n4) && !st5.czekam.some(x => x.i === n4) && document.querySelector(`#czbody .kx-row[data-i="${n4}"]`).classList.contains('skipd');
+        return { n0, dalej: dalej.i, n1, n2, czekaOk, daleko: daleko.i, n3, n4, przycisk: !!btn, n5, pomOk };
+      });
+      ok(pk.n1 === pk.n0, 'Do czytania: ptaszek dalej w kolejności = „poza kolejnością”, następne się nie przesuwa', JSON.stringify(pk));
+      ok(pk.n2 > pk.n0 && pk.czekaOk, 'Do czytania: „⏳ czekam na PL” – następne przeskakuje dziurę, a ona nie jest zaległa', JSON.stringify(pk));
+      ok(pk.n3 > pk.daleko && pk.przycisk && pk.n4 === pk.n2, 'Do czytania: „↩ to było poza kolejnością” cofa następne na poprzednie miejsce', JSON.stringify(pk));
+      ok(pk.pomOk, 'Do czytania: „⏭ pominięte na stałe” – następne idzie dalej, wiersz szary, nie jest zaległe', JSON.stringify(pk));
       // Wydajność: długie listy doczytują się porcjami (komiksy, planszówki), a nie rysują wszystkiego naraz
       const dz = await page.evaluate(async () => {
         App.go('komiksy'); for (let k = 0; k < 20 && !document.querySelector('#klist .kx-tile'); k++) await new Promise(r => setTimeout(r, 300));

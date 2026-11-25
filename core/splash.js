@@ -40,7 +40,8 @@
     } catch (e) { K = []; G = []; }
     const B = window.BGG_IMPORT;
     const nK = K.length || (window.KOMIKSY_DANE || []).filter(c => c.status === 'owned').length;
-    let srcs = [...G.map(g => g.image || g.thumb), ...K.map(c => c.image || c.thumb)].filter(Boolean);
+    // gry: miniatura (okładki z API BGG w „image” to oryginały, często po kilka MB)
+    let srcs = [...G.map(g => g.thumb || g.image), ...K.map(c => c.image || c.thumb)].filter(Boolean);
     if (!G.length && B && B.rows) srcs = srcs.concat(B.rows.filter(r => !r[1] && r[8]).map(r => B.cover(r[8])));
     draw([...new Set(srcs)], G.length || (B && B.rows ? B.rows.filter(r => !r[1]).length : 0), nK);
   }

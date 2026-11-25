@@ -1,13 +1,19 @@
 name: Odśwież dane z BGG
 
-# Raz dziennie pobiera kolekcję Silent82 i szczegóły gier z oficjalnego API BoardGameGeek do bgg.json
+# Raz dziennie pobiera kolekcję (szczegóły nowych gier codziennie, wszystkich raz w tygodniu – zasady BGG: jak najmniej zapytań)
+# Pobiera kolekcję Silent82 i szczegóły gier z oficjalnego API BoardGameGeek do bgg.json
 # (okładki w pełnym rozmiarze, liczba graczy, czas, mechaniki, kategorie, autorzy, dodatki).
-# Klucz API jest w sekrecie repozytorium BGG_TOKEN (Settings › Secrets and variables › Actions) – nie w kodzie.
+# Klucz API jest w sekrecie repozytorium MOJA_KOLEKCJA (dawniej BGG_TOKEN) (Settings › Secrets and variables › Actions) – nie w kodzie.
 # Bez sekretu workflow kończy się bez zmian. Zmienia tylko bgg.json (push z GITHUB_TOKEN nie uruchamia budowania APK).
 on:
   schedule:
     - cron: '23 4 * * *'
   workflow_dispatch:
+    inputs:
+      pelne:
+        description: 'Pobierz od nowa szczegóły wszystkich gier'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -23,15 +29,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Pobierz dane z BGG
         env:
-          BGG_TOKEN: ${{ secrets.BGG_TOKEN }}
+          BGG_TOKEN: ${{ secrets.MOJA_KOLEKCJA || secrets.BGG_TOKEN }}
+          BGG_PELNE: ${{ inputs.pelne && '1' || '0' }}
         run: python3 moduly/planszowki/narzedzia/pobierz_bgg.py bgg.json Silent82
       - name: Zapisz zmiany
         run: |
           [ -f bgg.json ] || { echo 'Brak bgg.json (brak klucza?)'; exit 0; }
-          git add -N bgg.json
-          git diff --quiet -- bgg.json && { echo 'Bez zmian'; exit 0; }
+          git add -N bgg.json; [ -f bgg-gry.json ] && git add -N bgg-gry.json
+          git diff --quiet -- bgg.json bgg-gry.json && { echo 'Bez zmian'; exit 0; }
           git config user.name 'bgg-bot'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add bgg.json
+          git add bgg.json; [ -f bgg-gry.json ] && git add bgg-gry.json
           git commit -m 'Dane z BGG: odświeżenie kolekcji i szczegółów gier'
           for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 10; done
