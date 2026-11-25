@@ -35,10 +35,10 @@ jobs:
       - name: Zapisz zmiany
         run: |
           [ -f bgg.json ] || { echo 'Brak bgg.json (brak klucza?)'; exit 0; }
-          git add -N bgg.json
-          git diff --quiet -- bgg.json && { echo 'Bez zmian'; exit 0; }
+          git add -N bgg.json; [ -f bgg-gry.json ] && git add -N bgg-gry.json
+          git diff --quiet -- bgg.json bgg-gry.json && { echo 'Bez zmian'; exit 0; }
           git config user.name 'bgg-bot'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add bgg.json
+          git add bgg.json; [ -f bgg-gry.json ] && git add bgg-gry.json
           git commit -m 'Dane z BGG: odświeżenie kolekcji i szczegółów gier'
           for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 10; done
