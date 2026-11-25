@@ -135,20 +135,25 @@ def szczegoly(ids, token):
     return gry
 
 
-def indeks_gier(plik, token, min_ocen=10):
-    """Lista gier z BGG do wyszukiwarki w aplikacji (bgg-gry.json): oficjalny zrzut rankingów BGG (CSV, raz dziennie
-    tworzony przez BGG, dostępny dla zarejestrowanych aplikacji). Jedno pobranie tygodniowo zamiast tysięcy zapytań.
-    Format: {"pobrano", "gry": [[id, nazwa, rok, ranking, liczba_ocen, dodatek(0/1)], ...]} – tylko pozycje z co najmniej min_ocen ocenami."""
+def indeks_gier(plik, token, min_ocen=20):
+    """Lista gier z BGG do wyszukiwarki w aplikacji (bgg-gry.json) z oficjalnego zrzutu rankingów BGG (CSV).
+    Jedno pobranie tygodniowo zamiast tysięcy zapytań. Strona z linkiem do zrzutu wymaga zalogowania na BGG – jeśli
+    token nie wystarcza, zostaje dotychczasowy plik (można go odświeżyć ręcznie: zip_do_indeksu na pobranym pliku)."""
     req = urllib.request.Request('https://boardgamegeek.com/data_dumps/bg_ranks',
                                  headers={'Authorization': 'Bearer ' + token, 'User-Agent': 'moje-kolekcje (prywatna aplikacja)'})
     with urllib.request.urlopen(req, timeout=60) as r:
         strona = r.read().decode('utf-8', 'replace')
     m = re.search(r'https://geek-export-stats\.s3\.amazonaws\.com/[^"\'<> ]+?\.zip[^"\'<> ]*', strona)
     if not m:
-        t = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', strona))
-        print('Nie znalazłem linku do zrzutu rankingów BGG – pomijam listę gier. Strona:', len(strona), 'znaków;', t[t.find('Download') - 100:t.find('Download') + 200] if 'Download' in t else t[-400:]); return
+        print('Strona zrzutu rankingów BGG niedostępna z kluczem API – zostaje dotychczasowa lista gier.'); return
     with urllib.request.urlopen(html.unescape(m.group(0)), timeout=300) as r:
-        z = zipfile.ZipFile(io.BytesIO(r.read()))
+        zip_do_indeksu(r.read(), plik, min_ocen)
+
+
+def zip_do_indeksu(dane_zip, plik, min_ocen=20):
+    """Zrzut rankingów BGG (zip z CSV) -> bgg-gry.json: {"pobrano", "gry": [[id, nazwa, rok, ranking, liczba_ocen, dodatek], ...]}
+    tylko pozycje z co najmniej min_ocen ocenami, posortowane od najpopularniejszych."""
+    z = zipfile.ZipFile(io.BytesIO(dane_zip))
     nazwa = next(n for n in z.namelist() if n.endswith('.csv'))
     gry = []
     with z.open(nazwa) as f:
@@ -206,4 +211,7 @@ def main(plik='bgg.json', user='Silent82'):
 
 
 if __name__ == '__main__':
-    main(*sys.argv[1:3])
+    if len(sys.argv) > 2 and sys.argv[1] == '--zip':   # ręcznie: python3 pobierz_bgg.py --zip boardgames_ranks.zip bgg-gry.json
+        zip_do_indeksu(open(sys.argv[2], 'rb').read(), sys.argv[3] if len(sys.argv) > 3 else 'bgg-gry.json')
+    else:
+        main(*sys.argv[1:3])

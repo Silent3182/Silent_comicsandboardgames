@@ -36,7 +36,7 @@
     })().finally(() => { wczyt = null; }));
   }
 
-  /* Szukanie w liście BGG: dokładnie > początek tytułu > początek słowa > fragment; potem popularność (liczba ocen) */
+  /* Szukanie w liście BGG: dokładnie > początek tytułu > początek słowa > fragment; gry przed dodatkami; potem popularność (liczba ocen) */
   function wLiscie(q, limit) {
     const f = norm(q); if (!f || !lista) return [];
     const wyn = [];
@@ -46,7 +46,7 @@
       wyn.push([pkt, x.g]);
       if (wyn.length > 4000) break;
     }
-    wyn.sort((a, b) => a[0] - b[0] || b[1][4] - a[1][4]);
+    wyn.sort((a, b) => a[0] - b[0] || a[1][5] - b[1][5] || b[1][4] - a[1][4]); // gry przed dodatkami
     return wyn.slice(0, limit).map(([, g]) => ({ bggId: g[0], title: g[1], year: g[2] || null, rank: g[3] || null, exp: !!g[5] }));
   }
 
@@ -118,7 +118,8 @@
     st.textContent = '.sg-w{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}'
       + '.sg-w img,.sg-w .ph{width:44px;height:44px;flex:0 0 44px;object-fit:contain;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center}'
       + '.sg-t{flex:1;min-width:0;display:flex;flex-direction:column}.sg-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sg-t small{color:var(--muted);font-size:12.5px}'
-      + '.sg-b{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sg-b button{white-space:nowrap}.sg-head{margin:14px 0 4px;font-size:13px;color:var(--muted)}';
+      + '.sg-b{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sg-b button{white-space:nowrap}.sg-head{margin:14px 0 4px;font-size:13px;color:var(--muted)}'
+      + '@media (max-width:640px){.sg-w{flex-wrap:wrap}.sg-b{flex-basis:100%;padding-left:54px;justify-content:flex-start}}';
     document.head.appendChild(st);
   }
   const otworzBgg = id => { const u = 'https://boardgamegeek.com/boardgame/' + id; const w = window.open(u, '_blank'); if (w) w.opener = null; else location.href = u; };
