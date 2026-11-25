@@ -288,9 +288,15 @@
     const serieBez = new Map();
     Z.kom.forEach(k => { if (!k.series) return; const e = serieBez.get(k.series) || { n: 0, z: 0, id: k.id }; e.n++; if (miejsce('comic', k)) e.z++; serieBez.set(k.series, e); });
     const bezSerii = [...serieBez.entries()].filter(([, e]) => !e.z).sort((a, b) => a[0].localeCompare(b[0], 'pl'));
+    const raport = await DB.setting('polkiUkladRaport').catch(() => null);
     el.innerHTML = `
       <div class="pk-head"><h2 style="margin:0">Półki</h2><span class="spacer"></span><button class="primary" id="pkNew">+ Nowy regał</button></div>
       <div class="card" style="margin-top:12px"><input type="search" id="pkQ" style="width:100%" placeholder="Gdzie stoi…? Wpisz tytuł" value="${esc(st.szuk)}"><div id="pkWyn"></div></div>
+      ${raport ? `<details class="card" style="margin-top:12px" id="pkRap"><summary><b>📷 Rozmieszczenie ze zdjęć półek</b> <span class="muted">(${esc(raport.wersja)}): ${raport.ustawione} ${pl(raport.ustawione, 'gra', 'gry', 'gier')} na miejscach, ${raport.dodane.length} ${pl(raport.dodane.length, 'nowa', 'nowe', 'nowych')} w kolekcji</span></summary>
+        ${raport.dodane.length ? `<p style="margin:10px 0 4px"><b>Dodane do kolekcji:</b> ${raport.dodane.map(esc).join(', ')}</p>` : ''}
+        ${raport.zLista.length ? `<p style="margin:6px 0"><b>Przeniesione z listy życzeń do kolekcji:</b> ${raport.zLista.map(esc).join(', ')}</p>` : ''}
+        ${raport.juzMialy ? `<p class="muted" style="margin:6px 0">${raport.juzMialy} ${pl(raport.juzMialy, 'gra miała', 'gry miały', 'gier miało')} już zapisane miejsce – zostawiono je bez zmian.</p>` : ''}
+        <button class="small ghost" id="pkRapZn">Postaw jeszcze raz gry bez miejsca</button></details>` : ''}
       ${C.shelves.length ? '' : `<div class="empty">Nie masz jeszcze regałów. Dodaj swoje Kallaxy i inne regały, a potem kliknij przegródkę i wybierz, co w niej stoi.<br><br><button class="primary" id="pkNew2">+ Dodaj pierwszy regał</button></div>`}
       <div class="pk-shelves">${C.shelves.map(sh => {
         const n = [...Z.cell.entries()].filter(([k]) => k.startsWith(sh.id + '|')).reduce((a, [, x]) => a + Z.ile(x), 0);
@@ -306,7 +312,8 @@
 
     const $ = s => el.querySelector(s);
     const nowy = async () => { if (await editShelf()) render(el); };
-    $('#pkNew').onclick = nowy; if ($('#pkNew2')) $('#pkNew2').onclick = nowy;
+    $('#pkNew').onclick = nowy;
+    if ($('#pkRapZn')) $('#pkRapZn').onclick = async () => { if (!App.has('polki.uklad')) return; const przed = raport ? raport.ustawione : 0; const r = await App.call('polki.uklad', true); if (r) { const n = r.ustawione - przed; App.ui.toast(n ? `📍 Ustawiono ${n} ${pl(n, 'grę', 'gry', 'gier')}` : 'Wszystkie gry ze zdjęć mają już miejsce'); } render(el); }; if ($('#pkNew2')) $('#pkNew2').onclick = nowy;
     el.querySelectorAll('[data-foto]').forEach(b => b.onclick = async () => { await App.call('polki.zdjecia', b.dataset.foto); render(el); });
     el.querySelectorAll('[data-ed]').forEach(b => b.onclick = async () => {
       const sh = C.byId.get(b.dataset.ed);
