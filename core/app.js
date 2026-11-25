@@ -154,10 +154,37 @@
     return { id, params };
   }
 
+  /* Historia ekranów i pozycja przewijania (prośba Anety 2026-11-25):
+   *  - każdy ekran (adres #/…) pamięta, gdzie był przewinięty; po powrocie (Wstecz) albo odświeżeniu wraca w to samo miejsce,
+   *    a nowy ekran zaczyna od góry. Długie listy (App.ui.lista) dorysowują się po drodze.
+   *  - stos = ekrany otwarte w tej sesji; Wstecz na telefonie cofa po nim (zob. App.start). */
+  const pozycje = new Map(), stos = [];
+  let biezacy = null;
+  const scrollY = () => window.scrollY || document.documentElement.scrollTop || 0;
+  window.addEventListener('scroll', () => { if (biezacy) pozycje.set(biezacy, scrollY()); }, { passive: true });
+  async function przewin(h, y) {
+    if (!y) { window.scrollTo(0, 0); return; }
+    const t0 = Date.now();
+    while (Date.now() - t0 < 2500) {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max >= y - 2) break;
+      window.scrollTo(0, max);                       // na dół: lista dorysuje kolejną porcję
+      await new Promise(r => setTimeout(r, 80));
+      if (biezacy !== h) return;                     // w międzyczasie inny ekran
+    }
+    window.scrollTo(0, y);
+  }
+
   async function route() {
     const { id, params } = parseHash();
     const m = modules.find(x => x.id === id) || modules[0];
     if (!m) return;
+    const h = location.hash || '#/';
+    let wroc = 0;
+    if (h === biezacy) wroc = pozycje.get(h) || 0;                                    // odświeżenie tego samego ekranu
+    else if (stos.length > 1 && stos[stos.length - 2] === h) { stos.pop(); wroc = pozycje.get(h) || 0; }   // Wstecz
+    else { stos.push(h); if (stos.length > 60) stos.shift(); pozycje.delete(h); }      // nowy ekran – od góry
+    biezacy = null;                                  // czyszczenie ekranu nie nadpisuje zapamiętanej pozycji
     current = m;
     renderNav();
     const main = document.getElementById('main');
@@ -165,6 +192,29 @@
     main.scrollTop = 0;
     try { await m.render(main, params, { db: DB, ui, go: App.go }); }
     catch (e) { console.error(e); main.innerHTML = `<div class="err"><p><b>Nie udało się otworzyć zakładki „${esc(m.title)}”.</b></p><p>${esc(komunikat(e) || '')}</p><button class="primary" onclick="App.refresh()">Spróbuj ponownie</button></div>`; }
+    if (location.hash !== h && (location.hash || '#/') !== h) return;
+    biezacy = h;
+    await przewin(h, wroc);
+    pozycje.set(h, scrollY());
+  }
+
+  /* Przycisk Wstecz na Androidzie (APK, wtyczka @capacitor/app): zamyka okno/menu, cofa do poprzedniego ekranu,
+   * z pierwszego ekranu przechodzi na Start, a na Starcie wychodzi z aplikacji dopiero po drugim naciśnięciu. */
+  function wstecz() {
+    const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (!P || !P.addListener) return;
+    let ostatnie = 0;
+    P.addListener('backButton', () => {
+      const dlg = [...document.querySelectorAll('dialog[open]')].pop();
+      if (dlg) { dlg.close('cancel'); return; }
+      const nav = document.getElementById('nav');
+      if (nav && nav.classList.contains('open')) { nav.classList.remove('open'); return; }
+      if (stos.length > 1) { history.back(); return; }
+      if (current && current.id !== 'start' && modules.some(x => x.id === 'start')) { stos.length = 0; App.go('start'); return; }
+      if (Date.now() - ostatnie < 2200) { P.exitApp(); return; }
+      ostatnie = Date.now();
+      ui.toast('Naciśnij Wstecz jeszcze raz, żeby wyjść z aplikacji', 2200);
+    });
   }
 
   const App = {
@@ -180,13 +230,16 @@
       if (location.hash === h) route(); else location.hash = h;
     },
     refresh() { route(); },
+    wstecz: { stos, pozycje },
     provide(name, fn) { services[name] = fn; },
     has(name) { return !!services[name]; },
     call(name, ...args) { if (!services[name]) { ui.toast('Ta funkcja jeszcze nie jest dostępna'); return; } return services[name](...args); },
     start() {
       App._started = true;
       window.addEventListener('hashchange', route);
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';   // przewijanie przywraca route()
       route();
+      wstecz();
       if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) navigator.serviceWorker.register('sw.js').catch(() => {});
     }
   };

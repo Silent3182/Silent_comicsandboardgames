@@ -80,9 +80,31 @@
     gi.oninput = () => {
       const q = gi.value.trim().toLowerCase(); gra = null; pokazGre();
       gres.innerHTML = !q ? '' : gry.filter(g => (window.Tytuly ? Tytuly.pasuje(g, q) : g.title.toLowerCase().includes(q))).slice(0, 8).map(g => `<button data-g="${esc(g.id)}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="">` : '<span>🎲</span>'}<span>${esc(g.title)}</span></button>`).join('')
-        + `<div class="ks-sub" style="padding:4px 8px">Nie ma na liście? Zostaw wpisany tytuł – zapiszę grę jako „spoza kolekcji”.</div>`;
+        + `<div class="ks-sub" style="padding:4px 8px">Nie ma na liście? Zostaw wpisany tytuł – zapiszę grę jako „spoza kolekcji”.</div><div id="lc-bgg"></div>`;
+      szukajBgg(gi.value.trim());
     };
-    gres.onclick = e => { const b = e.target.closest('[data-g]'); if (!b) return; gra = d.gameById.get(b.dataset.g); gi.value = ''; gres.innerHTML = ''; pokazGre(); };
+    // gry spoza kolekcji z BGG (szukaj-gier.js) – po wybraniu pytamy, czy to Twoja gra
+    let sgT = null, sgSeq = 0, sgHits = [];
+    const szukajBgg = q => {
+      clearTimeout(sgT); const my = ++sgSeq; sgHits = [];
+      if (!window.SzukajGier || q.length < 3) return;
+      sgT = setTimeout(async () => {
+        const byBgg = new Set(d.games.filter(g => g.bggId).map(g => g.bggId));
+        const hits = (await SzukajGier.szukaj(q, { limit: 10 }).catch(() => [])).filter(h => !byBgg.has(h.bggId)).slice(0, 6);
+        const box = el.querySelector('#lc-bgg'); if (my !== sgSeq || !box) return;
+        sgHits = hits;
+        box.innerHTML = hits.length ? '<div class="ks-sub" style="padding:4px 8px">Spoza kolekcji (z BGG):</div>' + hits.map((h, i) => `<button data-sgi="${i}">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<span>🎲</span>'}<span>${esc(h.title)}${h.year ? ' (' + h.year + ')' : ''}</span></button>`).join('') : '';
+      }, 400);
+    };
+    gres.onclick = async e => {
+      const s = e.target.closest('[data-sgi]');
+      if (s) {
+        const h = sgHits[+s.dataset.sgi]; if (!h) return;
+        const mine = await App.ui.confirm(`Gry „${h.title}” nie ma w kolekcji.\n\nOK – mam ją, dodaj do mojej kolekcji\nAnuluj – zapisz jako grę spoza kolekcji`);
+        gra = await SzukajGier.dodaj(h, mine ? 'owned' : 'played'); d.games.push(gra); d.gameById.set(gra.id, gra);
+        gi.value = ''; gres.innerHTML = ''; pokazGre(); return;
+      }
+      const b = e.target.closest('[data-g]'); if (!b) return; gra = d.gameById.get(b.dataset.g); gi.value = ''; gres.innerHTML = ''; pokazGre(); };
     el.querySelectorAll('[data-last]').forEach(b => b.onclick = () => { gra = d.gameById.get(b.dataset.last); gi.value = ''; gres.innerHTML = ''; pokazGre(); });
     const rysuj = () => {
       const wszyscy = gracze.concat(nowi);
