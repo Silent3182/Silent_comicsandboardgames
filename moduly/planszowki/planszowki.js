@@ -110,8 +110,13 @@
   }
 
   /* ---------- formularz rozgrywki ---------- */
-  async function editPlay(play, presetGameId) {
+  async function editPlay(play, presetGameId, opt = {}) {
     const d = await load();
+    if (!play && presetGameId && opt.jakOstatnio) {
+      // gracze z ostatniej partii tej gry (bez wyników) – szybkie wpisanie wyniku po przytrzymaniu okładki
+      const ost = (d.byGame.get(presetGameId) || [])[0];
+      play = { date: App.ui.today(), gameId: presetGameId, players: ost ? ost.players.map(x => ({ playerId: x.playerId })) : [] };
+    }
     play = play || { date: App.ui.today(), gameId: presetGameId, players: [] };
     const gamesSorted = d.games.filter(g => g.status !== 'wishlist').sort((a, b) => a.title.localeCompare(b.title, 'pl'));
     const plist = window.KS ? KS.kolejnosc(d.players, d.plays) : d.players.slice().sort((a, b) => (b.isMe - a.isMe) || a.name.localeCompare(b.name, 'pl'));
@@ -144,7 +149,7 @@
         const gi = dlg.querySelector('#pl-game'), gres = dlg.querySelector('#pl-gres');
         let tmr = null, seq = 0;
         const pick = g => { picked = g; gi.value = g.title; seq++; clearTimeout(tmr); gres.innerHTML = App.has('polki.html') ? App.call('polki.html', 'game', g) : ''; /* gdzie stoi gra */ };
-        const row = (g, i, src) => `<button type="button" class="pl-gopt" data-src="${src}" data-i="${i}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="ph">🎲</span>'}<span><b>${esc(g.title)}</b><small>${[g.year, src === 'bgg' ? 'spoza kolekcji · BGG' : (g.status !== 'owned' ? STATUS[g.status] : '')].filter(Boolean).join(' · ')}</small></span></button>`;
+        const row = (g, i, src) => `<button type="button" class="pl-gopt" data-src="${src}" data-i="${i}">${g.thumb || g.image ? `<img src="${esc(g.thumb || g.image)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="ph">🎲</span>'}<span><b>${esc(g.title)}</b><small>${[src === 'bgg' && g.alt ? esc(g.alt) : '', g.year, src === 'bgg' ? 'spoza kolekcji · BGG' : (g.status !== 'owned' ? STATUS[g.status] : '')].filter(Boolean).join(' · ')}</small></span></button>`;
         let local = [], online = [];
         const draw = (note) => {
           gres.innerHTML = local.map((g, i) => row(g, i, 'col')).join('') + (note ? `<div class="pl-gnote">${note}</div>` : '') + online.map((g, i) => row(g, i, 'bgg')).join('');
@@ -164,7 +169,7 @@
           tmr = setTimeout(async () => {
             try {
               const byBgg = new Map(d.games.filter(g => g.bggId).map(g => [g.bggId, g]));
-              const all = await searchOnline(gi.value.trim());
+              const all = window.SzukajGier ? await SzukajGier.szukaj(gi.value.trim(), { limit: 14 }) : await searchOnline(gi.value.trim());
               if (my !== seq) return;
               // polska nazwa gry, którą mam pod angielskim tytułem (np. „Wsiąść do pociągu” → Ticket to Ride)
               all.filter(g => byBgg.has(g.bggId)).forEach(g => { const mine = byBgg.get(g.bggId); if (!local.includes(mine)) local.push(mine); });
@@ -188,7 +193,12 @@
     else if (picked && picked.bggId) {
       // gra spoza kolekcji wybrana z BGG – zapisz jako „nie moja”, żeby statystyki miały tytuł i okładkę
       const ex = d.games.find(g => g.bggId === picked.bggId);
-      gameId = ex ? ex.id : (await DB.put('games', Object.assign({ id: 'bgg-' + picked.bggId, status: 'played', source: 'wikidata' }, picked, { thumb: picked.image }))).id;
+      if (ex) gameId = ex.id;
+      else {
+        const mine = await App.ui.confirm(`Gry „${picked.title}” nie ma w kolekcji.\n\nOK – mam ją, dodaj do mojej kolekcji\nAnuluj – zapisz jako grę spoza kolekcji`);
+        gameId = window.SzukajGier ? (await SzukajGier.dodaj(picked, mine ? 'owned' : 'played')).id
+          : (await DB.put('games', Object.assign({ id: 'bgg-' + picked.bggId, status: mine ? 'owned' : 'played', source: 'wikidata' }, picked, { thumb: picked.image }))).id;
+      }
     } else {
       const game = typed && d.games.find(g => g.title.toLowerCase() === typed.toLowerCase());
       if (game) gameId = game.id;
@@ -244,8 +254,32 @@
         <button id="dir" title="Odwróć kolejność">${dir === '1' ? '↓' : '↑'}</button>
         <span class="seg"><button data-v="grid" class="${view === 'grid' ? 'on' : ''}" title="Kafelki">▦</button><button data-v="list" class="${view === 'list' ? 'on' : ''}" title="Lista">☰</button></span>
       </div>
-      <div id="out"></div>${bggLogo()}`;
+      <div id="out"></div><div id="sgOut"></div>${bggLogo()}`;
     const $ = s => el.querySelector(s);
+    /* Gry spoza kolekcji z BGG (szukaj-gier.js): „+ Mam” / „♡ Chcę” dodaje grę do aplikacji, „BGG ↗” otwiera ją na BGG */
+    let sgT = null, sgSeq = 0, sgHits = [];
+    function szukajBgg() {
+      const box = $('#sgOut'); clearTimeout(sgT); const my = ++sgSeq;
+      if (!window.SzukajGier || q.trim().length < 3) { box.innerHTML = ''; return; }
+      sgT = setTimeout(async () => {
+        const hits = await SzukajGier.szukaj(q.trim(), { limit: 10 }).catch(() => []);
+        if (my !== sgSeq) return;
+        const byBgg = new Map(d.games.filter(g => g.bggId).map(g => [g.bggId, g]));
+        sgHits = hits.filter(h => { const g = byBgg.get(h.bggId); return !g || g.status === 'played' || g.status === 'sold'; }).slice(0, 8);
+        SzukajGier.css();
+        box.innerHTML = sgHits.length ? `<div class="sg-head">Na BGG – nie masz w kolekcji:</div>` + sgHits.map((h, i) => SzukajGier.wiersz(h,
+          `<button class="small primary" data-sg="owned" data-i="${i}">+ Mam</button><button class="small" data-sg="wishlist" data-i="${i}">♡ Chcę</button><button class="small ghost" data-sgb="${h.bggId}" title="Otwórz na BGG">BGG ↗</button>`)).join('')
+          + '<p class="muted" style="font-size:12.5px">Dodana gra trafia do aplikacji od razu. Żeby była też na Twoim koncie BGG, otwórz ją na BGG i kliknij „Add to collection” – wtedy następnego dnia aplikacja sama dociągnie liczbę graczy, czas i okładkę.</p>' : '';
+      }, 350);
+    }
+    $('#sgOut').onclick = async e => {
+      const bb = e.target.closest('[data-sgb]'); if (bb) return SzukajGier.otworzBgg(bb.dataset.sgb);
+      const b = e.target.closest('[data-sg]'); if (!b) return;
+      b.disabled = true;
+      const g = await SzukajGier.dodaj(sgHits[+b.dataset.i], b.dataset.sg);
+      App.ui.toast(b.dataset.sg === 'owned' ? `Dodano „${g.title}” do kolekcji` : `Dodano „${g.title}” do listy życzeń`);
+      App.go('planszowki', { gra: g.id });
+    };
     function draw() {
       const ql = q.toLowerCase();
       let arr = d.games.filter(g => {
@@ -286,14 +320,14 @@
         if (Date.now() - przytrzymano < 700) return; // to był koniec przytrzymania, nie kliknięcie
         const t = e.target.closest('[data-id]'); if (t) App.go('planszowki', { gra: t.dataset.id });
       };
-      // przytrzymanie okładki (ok. 0,6 s) = szybka partia: licznik punktów z tą grą i graczami z ostatniej partii.
+      // przytrzymanie okładki (ok. 0,6 s) = wpisanie wyniku partii tej gry (gracze jak w ostatniej partii) – prośba Anety 2026-11-25.
       // Ruch palca o więcej niż kilka pikseli (przewijanie) albo puszczenie wcześniej = zwykłe przewijanie / kliknięcie.
       out.classList.add('pl-lista');
       let tm = null, x0 = 0, y0 = 0;
       const stop = () => { clearTimeout(tm); tm = null; out.querySelectorAll('.pl-hold').forEach(x => x.classList.remove('pl-hold')); };
       out.onpointerdown = e => {
         stop();
-        if (e.button > 0 || e.isPrimary === false || !App.has('licznik.start') || e.target.closest('[data-bgg]')) return;
+        if (e.button > 0 || e.isPrimary === false || e.target.closest('[data-bgg]')) return;
         const t = e.target.closest('[data-id]'); if (!t) return;
         x0 = e.clientX; y0 = e.clientY;
         t.classList.add('pl-hold');
@@ -301,22 +335,22 @@
         tm = setTimeout(() => {
           stop(); przytrzymano = Date.now();
           try { if (navigator.vibrate) navigator.vibrate(30); } catch (er) {}
-          App.call('licznik.start', t.dataset.id);
+          editPlay(null, t.dataset.id, { jakOstatnio: true }).then(p => { if (p) App.refresh(); });
         }, 600);
       };
       out.onpointermove = e => { if (tm && Math.hypot(e.clientX - x0, e.clientY - y0) > 10) stop(); };
       out.onpointerup = out.onpointercancel = out.onpointerleave = stop;
       // bez systemowego menu „zapisz obraz” przy przytrzymaniu okładki
-      out.oncontextmenu = e => { if (e.target.closest('[data-id]') && App.has('licznik.start')) e.preventDefault(); };
+      out.oncontextmenu = e => { if (e.target.closest('[data-id]')) e.preventDefault(); };
     }
-    $('#q').oninput = e => { q = e.target.value; prefs.set('q', q); draw(); };
+    $('#q').oninput = e => { q = e.target.value; prefs.set('q', q); draw(); szukajBgg(); };
     $('#filter').onchange = e => { filter = e.target.value; prefs.set('filter', filter); draw(); };
     $('#sort').onchange = e => { sort = e.target.value; prefs.set('sort', sort); draw(); };
     $('#dir').onclick = e => { dir = dir === '1' ? '-1' : '1'; prefs.set('dir', dir); e.target.textContent = dir === '1' ? '↓' : '↑'; draw(); };
     el.querySelectorAll('.seg button').forEach(b => b.onclick = () => { view = b.dataset.v; prefs.set('view', view); el.querySelectorAll('.seg button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
     $('#addGame').onclick = async () => { const g = await editGame(); if (g) App.go('planszowki', { gra: g.id }); };
     $('#addPlay').onclick = async () => { if (await editPlay()) App.refresh(); };
-    draw();
+    draw(); szukajBgg();
   }
 
   /* ---------- widok: karta gry ---------- */

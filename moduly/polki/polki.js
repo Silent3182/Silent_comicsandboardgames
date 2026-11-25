@@ -256,7 +256,30 @@
         rows.sort((a, b) => a.t.localeCompare(b.t, 'pl'));
         const set = zazn[zak.v];
         list.innerHTML = rows.slice(0, 300).map(x => `<label><input type="checkbox" data-id="${esc(x.id)}" ${set.has(x.id) ? 'checked' : ''}> <span>${esc(x.t)}</span>${x.gdzie ? `<small>📍 ${esc(x.gdzie)}</small>` : ''}</label>`).join('') + (rows.length > 300 ? `<p class="muted" style="padding:8px">…i ${rows.length - 300} więcej – zawęź wyszukiwanie.</p>` : '') || '<p class="muted" style="padding:8px">Nic nie znaleziono.</p>';
+        if (zak.v === 'gry') szukajBgg(q.value.trim());
       };
+      // gra, której nie ma w aplikacji: wyszukaj na BGG (szukaj-gier.js), dodaj do kolekcji i od razu zaznacz do postawienia
+      let sgT = null, sgSeq = 0, sgHits = [];
+      const szukajBgg = f => {
+        clearTimeout(sgT); const my = ++sgSeq;
+        if (!window.SzukajGier || f.length < 3) return;
+        sgT = setTimeout(async () => {
+          const znane = new Set(Z.gry.map(g => g.bggId).filter(Boolean));
+          const hits = (await SzukajGier.szukaj(f, { limit: 10 }).catch(() => [])).filter(h => !znane.has(h.bggId)).slice(0, 6);
+          if (my !== sgSeq || zak.v !== 'gry') return;
+          sgHits = hits; list.querySelectorAll('.pk-bgg').forEach(x => x.remove());
+          if (hits.length) list.insertAdjacentHTML('beforeend', `<div class="pk-bgg" style="margin-top:8px;font-size:13px;color:var(--muted)">Nie masz w aplikacji – dodaj z BGG do kolekcji:</div>`
+            + hits.map((h, i) => `<div class="pk-bgg row" style="gap:8px;padding:4px 0"><span style="flex:1">${esc(h.title)}${h.year ? ' (' + h.year + ')' : ''}</span><button type="button" class="small" data-sgi="${i}">+ Dodaj</button></div>`).join(''));
+        }, 400);
+      };
+      list.addEventListener('click', async e => {
+        const b = e.target.closest('[data-sgi]'); if (!b) return;
+        e.preventDefault(); b.disabled = true;
+        const g = await SzukajGier.dodaj(sgHits[+b.dataset.sgi], 'owned');
+        if (!Z.gry.some(x => x.id === g.id)) Z.gry.push(g);
+        zazn.gry.add(g.id); q.value = g.title; draw();
+        App.ui.toast(`Dodano „${g.title}” do kolekcji – zaznaczona do postawienia`);
+      });
       list.addEventListener('change', e => { const i = e.target.closest('input[data-id]'); if (!i) return; const set = zazn[zak.v]; i.checked ? set.add(i.dataset.id) : set.delete(i.dataset.id); });
       dlg.querySelectorAll('.pk-tabs button').forEach(b => b.onclick = () => { zak.v = b.dataset.v; dlg.querySelectorAll('.pk-tabs button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
       q.oninput = draw; bez.onchange = draw; draw();

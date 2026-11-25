@@ -145,7 +145,8 @@ def indeks_gier(plik, token, min_ocen=10):
         strona = r.read().decode('utf-8', 'replace')
     m = re.search(r'https://geek-export-stats\.s3\.amazonaws\.com/[^"\'<> ]+?\.zip[^"\'<> ]*', strona)
     if not m:
-        print('Nie znalazłem linku do zrzutu rankingów BGG – pomijam listę gier.'); return
+        t = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', strona))
+        print('Nie znalazłem linku do zrzutu rankingów BGG – pomijam listę gier. Strona:', len(strona), 'znaków;', t[t.find('Download') - 100:t.find('Download') + 200] if 'Download' in t else t[-400:]); return
     with urllib.request.urlopen(html.unescape(m.group(0)), timeout=300) as r:
         z = zipfile.ZipFile(io.BytesIO(r.read()))
     nazwa = next(n for n in z.namelist() if n.endswith('.csv'))
