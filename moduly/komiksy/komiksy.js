@@ -46,6 +46,10 @@
 .kx-row input[type=checkbox]{width:22px;height:22px;flex:none;margin-top:1px}
 .kx-row .kx-main{flex:1;min-width:0}
 .kx-row.read{background:rgba(146,208,80,.45)}
+.kx-row.wait{background:rgba(255,190,60,.22)}
+.kx-row.skipd{background:rgba(127,127,127,.16);opacity:.75}
+.kx-b.wait{background:#ffe2a8;color:#5a3a00}
+.kx-b[hidden]{display:none}
 .kx-row.hdr{background:rgba(31,58,95,.08);font-weight:600}
 .kx-row.note{font-size:12px;opacity:.7}
 .kx-next{border:2px solid #1f3a5f;border-radius:14px;padding:14px;margin:10px 0}
@@ -350,18 +354,29 @@
     const opt = Object.assign({ pomin: true, wyl: ['Star Wars'] }, (await DB.setting('mroOpcje')) || {});
     const isRead = x => { const o = ov.get(x.id); return o ? !!o.read : x.base; };
     const counts = x => x.typ === 0 && !opt.wyl.includes(x.sec) && !(opt.pomin && x.ex.pomin);
-    let last = -1; MRO.list.forEach(x => { if (counts(x) && isRead(x)) last = x.i; });
-    const next = MRO.list.find(x => x.i > last && counts(x) && !isRead(x));
-    const backlog = MRO.list.filter(x => x.i < last && counts(x) && !isRead(x));
+    // „przeczytane poza kolejnością” (ahead) nie przesuwa miejsca, w którym jestem (prośba Anety)
+    const ahead = x => { const o = ov.get(x.id); return !!(o && o.read && o.ahead); };
+    // „⏳ czekam na polskie wydanie” – celowa dziura: nie jest przeczytane, ale „następne” i „zaległe” ją omijają
+    const czeka = x => { const o = ov.get(x.id); return !!(o && o.czekam) && !isRead(x); };
+    const S = { ov, opt, isRead, counts, ahead, czeka };
+    S.przelicz = () => {
+      let last = -1; MRO.list.forEach(x => { if (counts(x) && isRead(x) && !ahead(x)) last = x.i; });
+      S.last = last;
+      S.next = MRO.list.find(x => x.i > last && counts(x) && !isRead(x) && !czeka(x));
+      S.backlog = MRO.list.filter(x => x.i < last && counts(x) && !isRead(x) && !czeka(x));
+      S.czekam = MRO.list.filter(x => counts(x) && czeka(x));
+    };
+    S.przelicz();
     // tomy przy zeszycie: automatyczne (ex.k) minus odrzucone + dodane ręcznie
     const vols = x => { const o = ov.get(x.id) || {}; const off = o.comicIdsOff || [];
       return [...new Set((x.ex.k || []).filter(id => !off.includes(id)).concat(o.comicIds || []))]; };
-    return { ov, opt, isRead, counts, last, next, backlog, vols };
+    S.vols = vols;
+    return S;
   }
-  async function setRead(items, read) {
+  async function setRead(items, read, ahead = false) {
     const t = new Date().toISOString();
     const old = new Map((await DB.all('readingOrder')).map(r => [r.id, r]));
-    await DB.putMany('readingOrder', items.map(x => Object.assign({}, old.get(x.id) || {}, { id: x.id, order: x.i + 1, part: x.sec, title: x.title, read, readAt: read ? t : null })));
+    await DB.putMany('readingOrder', items.map(x => Object.assign({}, old.get(x.id) || {}, { id: x.id, order: x.i + 1, part: x.sec, title: x.title, read, readAt: read ? t : null, ahead: !!(read && ahead), skipped: false, czekam: read ? false : (old.get(x.id) || {}).czekam || false })));
   }
   // Okno „📎 Tom”: odznacz błędne tomy, wybierz tom z listy albo dodaj nowy
   async function assignVolume(x, S) {
@@ -406,34 +421,83 @@
     if (x.typ === 1) return `<div class="kx-row hdr"><div class="kx-main">📘 ${esc(x.title)}</div></div>`;
     if (x.typ === 2) return `<div class="kx-row hdr"><div class="kx-main">➡️ Event: ${esc(x.ex.ev || x.title)}${x.ev ? '' : ' <span class="kx-muted">(brak listy w arkuszu)</span>'}</div></div>`;
     if (x.typ === 3) return `<div class="kx-row note"><div class="kx-main">${x.title.startsWith('http') ? `<a href="${esc(x.title)}" target="_blank" rel="noopener">${esc(x.title)}</a>` : esc(x.title)}</div></div>`;
-    const r = S.isRead(x); const e = x.ex;
-    return `<div class="kx-row ${r ? 'read' : ''}" data-i="${x.i}"><input type="checkbox" ${r ? 'checked' : ''} data-i="${x.i}" title="Przeczytane">
+    const r = S.isRead(x); const e = x.ex; const w = S.czeka(x); const sk = r && !!(S.ov.get(x.id) || {}).skipped;
+    return `<div class="kx-row ${sk ? 'skipd' : r ? 'read' : w ? 'wait' : ''}" data-i="${x.i}"><input type="checkbox" ${r ? 'checked' : ''} data-i="${x.i}" title="Przeczytane">
       <div class="kx-main"><div class="kx-tt">${esc(x.title)}</div>
       <div class="kx-muted">${opts.sec ? esc(x.sec) + (x.ev ? ' · ' + esc(x.ev) : '') + ' · ' : (x.ev ? esc(x.ev) + ' · ' : '')}#${x.i + 1}
-        ${e.mustRead ? '<span class="kx-b must">Must read</span>' : ''}${e.pomin ? '<span class="kx-b skip">do pominięcia</span>' : ''}${e.ocena ? `<span class="kx-b">ocena ${e.ocena}</span>` : ''}${codesHtml([x.wyd, e.nosnik].filter(Boolean).join(' / '), idx, S.vols(x))} ${e.uwagi ? esc(e.uwagi) : ''}</div></div>
-      <button class="ghost" data-tom="${x.i}" title="Przypisz tom z kolekcji">📎</button>
+        <span class="kx-b wait" data-wb ${w ? '' : 'hidden'}>⏳ czekam na PL</span><span class="kx-b skip" data-sb ${sk ? '' : 'hidden'}>⏭ pominięte</span>${r && S.ahead(x) ? '<span class="kx-b" title="Przeczytane wcześniej, nie zmienia miejsca, w którym jesteś">poza kolejnością</span>' : ''}${e.mustRead ? '<span class="kx-b must">Must read</span>' : ''}${e.pomin ? '<span class="kx-b skip">do pominięcia</span>' : ''}${e.ocena ? `<span class="kx-b">ocena ${e.ocena}</span>` : ''}${codesHtml([x.wyd, e.nosnik].filter(Boolean).join(' / '), idx, S.vols(x))} ${e.uwagi ? esc(e.uwagi) : ''}</div></div>
+      <button class="ghost" data-wiecej="${x.i}" title="Więcej: czekam na PL, pomiń na stałe, tom">⋯</button>
       ${opts.upto ? `<button class="ghost" data-upto="${x.i}" title="Oznacz wszystko do tego miejsca jako przeczytane">⤒</button>` : ''}</div>`;
+  }
+  async function ustawCzekam(x, S, czekam) {
+    const o = Object.assign({}, S.ov.get(x.id) || {}, { id: x.id, order: x.i + 1, part: x.sec, title: x.title, czekam });
+    if (czekam) { o.read = false; o.readAt = null; o.ahead = false; }
+    await DB.put('readingOrder', o); S.ov.set(x.id, o); S.przelicz();
+    document.querySelectorAll(`.kx-row[data-i="${x.i}"]`).forEach(r => { r.classList.toggle('wait', czekam); r.classList.toggle('read', S.isRead(x)); const c = r.querySelector('input[type=checkbox]'); if (c) c.checked = S.isRead(x); const b = r.querySelector('[data-wb]'); if (b) b.hidden = !czekam; });
+    App.ui.toast(czekam ? '⏳ Czekasz na polskie wydanie – pominięte na razie' : 'Usunięto „czekam na PL”');
+  }
+  // „⏭ pominięte na stałe” (np. nuda): liczy się jak przeczytane, ale bez daty i z szarym wierszem
+  async function ustawPomin(x, S, pomin) {
+    const ahead = pomin && S.next && x.i > S.next.i;
+    const o = Object.assign({}, S.ov.get(x.id) || {}, { id: x.id, order: x.i + 1, part: x.sec, title: x.title, read: pomin, skipped: pomin, readAt: null, ahead: !!ahead, czekam: false });
+    await DB.put('readingOrder', o); S.ov.set(x.id, o); S.przelicz();
+    document.querySelectorAll(`.kx-row[data-i="${x.i}"]`).forEach(r => { r.classList.toggle('skipd', pomin); r.classList.remove('read', 'wait'); const c = r.querySelector('input[type=checkbox]'); if (c) c.checked = pomin;
+      const b = r.querySelector('[data-wb]'); if (b) b.hidden = true; const sb = r.querySelector('[data-sb]'); if (sb) sb.hidden = !pomin; });
+    App.ui.toast(pomin ? '⏭ Pominięte na stałe' : 'Przywrócono do kolejki');
+  }
+  // menu „⋯” przy pozycji – mniej przycisków w wierszu na telefonie
+  async function menuPozycji(x, S) {
+    const sk = S.isRead(x) && !!(S.ov.get(x.id) || {}).skipped, w = S.czeka(x), r = S.isRead(x);
+    const dlg = document.createElement('dialog'); dlg.className = 'dlg';
+    dlg.innerHTML = `<form method="dialog"><h3>#${x.i + 1} ${esc(x.title)}</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+      <button value="czeka" data-m="czeka">${w ? '✖ Usuń „czekam na PL”' : '⏳ Czekam na polskie wydanie'}</button>
+      <button value="pomin" data-m="pomin">${sk ? '↩ Przywróć do kolejki' : '⏭ Pomiń na stałe (nuda)'}</button>
+      ${r && !sk ? `<button value="ahead" data-m="ahead">${S.ahead(x) ? '➡ Jednak czytałem w kolejności' : '↪ Czytane poza kolejnością'}</button>` : ''}
+      <button value="tom" data-m="tom">📎 Przypisz tom</button></div>
+      <div class="dlg-btns"><button value="cancel" class="ghost">Anuluj</button></div></form>`;
+    document.body.appendChild(dlg);
+    const res = await new Promise(rs => { dlg.addEventListener('close', () => rs(dlg.returnValue)); dlg.showModal(); });
+    dlg.remove();
+    if (res === 'czeka') return ustawCzekam(x, S, !w);
+    if (res === 'pomin') return ustawPomin(x, S, !sk);
+    if (res === 'tom') return assignVolume(x, S);
+    if (res === 'ahead') {
+      const o = Object.assign({}, S.ov.get(x.id), { ahead: !S.ahead(x) });
+      await DB.put('readingOrder', o); S.ov.set(x.id, o); S.przelicz(); App.refresh();
+    }
   }
   function bindRows(el, S) {
     // odznaczanie bez przerysowania listy – lista zostaje w tym samym miejscu (prośba Anety)
-    const naMiejscu = (items, read) => {
+    const naMiejscu = (items, read, ahead = false) => {
       const t = read ? new Date().toISOString() : null;
       items.forEach(x => {
-        S.ov.set(x.id, Object.assign({}, S.ov.get(x.id) || {}, { id: x.id, read, readAt: t }));
-        document.querySelectorAll(`.kx-row[data-i="${x.i}"]`).forEach(r => { r.classList.toggle('read', read); const c = r.querySelector('input[type=checkbox]'); if (c) c.checked = read; });
+        const o = S.ov.get(x.id) || {};
+        S.ov.set(x.id, Object.assign({}, o, { id: x.id, read, readAt: t, ahead: !!(read && ahead), skipped: false, czekam: read ? false : !!o.czekam }));
+        document.querySelectorAll(`.kx-row[data-i="${x.i}"]`).forEach(r => { r.classList.toggle('read', read); r.classList.toggle('wait', S.czeka(x)); const c = r.querySelector('input[type=checkbox]'); if (c) c.checked = read; const b = r.querySelector('[data-wb]'); if (b) b.hidden = !S.czeka(x); r.classList.remove('skipd'); const sb = r.querySelector('[data-sb]'); if (sb) sb.hidden = true; });
       });
       const L = MRO.list, tot = L.filter(S.counts).length, done = L.filter(x => S.counts(x) && S.isRead(x)).length;
       const bar = document.getElementById('czprog'), txt = document.getElementById('czprogt');
       if (bar) bar.style.width = (done / Math.max(1, tot) * 100).toFixed(2) + '%';
       if (txt) txt.textContent = `Przeczytane ${done.toLocaleString('pl-PL')} z ${tot.toLocaleString('pl-PL')} (${(done / Math.max(1, tot) * 100).toFixed(1)}%)`;
+      S.przelicz();
     };
     // jeden nasłuch na całą listę (delegacja) – działa też dla wierszy doczytanych później
     el.onchange = async e => {
       const cb = e.target.closest('input[type=checkbox][data-i]'); if (!cb) return;
-      const x = MRO.list[+cb.dataset.i]; await setRead([x], cb.checked); naMiejscu([x], cb.checked);
+      const x = MRO.list[+cb.dataset.i];
+      // zaznaczenie czegoś dalej niż „następne” = przeczytane poza kolejnością: miejsce czytania się nie przesuwa
+      const ahead = cb.checked && S.next && x.i > S.next.i;
+      await setRead([x], cb.checked, ahead); naMiejscu([x], cb.checked, ahead);
+      if (ahead) App.ui.toast(`Przeczytane poza kolejnością – dalej czytasz od #${S.next.i + 1}`);
     };
     el.onclick = async e => {
+      const bm = e.target.closest('[data-wiecej]'); if (bm) return menuPozycji(MRO.list[+bm.dataset.wiecej], S);
       const bt = e.target.closest('[data-tom]'); if (bt) return assignVolume(MRO.list[+bt.dataset.tom], S);
+      const bp = e.target.closest('[data-pomin]');
+      if (bp) { const x = MRO.list[+bp.dataset.pomin]; await ustawPomin(x, S, !(S.isRead(x) && (S.ov.get(x.id) || {}).skipped)); return; }
+      const bw = e.target.closest('[data-czeka]');
+      if (bw) { const x = MRO.list[+bw.dataset.czeka]; await ustawCzekam(x, S, !S.czeka(x)); return; }
       const b = e.target.closest('[data-upto]'); if (!b) return;
       const to = +b.dataset.upto;
       const items = MRO.list.filter(x => x.i <= to && S.counts(x) && !S.isRead(x));
@@ -516,7 +580,9 @@
     const L = MRO.list;
     const tot = L.filter(S.counts).length; const done = L.filter(x => S.counts(x) && S.isRead(x)).length;
     const nx = S.next;
-    const tabs = [['next', 'Następne'], ['backlog', `Zaległe (${S.backlog.length})`], ['all', 'Cała lista'], ['postac', 'Postać / event'], ['historia', 'Oś czasu'], ['opcje', 'Ustawienia i aktualizacja']];
+    // ostatnia przeczytana (w aplikacji) pozycja wyznaczająca miejsce – można ją oznaczyć jako „poza kolejnością”
+    const ostatni = S.last >= 0 && (S.ov.get(MRO.list[S.last].id) || {}).read ? MRO.list[S.last] : null;
+    const tabs = [['next', 'Następne'], ['backlog', `Zaległe (${S.backlog.length})`], ['czekam', `⏳ Czekam na PL (${S.czekam.length})`], ['all', 'Cała lista'], ['postac', 'Postać / event'], ['historia', 'Oś czasu'], ['opcje', 'Ustawienia i aktualizacja']];
     el.innerHTML = `
       <h2>Master Reading Order</h2>
       <div class="kx-prog"><div id="czprog" style="width:${(done / Math.max(1, tot) * 100).toFixed(2)}%"></div></div>
@@ -536,16 +602,29 @@
           <div>${e.mustRead ? '<span class="kx-b must">Must read</span>' : ''}${e.ocena ? `<span class="kx-b">ocena ${e.ocena}</span>` : ''}${e.typ ? `<span class="kx-b">${esc(e.typ)}</span>` : ''}${e.uwagi ? esc(e.uwagi) : ''}</div>
           <p>${codesHtml([nx.wyd, e.nosnik].filter(Boolean).join(' / '), idx, S.vols(nx)).trim() || '<span class="kx-muted">Nie znalazłem tego zeszytu w żadnym tomie kolekcji</span>'}</p>
           <p id="czpolka"></p>
-          <div class="kx-btns"><button class="pri" id="czok">✓ Przeczytane</button><button id="czskip">Pomiń (oznacz jako przeczytane bez czytania)</button><button id="cztom">📎 Tom</button></div>
+          <div class="kx-btns"><button class="pri" id="czok">✓ Przeczytane</button><button id="czwait">⏳ Czekam na PL</button><button id="czskip">⏭ Pomiń na stałe (nuda)</button><button id="cztom">📎 Tom</button></div>
           ${S.backlog.length ? `<p class="kx-muted">Masz ${S.backlog.length} zaległych pozycji wcześniej w kolejności – zobacz „Zaległe”.</p>` : ''}
+          ${ostatni ? `<p class="kx-muted">Ostatnio w kolejności: #${ostatni.i + 1} ${esc(ostatni.title)}. Przeczytałeś to poza kolejnością?
+            <button id="czwroc" class="ghost">↩ Tak, nie przesuwaj mnie</button></p>` : ''}
         </div>
         <h3>Dalej w kolejce</h3><div>${upcoming.map(x => itemRow(x, S, idx, { sec: x.sec !== nx.sec, upto: true })).join('')}</div>`;
       body.querySelector('#czok').onclick = async () => { await setRead([nx], true); App.ui.toast('✓ ' + nx.title); App.refresh(); };
       body.querySelector('#czskip').onclick = async () => { await DB.put('readingOrder', Object.assign({}, S.ov.get(nx.id) || {}, { id: nx.id, order: nx.i + 1, part: nx.sec, title: nx.title, read: true, skipped: true, readAt: null })); App.refresh(); };
       body.querySelector('#cztom').onclick = () => assignVolume(nx, S);
+      body.querySelector('#czwait').onclick = async () => { await ustawCzekam(nx, S, true); App.refresh(); };
+      const wroc = body.querySelector('#czwroc');
+      if (wroc) wroc.onclick = async () => {
+        const o = Object.assign({}, S.ov.get(ostatni.id), { ahead: true });
+        await DB.put('readingOrder', o); S.ov.set(ostatni.id, o); S.przelicz();
+        App.ui.toast(`#${ostatni.i + 1} – poza kolejnością. Następny: #${S.next ? S.next.i + 1 : '–'}`); App.refresh();
+      };
       if (App.has('polki.html') && S.vols(nx).length) { // gdzie stoi tom z następnym zeszytem
         Promise.all(S.vols(nx).map(i => DB.get('comics', i))).then(cs => { const h = cs.filter(Boolean).map(k => App.call('polki.html', 'comic', k)).filter(Boolean); const p = body.querySelector('#czpolka'); if (p && h.length) p.innerHTML = [...new Set(h)].join(' '); });
       }
+      bindRows(body, S);
+    } else if (cz.view === 'czekam') {
+      if (S.czekam.length) App.ui.lista(body, S.czekam, x => itemRow(x, S, idx, { sec: true }), { porcja: 80, przed: '<p class="kx-muted">Pozycje, które celowo omijasz do czasu polskiego wydania. Nie liczą się jako zaległe. Odznacz ⏳, gdy chcesz je znów mieć w kolejce, albo ptaszek, gdy przeczytasz.</p>' });
+      else body.innerHTML = '<p>Nic nie czeka na polskie wydanie. Przy każdej pozycji jest przycisk ⏳.</p>';
       bindRows(body, S);
     } else if (cz.view === 'backlog') {
       if (S.backlog.length) App.ui.lista(body, S.backlog, x => itemRow(x, S, idx, { sec: true }), { porcja: 80, przed: '<p class="kx-muted">Pozycje przed miejscem, w którym jesteś, które nie są odznaczone. Odznacz, gdy przeczytasz.</p>' });
