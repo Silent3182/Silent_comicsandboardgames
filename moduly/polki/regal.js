@@ -17,8 +17,8 @@
   const num = v => String(Math.round(v * 10) / 10).replace('.', ',');
 
   /* ---------- geometria regału ---------- */
-  // przybliżone wymiary regałów ze zdjęć (do poprawienia przyciskiem 📏 „Wymiary”)
-  const DOMYSLNE = { 'salon-regal': { kol: [30, 40, 40] } };
+  // wymiary regałów od Marcina (salon: kolumny 27/57/57 cm, 26.11.2026), półki od góry 30/22/27/25/32/32/42 cm (do poprawienia przyciskiem 📏 „Wymiary”)
+  const DOMYSLNE = { 'salon-regal': { kol: [27, 57, 57], rz: [30, 22, 27, 25, 32, 32, 42] } };
   const lista = (v, n, def) => { const a = (Array.isArray(v) ? v : []).map(Number).filter(x => x > 0); return Array.from({ length: n }, (_, i) => a[i] || a[a.length - 1] || def); };
   function geo(sh) {
     const rows = sh.rows || 1, cols = sh.cols || 1, wym = sh.wym || DOMYSLNE[sh.id] || {};
