@@ -18,7 +18,7 @@
 
   /* ---------- geometria regału ---------- */
   // wymiary regałów od Marcina (salon: kolumny 27/57/57 cm, 26.11.2026), półki od góry 30/22/27/25/32/32/42 cm (do poprawienia przyciskiem 📏 „Wymiary”)
-  const DOMYSLNE = { 'salon-regal': { kol: [27, 57, 57], rz: [30, 22, 27, 25, 32, 32, 42] } };
+  const DOMYSLNE = { 'salon-regal': { kol: [27, 57, 57], rz: [30, 22, 27, 25, 32, 32, 42], d: 36 } };
   const lista = (v, n, def) => { const a = (Array.isArray(v) ? v : []).map(Number).filter(x => x > 0); return Array.from({ length: n }, (_, i) => a[i] || a[a.length - 1] || def); };
   function geo(sh) {
     const rows = sh.rows || 1, cols = sh.cols || 1, wym = sh.wym || DOMYSLNE[sh.id] || {};
@@ -69,18 +69,33 @@
     .sort((a, b) => (a.p.i != null ? a.p.i : 9999) - (b.p.i != null ? b.p.i : 9999) || a.t.localeCompare(b.t, 'pl'));
 
   /* ---------- układ pudełek w przegródce (cm, od lewego dolnego rogu) ---------- */
-  function uloz(items, Wc, Hc) {
+  /* Jak stoi pudełko: { lez, w (szerokość z przodu), h (wysokość), d (głębokość), obr }.
+   * Stojące: najcieńszy bok z przodu, a z dwóch pozostałych jeden w górę, drugi w głąb – wybieramy tak, żeby
+   * zmieściło się na wysokość i w głąb (prostokątne pudełko bywa obrócone krótszym bokiem do góry).
+   * polka.lez = leży/stoi, polka.obr = true: krótszy z dwóch dużych boków w górę (stoi) / z przodu (leży). Brak = automatycznie. */
+  function orient(it, Wc, Hc, D) {
+    const a = it.a.slice().sort((p, q) => p - q), m = 0.5;
+    const D_ = D || 99;
+    const st = [{ h: a[2], d: a[1], obr: false }, { h: a[1], d: a[2], obr: true }];
+    const mozeStac = st.some(o => o.h <= Hc + m);
+    const lez = it.p.lez != null ? !!it.p.lez : !mozeStac;
+    if (!lez) {
+      let o = it.p.obr != null ? st[it.p.obr ? 1 : 0] : (st.find(o => o.h <= Hc + m && o.d <= D_ + 1) || st.find(o => o.h <= Hc + m) || st[1]);
+      return { lez, w: a[0], h: o.h, d: o.d, obr: o.obr };
+    }
+    const le = [{ w: a[2], d: a[1], obr: false }, { w: a[1], d: a[2], obr: true }];
+    let o = it.p.obr != null ? le[it.p.obr ? 1 : 0] : (le.find(o => o.w <= Wc + m && o.d <= D_ + 1) || le.find(o => o.w <= Wc + m) || le[1]);
+    return { lez, w: o.w, h: a[0], d: o.d, obr: o.obr };
+  }
+  function uloz(items, Wc, Hc, D) {
     let x = 0, stos = null; const out = [];
     for (const it of items) {
-      const a = it.a.slice().sort((p, q) => p - q);
-      const lez = it.p.lez != null ? !!it.p.lez : a[1] > Hc + 0.5;   // nie stanie nawet krótszym bokiem → leży
-      let w, h;
-      if (!lez) { w = a[0]; h = a[2] <= Hc ? a[2] : a[1]; stos = null; out.push({ it, x, y: 0, w, h, lez }); x += w + 0.15; continue; }
-      h = a[0]; w = a[2] <= Wc ? a[2] : a[1];
-      if (stos && stos.y + h <= Hc + 0.3) { out.push({ it, x: stos.x, y: stos.y, w, h, lez }); stos.y += h; stos.w = Math.max(stos.w, w); x = Math.max(x, stos.x + stos.w + 0.15); }
-      else { stos = { x, y: h, w }; out.push({ it, x, y: 0, w, h, lez }); x += w + 0.15; }
+      const o = orient(it, Wc, Hc, D), { lez, w, h, d } = o;
+      if (!lez) { stos = null; out.push({ it, x, y: 0, w, h, d, lez }); x += w + 0.15; continue; }
+      if (stos && stos.y + h <= Hc + 0.3) { out.push({ it, x: stos.x, y: stos.y, w, h, d, lez }); stos.y += h; stos.w = Math.max(stos.w, w); x = Math.max(x, stos.x + stos.w + 0.15); }
+      else { stos = { x, y: h, w }; out.push({ it, x, y: 0, w, h, d, lez }); x += w + 0.15; }
     }
-    out.forEach(o => { o.za = o.x + o.w > Wc + 0.5 || o.y + o.h > Hc + 0.5; });
+    out.forEach(o => { o.za = o.x + o.w > Wc + 0.5 || o.y + o.h > Hc + 0.5; o.wystaje = D && o.d > D + 1 ? o.d - D : 0; });
     return { out, zajete: x, za: out.filter(o => o.za).length };
   }
 
@@ -160,7 +175,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
       const nazwa = (sh.cells || {})[r + '-' + c];
       let inner = '', za = 0;
       if (st.tryb === 'okladki') inner = okladki(items, Wc, Hc);
-      else { const u = uloz(items, Wc, Hc); za = u.za; zaRazem += za; inner = u.out.map(o => pudlo(o, Hc)).join(''); }
+      else { const u = uloz(items, Wc, Hc, g.d); za = u.za; zaRazem += za; inner = u.out.map(o => pudlo(o, Hc)).join(''); }
       h += `<div class="rg-cell ${za ? 'za' : ''}" data-r="${r}" data-c="${c}" style="left:${g.xs[c - 1] * PX}px;top:${g.ys[r - 1] * PX}px;width:${Wc * PX}px;height:${Hc * PX}px">
         <span class="lb">${esc(nazwa || ((g.cols > 1 ? r + '/' + c : r) + ''))}</span>${za ? `<span class="bad">za ciasno: ${za}</span>` : ''}${inner}</div>`;
     }
@@ -230,7 +245,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
   async function ustaw(zmiany) {
     const P = W(), gry = [], kom = []; let serie = null;
     zmiany.forEach(({ it, p }) => {
-      const np = { s: p.s, r: p.r || null, c: p.c || null }; if (p.i != null) np.i = p.i; if (p.lez != null) np.lez = p.lez;
+      const np = { s: p.s, r: p.r || null, c: p.c || null }; if (p.i != null) np.i = p.i; if (p.lez != null) np.lez = p.lez; if (p.obr != null) np.obr = p.obr;
       it.p = np;
       if (it.typ === 'game') { it.rec = Object.assign({}, it.rec, { polka: np }); gry.push(it.rec); }
       else if (it.typ === 'comic') { it.rec = Object.assign({}, it.rec, { polka: np }); kom.push(it.rec); }
@@ -260,7 +275,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
     const sh = W().C.byId.get(s), g = geo(sh);
     // miejsce wstawienia: przed pierwszym pudełkiem, którego środek jest na prawo od miejsca upuszczenia
     let idx = lst.length;
-    if (xcm != null && r) { const u = uloz(lst, g.kol[c - 1], g.rz[r - 1]); const o = u.out.find(o => o.x + o.w / 2 > xcm); if (o) idx = lst.indexOf(o.it); }
+    if (xcm != null && r) { const u = uloz(lst, g.kol[c - 1], g.rz[r - 1], g.d); const o = u.out.find(o => o.x + o.w / 2 > xcm); if (o) idx = lst.indexOf(o.it); }
     lst.splice(idx, 0, a);
     const zm = numeruj(lst, s, r || null, c || null);
     zm.forEach(z => { if (z.it.p.lez != null) z.p.lez = z.it.p.lez; else delete z.p.lez; });
@@ -331,16 +346,24 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
             <small class="muted">(${it.zr === 'BGG' ? 'wymiary z BGG' : it.zr === 'wpisane' ? 'wpisane ręcznie' : 'szacunek – brak wymiarów'})</small></div>
           <div class="nav"><button type="button" data-n="-1" ${i ? '' : 'disabled'}>‹ Poprzednie</button><button type="button" data-n="1" ${i < lst.length - 1 ? '' : 'disabled'}>Następne ›</button></div>
           <div class="bt">
-            <button type="button" data-b="lez">${(it.p.lez != null ? it.p.lez : null) ? '⬆ Postaw' : '⬇ Połóż'}</button>
+            <button type="button" data-b="lez">⬇ Połóż</button>
+            ${it.typ === 'game' && it.p.r ? '<button type="button" data-b="obr" title="Obróć innym bokiem do góry / do przodu">🔄 Obróć</button>' : ''}
             ${it.typ === 'game' && App.has('pudelka.edytuj') ? '<button type="button" data-b="wym">📏 Wymiary pudełka</button>' : ''}
             ${it.typ !== 'serie' ? '<button type="button" data-b="karta">Otwórz kartę</button>' : ''}
             <button type="button" data-b="x" class="primary">Zamknij</button></div></div>`;
       dlg.querySelector('.rg-view').appendChild(box);
-      const lezyTeraz = () => { const sorted = it.a.slice().sort((x, y) => x - y), g = geo(sh); return it.p.lez != null ? !!it.p.lez : (it.p.r ? sorted[1] > g.rz[it.p.r - 1] + 0.5 : false); };
+      const g0 = geo(sh), teraz = () => it.p.r ? orient(it, g0.kol[it.p.c - 1], g0.rz[it.p.r - 1], g0.d) : { lez: !!it.p.lez, obr: !!it.p.obr };
+      const lezyTeraz = () => teraz().lez;
       box.querySelector('[data-b="lez"]').textContent = lezyTeraz() ? '⬆ Postaw' : '⬇ Połóż';
+      if (it.p.r && it.typ !== 'serie') {
+        const o = teraz();
+        box.querySelector('.nav').insertAdjacentHTML('beforebegin', `<div class="muted" style="font-size:13px">${o.lez ? 'Leży' : 'Stoi'}: ${num(o.w)} cm szer. × ${num(o.h)} cm wys., ${num(o.d)} cm w głąb${o.d > g0.d + 1 ? ` – <b style="color:var(--bad,#c8342a)">wystaje ${num(o.d - g0.d)} cm</b>` : ''}${o.h > g0.rz[it.p.r - 1] + 0.5 ? ` – <b style="color:var(--bad,#c8342a)">za wysokie o ${num(o.h - g0.rz[it.p.r - 1])} cm</b>` : ''}</div>`);
+      }
+      const bo = box.querySelector('[data-b="obr"]');
+      if (bo) bo.onclick = async () => { const o = teraz(); await zapisz([{ it, p: Object.assign({}, it.p, { lez: o.lez, obr: !o.obr }) }]); odswiez(); st.info(k); };
       box.querySelectorAll('[data-n]').forEach(b => b.onclick = () => st.info(lst[i + +b.dataset.n].k));
       box.querySelector('[data-b="x"]').onclick = zamknijInfo;
-      box.querySelector('[data-b="lez"]').onclick = async () => { await zapisz([{ it, p: Object.assign({}, it.p, { lez: !lezyTeraz() }) }]); odswiez(); st.info(k); };
+      box.querySelector('[data-b="lez"]').onclick = async () => { await zapisz([{ it, p: Object.assign({}, it.p, { lez: !lezyTeraz(), obr: undefined }) }]); odswiez(); st.info(k); };
       const bw = box.querySelector('[data-b="wym"]');
       if (bw) bw.onclick = async () => { if (await App.call('pudelka.edytuj', it.rec.id)) { await wczytaj(); odswiez(); st.info(k); } };
       const bk = box.querySelector('[data-b="karta"]');
