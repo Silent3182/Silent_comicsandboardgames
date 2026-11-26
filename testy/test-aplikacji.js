@@ -58,6 +58,11 @@ function testPliki() {
   ok(read('moduly/komiksy/komiksy.js').includes('okładki ze startowych danych'), 'komiksy.js: blok „okładki ze startowych danych” (ensureSeed) jest na miejscu');
   const wf = read('.github/workflows/apk.yml');
   ok(wf.includes('android-build/klucz.keystore') && wf.includes('Zły podpis APK') && fs.existsSync(path.join(ROOT, 'android-build/klucz.keystore')), 'APK podpisywane stałym kluczem z repo (z kontrolą podpisu)');
+  // każdy plik z listy offline musi trafić do APK (krok „Przygotuj projekt Capacitor” kopiuje tylko wymienione pliki i foldery)
+  const cpLine = (wf.match(/cp -r ([^\n]*) build\/www\//) || [])[1] || '';
+  const doApk = cpLine.split(/\s+/);
+  const pozaApk = files.filter(f => !doApk.includes(f.split('/')[0]));
+  ok(cpLine && !pozaApk.length, 'każdy plik z listy offline trafia do APK (apk.yml)', pozaApk.join(', '));
   try { JSON.parse(read('manifest.webmanifest')); ok(true, 'manifest.webmanifest to poprawny JSON'); } catch (e) { ok(false, 'manifest.webmanifest to poprawny JSON', e.message); }
   for (const f of fs.readdirSync(ROOT).filter(f => f.endsWith('.json'))) { try { JSON.parse(read(f)); ok(true, f + ' to poprawny JSON'); } catch (e) { ok(false, f + ' to poprawny JSON', e.message); } }
 }
