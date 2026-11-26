@@ -1,0 +1,194 @@
+/* Motyw „Kadr” – komiksowy wygląd aplikacji (wybór Marcina, 2026-11-26, wariant C+).
+ * Działa tylko gdy <html data-styl="kadr"> (domyślnie; w Ustawieniach › Wygląd można wrócić do „Klasyczny”).
+ * Zasady: papier z rastrem, grube kontury i twarde cienie na kartach i przyciskach, żółty dolny pasek,
+ * komiksowe litery (Bangers) w tytułach i głównych przyciskach, spokojne wiersze list (cienka linia).
+ * Zielony nadal znaczy „przeczytane / mam”. Czcionki są w folderze fonts/ (działają offline). */
+
+@font-face { font-family: "Bangers"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/bangers-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Bangers"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/bangers-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 500 900; font-display: swap; src: url(fonts/nunito-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 500 900; font-display: swap; src: url(fonts/nunito-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+/* ---------- Kolory: dzień ---------- */
+html[data-styl="kadr"] {
+  --bg: #fff6e0; --surface: #fffdf6; --surface2: #f6ecd2; --text: #16130f; --muted: #5c5448; --line: #e6dcc6;
+  --ink: #16130f; --sh: #16130f; --dot: rgba(22,19,15,.09);
+  --accent: #d8352a; --accent-soft: #fde1dc; --on-accent: #ffffff;
+  --accent-2: #ffcd3c; --accent-2-soft: #fff0c2; --on-yl: #16130f;
+  --blue: #2f6fd6;
+  --ok: #2f9e58; --ok-soft: #c9efc4; --on-ok: #ffffff; --bad: #c8342a; --bad-soft: #fde1dc;
+  --radius: 6px; --radius-s: 6px;
+  --shadow: 4px 4px 0 var(--sh); --shadow-lg: 6px 6px 0 var(--sh);
+  --nav-bg: #ffcd3c; --nav-line: #16130f; --nav-tx: #16130f; --nav-on: #16130f; --nav-on-tx: #ffcd3c;
+  --f-comic: "Bangers", "Impact", "Arial Narrow", sans-serif;
+  --f-text: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+/* ---------- Kolory: noc ---------- */
+@media (prefers-color-scheme: dark) {
+  html[data-styl="kadr"]:not([data-theme="light"]) {
+    --bg: #1a1712; --surface: #26221b; --surface2: #302a21; --text: #f1e4c3; --muted: #b5aa91; --line: #3a342a;
+    --ink: #f1e4c3; --sh: #000000; --dot: rgba(255,236,190,.07);
+    --accent: #e04a3c; --accent-soft: #43241f; --on-accent: #ffffff;
+    --accent-2: #ffcd3c; --accent-2-soft: #3b3018; --blue: #3a73d8;
+    --ok: #34a85e; --ok-soft: #1f3d29; --on-ok: #ffffff; --bad: #ef7a68; --bad-soft: #43241f;
+    --nav-bg: #211d17; --nav-line: #ffcd3c; --nav-tx: #f1e4c3; --nav-on: #ffcd3c; --nav-on-tx: #16130f;
+    color-scheme: dark;
+  }
+}
+html[data-styl="kadr"][data-theme="dark"] {
+  --bg: #1a1712; --surface: #26221b; --surface2: #302a21; --text: #f1e4c3; --muted: #b5aa91; --line: #3a342a;
+  --ink: #f1e4c3; --sh: #000000; --dot: rgba(255,236,190,.07);
+  --accent: #e04a3c; --accent-soft: #43241f; --on-accent: #ffffff;
+  --accent-2: #ffcd3c; --accent-2-soft: #3b3018; --blue: #3a73d8;
+  --ok: #34a85e; --ok-soft: #1f3d29; --on-ok: #ffffff; --bad: #ef7a68; --bad-soft: #43241f;
+  --nav-bg: #211d17; --nav-line: #ffcd3c; --nav-tx: #f1e4c3; --nav-on: #ffcd3c; --nav-on-tx: #16130f;
+  color-scheme: dark;
+}
+
+/* ---------- Podstawa ---------- */
+html[data-styl="kadr"] body { font-family: var(--f-text); font-weight: 600; background-color: var(--bg); background-image: radial-gradient(var(--dot) 1.2px, transparent 1.3px); background-size: 9px 9px; }
+html[data-styl="kadr"] #main h1, html[data-styl="kadr"] #main > h2:first-child, html[data-styl="kadr"] #main > div:first-child > h2:first-child, html[data-styl="kadr"] #main > div > h2:first-child,
+html[data-styl="kadr"] #main .st-head h1 { font-family: var(--f-comic); font-weight: 400; letter-spacing: .035em; text-transform: uppercase; font-size: 34px; line-height: 1.02; }
+html[data-styl="kadr"] h2 { font-weight: 900; letter-spacing: 0; }
+html[data-styl="kadr"] h3 { font-weight: 900; }
+html[data-styl="kadr"] a { color: var(--accent); font-weight: 800; }
+
+/* ---------- Karty, listy, kafelki, statystyki ---------- */
+html[data-styl="kadr"] .card, html[data-styl="kadr"] .list, html[data-styl="kadr"] .stat, html[data-styl="kadr"] .tile,
+html[data-styl="kadr"] #main .kx-tile, html[data-styl="kadr"] #main .spr .box, html[data-styl="kadr"] #main .spr .stat, html[data-styl="kadr"] div.err {
+  background: var(--surface); border: 2.5px solid var(--ink); border-radius: 6px; box-shadow: var(--shadow); }
+html[data-styl="kadr"] .tile:hover, html[data-styl="kadr"] #main .kx-tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--sh); }
+html[data-styl="kadr"] .tile .cov, html[data-styl="kadr"] #main .kx-cov { border-bottom: 2px solid var(--ink); }
+html[data-styl="kadr"] .tile .t { font-weight: 800; }
+html[data-styl="kadr"] .li { border-bottom: 1px solid var(--line); }
+html[data-styl="kadr"] .li .t { font-weight: 800; }
+html[data-styl="kadr"] .li img, html[data-styl="kadr"] .li .ph { border: 1.5px solid var(--ink); border-radius: 3px; }
+html[data-styl="kadr"] .li .num { font-family: var(--f-comic); font-weight: 400; font-size: 22px; letter-spacing: .02em; }
+html[data-styl="kadr"] .stat .v, html[data-styl="kadr"] #main .spr .stat b { font-family: var(--f-comic); font-weight: 400; letter-spacing: .03em; font-size: 30px; }
+html[data-styl="kadr"] .empty { border: 2.5px dashed var(--ink); border-radius: 6px; background: var(--surface); }
+html[data-styl="kadr"] .detail .cover, html[data-styl="kadr"] #main .kx-det .kx-cov { border: 2.5px solid var(--ink); border-radius: 4px; box-shadow: var(--shadow); }
+html[data-styl="kadr"] .hbar { border: 1.5px solid var(--ink); border-radius: 3px; height: 12px; }
+html[data-styl="kadr"] .hbar > i, html[data-styl="kadr"] .bars .b { border-radius: 0; }
+html[data-styl="kadr"] .bars .b { border: 1.5px solid var(--ink); border-bottom: 0; }
+html[data-styl="kadr"] table.tbl th { font-family: var(--f-comic); font-weight: 400; font-size: 15px; letter-spacing: .05em; color: var(--text); border-bottom: 2.5px solid var(--ink); }
+
+/* ---------- Przyciski: twardy cień, po naciśnięciu „wciskają się” w papier ---------- */
+html[data-styl="kadr"] button, html[data-styl="kadr"] .btn {
+  border: 2.5px solid var(--ink); border-radius: 6px; background: var(--surface); color: var(--text); font-weight: 800; box-shadow: 3px 3px 0 var(--sh); transition: transform .06s, box-shadow .06s; }
+html[data-styl="kadr"] button:hover, html[data-styl="kadr"] .btn:hover { background: var(--surface2); border-color: var(--ink); }
+html[data-styl="kadr"] button:active, html[data-styl="kadr"] .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--sh); }
+html[data-styl="kadr"] button.primary, html[data-styl="kadr"] .btn.primary, html[data-styl="kadr"] #main .spr .btn:not(.ghost) {
+  background: var(--accent); border-color: var(--ink); color: var(--on-accent); font-family: var(--f-comic); font-weight: 400; font-size: 19px; letter-spacing: .05em; }
+html[data-styl="kadr"] button.primary:hover { background: color-mix(in srgb, var(--accent) 88%, black); }
+html[data-styl="kadr"] button.ghost { background: transparent; box-shadow: none; border-color: transparent; }
+html[data-styl="kadr"] button.ghost:active { transform: none; }
+html[data-styl="kadr"] button.small { box-shadow: 2px 2px 0 var(--sh); border-width: 2px; }
+html[data-styl="kadr"] button:disabled { box-shadow: none; }
+html[data-styl="kadr"] #main > .row:first-child > button { min-height: 46px; }
+
+/* ---------- Pola, przełączniki, chipy ---------- */
+html[data-styl="kadr"] input, html[data-styl="kadr"] select, html[data-styl="kadr"] textarea,
+html[data-styl="kadr"] #main .kx-bar input[type=search], html[data-styl="kadr"] #main .kx-bar select, html[data-styl="kadr"] #main .spr input, html[data-styl="kadr"] #main .spr select, html[data-styl="kadr"] #main .spr textarea {
+  border: 2px solid var(--ink); border-radius: 6px; background-color: var(--surface); color: var(--text); font-weight: 600; }
+html[data-styl="kadr"] input:focus, html[data-styl="kadr"] select:focus, html[data-styl="kadr"] textarea:focus { outline: 3px solid var(--accent-2); outline-offset: 1px; }
+html[data-styl="kadr"] .seg, html[data-styl="kadr"] #main .spr .seg { border: 2px solid var(--ink); border-radius: 6px; box-shadow: 3px 3px 0 var(--sh); background: var(--surface); }
+html[data-styl="kadr"] .seg button { border: 0; border-left: 2px solid var(--ink); box-shadow: none; border-radius: 0; }
+html[data-styl="kadr"] .seg button:first-child { border-left: 0; }
+html[data-styl="kadr"] .seg button:active { transform: none; }
+html[data-styl="kadr"] .seg button.on, html[data-styl="kadr"] #main .spr .seg button.on, html[data-styl="kadr"] #main .kx-chip.on { background: var(--nav-on); color: var(--nav-on-tx); border-color: var(--ink); }
+html[data-styl="kadr"] #main .spr .seg { box-shadow: none; border: 0; background: none; }
+html[data-styl="kadr"] #main .kx-chip, html[data-styl="kadr"] #main .spr .seg button { border: 2px solid var(--ink); border-radius: 4px; background: var(--surface); box-shadow: 2px 2px 0 var(--sh); font-weight: 800; }
+html[data-styl="kadr"] .chip { border-radius: 4px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--text); font-weight: 700; }
+html[data-styl="kadr"] .badge, html[data-styl="kadr"] #main .kx-b { border-radius: 3px; font-weight: 800; }
+html[data-styl="kadr"] .badge.sale, html[data-styl="kadr"] #main .kx-b.sale { background: var(--accent-2); color: var(--on-yl); border: 1.5px solid #16130f; }
+html[data-styl="kadr"] .tabs { border-bottom: 2.5px solid var(--ink); }
+html[data-styl="kadr"] .tabs button { border: 0; box-shadow: none; border-bottom: 4px solid transparent; font-weight: 800; }
+html[data-styl="kadr"] .tabs button:active { transform: none; }
+html[data-styl="kadr"] .tabs button.on { border-bottom-color: var(--accent); color: var(--text); }
+html[data-styl="kadr"] .toolbar { background: transparent; }
+@media (max-width: 760px) { html[data-styl="kadr"] .toolbar { background: var(--bg); border-bottom: 2px solid var(--ink); } }
+html[data-styl="kadr"] #main .kx-bar { background: transparent; }
+
+/* pola wyboru: kwadrat z konturem, zaznaczony = zielony z białym ptaszkiem */
+html[data-styl="kadr"] #main input[type=checkbox], html[data-styl="kadr"] dialog input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 22px; height: 22px; min-height: 0; padding: 0; border: 2px solid var(--ink); border-radius: 4px; background: var(--surface) center / 16px no-repeat; cursor: pointer; flex: 0 0 auto; }
+html[data-styl="kadr"] #main input[type=checkbox]:checked, html[data-styl="kadr"] dialog input[type=checkbox]:checked {
+  background-color: var(--ok); border-color: var(--ok); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+html[data-styl="kadr"] #main .kx-row input[type=checkbox] { width: 24px; height: 24px; }
+
+/* ---------- Nawigacja ---------- */
+html[data-styl="kadr"] #nav { background: var(--surface); border-right: 2.5px solid var(--ink); }
+html[data-styl="kadr"] #nav .brand { font-family: var(--f-comic); font-weight: 400; font-size: 22px; letter-spacing: .04em; text-transform: uppercase; }
+html[data-styl="kadr"] #nav button { border: 2px solid transparent; box-shadow: none; background: none; font-weight: 700; }
+html[data-styl="kadr"] #nav button:active { transform: none; }
+html[data-styl="kadr"] #nav button:hover { background: var(--surface2); }
+html[data-styl="kadr"] #nav button.active { background: var(--accent-2); color: var(--on-yl); border-color: #16130f; box-shadow: 3px 3px 0 var(--sh); font-weight: 900; }
+html[data-styl="kadr"] #nav button.active::before { display: none; }
+html[data-styl="kadr"] #nav .nav-h { color: var(--muted); font-weight: 900; }
+/* ikony: jednolity tusz zamiast kolorowych kafelków */
+html[data-styl="kadr"][data-ikony] #nav .ico svg.ic { background: none; box-shadow: none; color: currentColor; padding: 0; width: 22px; height: 22px; opacity: 1; }
+html[data-styl="kadr"][data-ikony] #nav button:not(.active) .ico { color: var(--text); }
+html[data-styl="kadr"][data-ikony] #nav .ico svg.ic .f { fill: currentColor; fill-opacity: .18; }
+html[data-styl="kadr"][data-ikony] #nav button.active .ico svg.ic .f { fill-opacity: .35; }
+html[data-styl="kadr"][data-ikony] #nav button.active .ico { color: #16130f; }
+@media (max-width: 760px) {
+  html[data-styl="kadr"] #nav { background: var(--nav-bg); border-top: 3px solid var(--nav-line); border-right: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  html[data-styl="kadr"] #nav > button { color: var(--nav-tx); background: none; border: 0; box-shadow: none; font-family: var(--f-comic); font-weight: 400; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; }
+  html[data-styl="kadr"][data-ikony] #nav > button .ico { color: var(--nav-tx); padding: 3px 14px; border-radius: 6px; }
+  html[data-styl="kadr"][data-ikony] #nav > button .ico svg.ic { width: 24px; height: 24px; }
+  html[data-styl="kadr"] #nav > button.active { color: var(--nav-tx); background: none; box-shadow: none; }
+  html[data-styl="kadr"][data-ikony] #nav > button.active .ico { background: var(--nav-on); color: var(--nav-on-tx); }
+  html[data-styl="kadr"] #nav .more-sheet { background: var(--surface); border: 2.5px solid var(--ink); border-radius: 6px; box-shadow: var(--shadow-lg); }
+  html[data-styl="kadr"] #nav .more-sheet button { background: var(--surface2); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--sh); color: var(--text); }
+  html[data-styl="kadr"] #nav .more-sheet button.active { background: var(--accent-2); color: var(--on-yl); }
+  html[data-styl="kadr"][data-ikony] #nav .more-sheet .ico svg.ic { width: 28px; height: 28px; }
+  html[data-styl="kadr"][data-ikony] #nav .more-sheet button:not(.active) .ico { color: var(--text); }
+  html[data-styl="kadr"] #nav.open .more-sheet .ms-h { font-family: var(--f-comic); font-weight: 400; font-size: 15px; letter-spacing: .05em; color: var(--text); }
+}
+
+/* ---------- Start (core/start.js) ---------- */
+html[data-styl="kadr"] .st-head small { display: inline-block; background: var(--accent-2); color: var(--on-yl); border: 2px solid #16130f; padding: 2px 8px; letter-spacing: .06em; font-weight: 900; }
+html[data-styl="kadr"] .st-sub { font-family: var(--f-comic); font-weight: 400; font-size: 20px; letter-spacing: .05em; color: var(--text); margin: 22px 0 10px; }
+html[data-styl="kadr"] .st-tile { border: 2.5px solid var(--ink); border-radius: 6px; box-shadow: var(--shadow); background: var(--surface); }
+html[data-styl="kadr"] .st-tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--sh); border-color: var(--ink); }
+html[data-styl="kadr"] .st-tile:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--sh); }
+html[data-styl="kadr"] .st-tile b { font-weight: 900; }
+html[data-styl="kadr"][data-ikony] .st-ic svg.ic { border: 2px solid #16130f; border-radius: 6px; box-shadow: none; background: var(--ik); color: #fff; }
+html[data-styl="kadr"][data-ikony] .st-ic svg.ic .f { fill: #fff; fill-opacity: .3; }
+
+/* ---------- Komiksy i kolejność czytania ---------- */
+html[data-styl="kadr"] #main .kx-next { background: var(--accent-2); color: var(--on-yl); border: 2.5px solid #16130f; border-radius: 6px; box-shadow: 4px 4px 0 var(--sh); }
+html[data-styl="kadr"] #main .kx-next h3 { font-weight: 900; color: var(--on-yl); }
+html[data-styl="kadr"] #main .kx-next .kx-muted, html[data-styl="kadr"] #main .kx-next small, html[data-styl="kadr"] #main .kx-next p { color: #4a4337; }
+html[data-styl="kadr"] #main .kx-next + h3 { font-family: var(--f-comic); font-weight: 400; font-size: 19px; letter-spacing: .05em; color: var(--text); text-transform: uppercase; }
+html[data-styl="kadr"] #main .kx-btns button, html[data-styl="kadr"] #main .kx-btns a, html[data-styl="kadr"] #main .kx-btns label.btn {
+  border: 2.5px solid #16130f !important; background: #fffdf6; color: #16130f; box-shadow: 3px 3px 0 #16130f; font-weight: 800; }
+html[data-styl="kadr"] #main .kx-btns:not(.kx-next .kx-btns) button, html[data-styl="kadr"] #main .kx-btns:not(.kx-next .kx-btns) a { border-color: var(--ink) !important; background: var(--surface); color: var(--text); box-shadow: 3px 3px 0 var(--sh); }
+html[data-styl="kadr"] #main .kx-btns .pri, html[data-styl="kadr"] #main .kx-btns:not(.kx-next .kx-btns) .pri { background: var(--ok); color: #fff; font-family: var(--f-comic); font-weight: 400; font-size: 21px !important; letter-spacing: .05em; }
+html[data-styl="kadr"] #main .kx-row { border-bottom: 1px solid var(--line); }
+html[data-styl="kadr"] #main .kx-row.read { background: var(--ok-soft); border-bottom-color: color-mix(in srgb, var(--ok) 30%, var(--ok-soft)); }
+html[data-styl="kadr"] #main .kx-row.hdr { background: var(--accent-2); color: var(--on-yl); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); font-family: var(--f-comic); font-weight: 400; letter-spacing: .05em; font-size: 16px; }
+html[data-styl="kadr"] #main .kx-row button { box-shadow: 2px 2px 0 var(--sh); border-width: 2px; }
+html[data-styl="kadr"] #main .kx-prog { height: 18px; border: 2px solid var(--ink); border-radius: 4px; background: var(--surface); box-shadow: 3px 3px 0 var(--sh); overflow: hidden; }
+html[data-styl="kadr"] #main .kx-prog div { border-radius: 0; border-right: 2px solid var(--ink); }
+html[data-styl="kadr"] #main .kx-stars button.on { background: var(--accent-2); color: var(--on-yl); border-color: var(--ink); }
+
+/* ---------- Okna, komunikaty ---------- */
+html[data-styl="kadr"] dialog.dlg { border: 3px solid var(--ink); border-radius: 8px; box-shadow: 6px 6px 0 var(--sh); }
+html[data-styl="kadr"] dialog.dlg h3 { font-family: var(--f-comic); font-weight: 400; font-size: 24px; letter-spacing: .04em; }
+html[data-styl="kadr"] .dlg-btns { border-top: 2px solid var(--ink); }
+@media (max-width: 760px) { html[data-styl="kadr"] dialog.dlg { border-radius: 10px 10px 0 0; border-bottom: 0; box-shadow: 0 -4px 0 var(--sh); } }
+html[data-styl="kadr"] #toast { background: #16130f; color: #ffcd3c; border: 2.5px solid #ffcd3c; border-radius: 6px; box-shadow: 4px 4px 0 rgba(0,0,0,.35); font-weight: 800; }
+html[data-styl="kadr"] #sk-fab, html[data-styl="kadr"] #as-fab { border: 2.5px solid var(--ink) !important; box-shadow: 3px 3px 0 var(--sh) !important; border-radius: 50% !important; }
+html[data-styl="kadr"] .pl-bgg { border: 1.5px solid var(--ink); box-shadow: 2px 2px 0 var(--sh); border-radius: 4px; }
+html[data-styl="kadr"] .wy-opt.on { background: var(--accent-2); color: var(--on-yl); border-color: #16130f; box-shadow: 3px 3px 0 var(--sh); }
+
+/* ---------- „KLIK!” po przeczytaniu (core/klik.js) ---------- */
+.klik-wybuch { position: fixed; z-index: 2000; width: 170px; height: 132px; margin: -66px 0 0 -85px; display: grid; place-items: center; pointer-events: none;
+  background: #ffcd3c; color: #16130f; font: 400 42px/1 "Bangers", "Impact", sans-serif; letter-spacing: .05em;
+  clip-path: polygon(50% 0, 60% 22%, 84% 6%, 78% 32%, 100% 38%, 82% 54%, 98% 76%, 70% 72%, 64% 100%, 48% 78%, 30% 98%, 28% 72%, 2% 80%, 16% 56%, 0 36%, 24% 32%, 16% 6%, 40% 22%);
+  filter: drop-shadow(3px 3px 0 #16130f); animation: klikBum .75s cubic-bezier(.2,1.6,.4,1) forwards; }
+.klik-wybuch span { transform: rotate(-8deg); }
+@keyframes klikBum { 0% { transform: scale(.2) rotate(-14deg); opacity: 0; } 18% { transform: scale(1.12) rotate(4deg); opacity: 1; } 32% { transform: scale(1) rotate(0); } 78% { opacity: 1; } 100% { transform: scale(1.05) rotate(0); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .klik-wybuch { animation: klikCisza .7s linear forwards; } @keyframes klikCisza { 0%, 70% { opacity: 1; } 100% { opacity: 0; } } }
