@@ -1,7 +1,7 @@
 /* Service worker: aplikacja działa offline, okładki zapamiętywane po pierwszym wyświetleniu. */
-const VERSION = 'v31';
+const VERSION = 'v32';
 const FILES = [
-  './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/powered-by-bgg.png', 'icons/icon-maskable-512.png',
+  './', 'index.html', 'style.css', 'motyw-kadr.css', 'fonts/bangers-latin.woff2', 'fonts/bangers-latin-ext.woff2', 'fonts/nunito-latin.woff2', 'fonts/nunito-latin-ext.woff2', 'core/klik.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/powered-by-bgg.png', 'icons/icon-maskable-512.png',
   'core/db.js', 'core/app.js', 'core/sync.js', 'core/ikony.js', 'core/start.js', 'core/wyglad.js', 'core/splash.js', 'core/przewijanie.js', 'core/lista.js', 'core/okladki.js',
   'moduly/planszowki/dane-bgg.js', 'moduly/tytuly/dane-tytuly.js', 'moduly/tytuly/tytuly.js', 'moduly/planszowki/planszowki.js', 'moduly/planszowki/bgg-dane.js', 'moduly/planszowki/szukaj-gier.js'
   , 'moduly/sprzedaz/sprzedaz.js', 'moduly/sprzedaz/sprzedaz-ui.js'

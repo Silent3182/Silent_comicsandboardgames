@@ -9,8 +9,9 @@
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="motyw-kadr.css">
 <script>/* Wygląd z Ustawień (core/wyglad.js): styl ikon i motyw, ustawiane przed narysowaniem strony */
-try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;if(w.splash==='0')h.dataset.splash='0';}catch(e){document.documentElement.dataset.ikony='kolor';}</script>
+try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';h.dataset.styl=w.styl||'kadr';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;if(w.splash==='0')h.dataset.splash='0';}catch(e){document.documentElement.dataset.ikony='kolor';document.documentElement.dataset.styl='kadr';}</script>
 </head>
 <body>
 <!-- Ekran startowy (core/splash.js): znika po 2 s -->
@@ -86,6 +87,7 @@ try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentEl
 <script src="moduly/gry-plus/ciemny-stol.js"></script>
 <!-- /Moduły -->
 <script src="core/wyglad.js"></script>
+<script src="core/klik.js"></script>
 <script src="core/splash.js"></script>
 <script src="core/przewijanie.js"></script>
 <script>App.start();</script>

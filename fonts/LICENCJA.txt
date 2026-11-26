@@ -1,0 +1,3 @@
+Czcionki Bangers (Vernon Adams) i Nunito (Vernon Adams i inni) z Google Fonts.
+Licencja: SIL Open Font License 1.1 – https://openfontlicense.org
+Używane przez motyw-kadr.css, wbudowane, żeby działały offline.
