@@ -17,16 +17,20 @@
   const num = v => String(Math.round(v * 10) / 10).replace('.', ',');
 
   /* ---------- geometria regału ---------- */
+  // przybliżone wymiary regałów ze zdjęć (do poprawienia przyciskiem 📏 „Wymiary”)
+  const DOMYSLNE = { 'salon-regal': { kol: [30, 40, 40] } };
   const lista = (v, n, def) => { const a = (Array.isArray(v) ? v : []).map(Number).filter(x => x > 0); return Array.from({ length: n }, (_, i) => a[i] || a[a.length - 1] || def); };
   function geo(sh) {
-    const rows = sh.rows || 1, cols = sh.cols || 1, wym = sh.wym || {};
+    const rows = sh.rows || 1, cols = sh.cols || 1, wym = sh.wym || DOMYSLNE[sh.id] || {};
     const kx = sh.kind === 'kallax';
     const t = +wym.t || (kx ? 3 : 1.8);
     const kol = lista(wym.kol, cols, kx ? 33 : 40), rz = lista(wym.rz, rows, kx ? 33 : 33);
     const xs = [], ys = [];
     let x = t; kol.forEach(w => { xs.push(x); x += w + t; });
     let y = t; rz.forEach(h => { ys.push(y); y += h + t; });
-    return { rows, cols, t, kol, rz, xs, ys, W: x, H: y, d: +wym.d || (kx ? 38 : 30), kx };
+    // kolor: z „Wymiary regału”, a domyślnie jak na zdjęciach Marcina – ciemne regały, biała tylko „Biała szafka”
+    const kolor = wym.kolor || (/biał/i.test(sh.name || '') ? 'bialy' : 'czarny');
+    return { rows, cols, t, kol, rz, xs, ys, W: x, H: y, d: +wym.d || (kx ? 38 : 30), kx, kolor };
   }
 
   /* ---------- wymiary rzeczy ---------- */
@@ -92,6 +96,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
 .rg-top select{flex:1 1 160px;min-width:0;max-width:340px}
 .rg-top .sp{flex:1}
 .rg-top button{min-height:38px;padding:4px 10px}
+@media (max-width:560px){.rg-top{flex-wrap:nowrap;gap:5px;padding:6px}.rg-top button{min-height:36px;padding:2px 8px;font-size:14px}.rg-top select{flex:1 1 0;font-size:14px;padding:4px 6px;min-height:36px}.rg-hint{font-size:11.5px;padding:3px 10px}}
 .rg-seg{display:inline-flex}
 .rg-seg button{border-radius:0}
 .rg-seg button:first-child{border-radius:6px 0 0 6px}
@@ -101,15 +106,16 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
 .rg-view{position:relative;flex:1;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;background-color:var(--bg);background-image:radial-gradient(var(--dot,rgba(0,0,0,.06)) 1.2px,transparent 1.3px);background-size:9px 9px}
 .rg-stage{position:absolute;left:0;top:0;transform-origin:0 0}
 .rg-frame{position:absolute;border-radius:3px;background:linear-gradient(180deg,#a8794a,#8a5e35);box-shadow:0 0 0 2px var(--ink,#2a1d10),6px 6px 0 var(--sh,rgba(0,0,0,.35))}
-.rg-frame.kx{background:#f3efe6}
-[data-theme="dark"] .rg-frame.kx{background:#d9d3c6}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rg-frame.kx{background:#d9d3c6}}
-.rg-cell{position:absolute;background:linear-gradient(180deg,#3c2a1a 0,#5b4129 18%,#6a4c30);box-shadow:inset 0 6px 10px rgba(0,0,0,.45),inset 0 -1px 0 rgba(255,255,255,.12);overflow:visible}
-.rg-frame.kx .rg-cell{background:linear-gradient(180deg,#bdb6a6 0,#d8d2c4 22%,#e2dccf);box-shadow:inset 0 6px 10px rgba(0,0,0,.28)}
+.rg-frame.k-czarny{background:linear-gradient(180deg,#3a2c24,#2a1f19)}
+.rg-frame.k-bialy{background:#f3efe6}
+.rg-frame.k-dab{background:linear-gradient(180deg,#c9a06a,#b38653)}
+.rg-cell{position:absolute;background:linear-gradient(180deg,#120c09 0,#21170f 20%,#2a1e16);box-shadow:inset 0 6px 10px rgba(0,0,0,.55),inset 0 -1px 0 rgba(255,255,255,.1);overflow:visible}
+.rg-frame.k-bialy .rg-cell{background:linear-gradient(180deg,#bdb6a6 0,#d8d2c4 22%,#e2dccf);box-shadow:inset 0 6px 10px rgba(0,0,0,.28)}
+.rg-frame.k-dab .rg-cell{background:linear-gradient(180deg,#7a5631 0,#94704a 22%,#a07a50)}
 .rg-cell.za{box-shadow:inset 0 0 0 3px #d8352a,inset 0 6px 10px rgba(0,0,0,.4)}
 .rg-cell.cel{box-shadow:inset 0 0 0 4px var(--accent-2,#ffcd3c)}
-.rg-cell .lb{position:absolute;left:3px;top:2px;font-size:9px;font-weight:800;color:rgba(255,255,255,.55);pointer-events:none;white-space:nowrap}
-.rg-frame.kx .rg-cell .lb{color:rgba(0,0,0,.4)}
+.rg-cell .lb{position:absolute;z-index:1;left:3px;top:2px;font-size:9px;font-weight:800;color:rgba(255,255,255,.55);pointer-events:none;white-space:nowrap}
+.rg-frame.k-bialy .rg-cell .lb{color:rgba(0,0,0,.4)}
 .rg-cell .bad{position:absolute;right:2px;top:2px;background:#d8352a;color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:3px;pointer-events:none;z-index:2}
 .rg-box{position:absolute;box-sizing:border-box;border:1px solid rgba(0,0,0,.75);border-radius:1px;background:#6d7a8a center/cover no-repeat;overflow:hidden;cursor:pointer;touch-action:none}
 .rg-box::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,.05) 30%,rgba(0,0,0,.05) 70%,rgba(0,0,0,.4))}
@@ -123,9 +129,9 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
 .rg-box.ciag{opacity:.25}
 .rg-box.drop{outline:3px solid var(--accent,#d8352a);outline-offset:1px;z-index:2}
 .rg-cov{position:absolute;box-sizing:border-box;padding:1px;cursor:pointer;touch-action:none}
-.rg-cov>i{display:block;width:100%;height:100%;background:#6d7a8a center/contain no-repeat;border-radius:1px;box-shadow:0 1px 3px rgba(0,0,0,.5)}
-.rg-cov>b{position:absolute;inset:1px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;font-size:5px;padding:2px;text-shadow:0 0 2px #000;pointer-events:none}
-.rg-cov.drop>i{outline:3px solid var(--accent,#d8352a)}
+.rg-cov>i{position:absolute;inset:1px;background:center/contain no-repeat;pointer-events:none}
+.rg-cov>b{position:absolute;inset:1px;border-radius:1px;box-shadow:0 1px 3px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;font-size:7px;line-height:1.1;padding:3px;text-shadow:0 0 2px #000;pointer-events:none;overflow:hidden}
+.rg-cov.drop>b{outline:3px solid var(--accent,#d8352a)}
 .rg-ghost{position:fixed;z-index:2147483000;pointer-events:none;opacity:.85;transform:translate(-50%,-50%) rotate(-3deg);box-shadow:4px 6px 12px rgba(0,0,0,.45)}
 .rg-tray{position:absolute;left:0;font-size:12px;color:var(--muted);font-weight:700}
 .rg-zoom{position:absolute;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;z-index:3}
@@ -146,7 +152,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
   function rysuj(dlg) {
     const P = W(), sh = P.C.byId.get(st.sh); if (!sh) return;
     const g = geo(sh), stage = dlg.querySelector('.rg-stage');
-    let h = `<div class="rg-frame ${g.kx ? 'kx' : ''}" style="width:${g.W * PX}px;height:${g.H * PX}px">`;
+    let h = `<div class="rg-frame k-${g.kolor}" style="width:${g.W * PX}px;height:${g.H * PX}px">`;
     let zaRazem = 0;
     for (let r = 1; r <= g.rows; r++) for (let c = 1; c <= g.cols; c++) {
       const Wc = g.kol[c - 1], Hc = g.rz[r - 1];
@@ -171,7 +177,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
     stage.dataset.h = (luzem.length ? g.H + 46 : g.H) * PX;
     const n = st.dane.filter(x => x.p.s === sh.id), szac = n.filter(x => x.zr === 'szac' && x.typ === 'game').length;
     dlg.querySelector('.rg-hint').innerHTML = `${esc(sh.name)}: ${num(g.W)} × ${num(g.H)} cm · ${n.length} poz.${szac ? ` · <span title="Brak wymiarów na BGG ani wpisanych ręcznie">${szac} pudełek o szacowanym rozmiarze (przerywana ramka)</span>` : ''}${zaRazem ? ` · <b style="color:var(--bad,#c8342a)">${zaRazem} się nie mieści</b>` : ''}
-      <br>Dwa palce lub kółko myszy – przybliżanie. Przytrzymaj pudełko i przeciągnij na inne – zamiana miejscami.`;
+      ${st.pomoc ? '' : '<br><span class="rg-pomoc">Dwa palce lub kółko myszy – przybliżanie. Przytrzymaj pudełko i przeciągnij na inne – zamiana miejscami. Stuknij – okładka.</span>'}`;
     dlg.querySelector('[data-a="cof"]').disabled = !st.cofnij.length;
     if (st.wyb) { const b = stage.querySelector(`[data-k="${CSS.escape(st.wyb)}"]`); if (b) b.classList.add('wyb'); }
   }
@@ -180,10 +186,12 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
     const dl = Math.max(it.t.length, 4);
     const fs = o.lez ? Math.min(hpx * 0.6, wpx / (dl * 0.58), 15) : Math.min(wpx * 0.62, hpx / (dl * 0.58), 15);
     const tom = it.typ === 'serie' ? `--tom:${TOM.h * PX}px;` : '';
-    const bg = it.typ !== 'serie' && it.th ? `background-image:url('${String(it.th).replace(/'/g, '%27')}');` : '';
+    const bg = kolor(it.t) + (it.typ !== 'serie' && it.th ? `background-image:url('${String(it.th).replace(/'/g, '%27')}');` : '');
     return `<div class="rg-box ${o.lez ? 'lez' : ''} ${it.zr === 'szac' && it.typ === 'game' ? 'szac' : ''} ${o.za ? 'za' : ''} ${it.typ === 'serie' ? 'ser' : ''}" data-k="${esc(it.k)}"
       style="left:${o.x * PX}px;bottom:${o.y * PX}px;width:${wpx}px;height:${hpx}px;${tom}${bg}" title="${esc(it.t)}"><span class="tt" style="font-size:${Math.max(fs, 2.2).toFixed(1)}px">${esc(it.typ === 'serie' ? it.t + (it.ile ? ' (' + it.ile + ')' : '') : it.t)}</span></div>`;
   }
+  // kolor pudełka bez okładki (albo zanim się wczyta) – stały dla tytułu, żeby regał nie był szary
+  const kolor = t => { let h = 0; for (const ch of String(t)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return `background-color:hsl(${h % 360},${32 + h % 20}%,${30 + (h >> 8) % 16}%);`; };
   function okladki(items, Wc, Hc) {
     if (!items.length) return '';
     const n = items.length, wp = Wc * PX, hp = Hc * PX;
@@ -191,7 +199,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
     for (let k = 1; k <= n; k++) { const w = Math.ceil(n / k), s = Math.min(wp / k, hp / w); if (s > best.s) best = { s, k, w }; }
     const s = best.s;
     const x0 = (wp - best.k * s) / 2, y0 = hp - best.w * s;
-    return items.map((it, i) => `<div class="rg-cov" data-k="${esc(it.k)}" style="left:${x0 + (i % best.k) * s}px;top:${y0 + Math.floor(i / best.k) * s}px;width:${s}px;height:${s}px" title="${esc(it.t)}"><i style="${it.th ? `background-image:url('${String(it.th).replace(/'/g, '%27')}')` : ''}"></i>${it.th ? '' : `<b>${esc(it.t)}</b>`}</div>`).join('');
+    return items.map((it, i) => `<div class="rg-cov" data-k="${esc(it.k)}" style="left:${x0 + (i % best.k) * s}px;top:${y0 + Math.floor(i / best.k) * s}px;width:${s}px;height:${s}px" title="${esc(it.t)}"><b style="${kolor(it.t)}">${esc(it.t)}</b><i style="${it.th ? `background-image:url('${String(it.th).replace(/'/g, '%27')}')` : ''}"></i></div>`).join('');
   }
 
   /* ---------- powiększenie ---------- */
@@ -379,6 +387,7 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
       zastosuj(dlg);
     }
     async function koniecDrag(e) {
+      st.pomoc = true;
       const d = drag; drag = null; czysc(); d.gh.remove(); d.el.classList.remove('ciag');
       const t = pod(e.clientX, e.clientY);
       if (!t || t === d.el) return;
@@ -454,11 +463,12 @@ dialog.rg-dlg::backdrop{background:var(--bg)}
       { name: 'kol', label: `Szerokość przegródek od lewej (cm, ${g.cols} ${g.cols === 1 ? 'kolumna' : 'kolumn'}; jedna liczba = wszystkie takie same)`, value: lst(g.kol) },
       { name: 'rz', label: `Wysokość półek od góry (cm, ${g.rows} ${g.rows === 1 ? 'półka' : 'półek'})`, value: lst(g.rz) },
       { name: 'd', label: 'Głębokość (cm)', type: 'number', step: '0.5', value: g.d },
-      { name: 't', label: 'Grubość desek (cm)', type: 'number', step: '0.1', value: g.t }
+      { name: 't', label: 'Grubość desek (cm)', type: 'number', step: '0.1', value: g.t },
+      { name: 'kolor', label: 'Kolor', type: 'select', value: g.kolor, options: [['czarny', 'Czarnobrązowy'], ['bialy', 'Biały'], ['dab', 'Jasne drewno (dąb)']] }
     ], { ok: 'Zapisz' });
     if (!out) return false;
     const liczby = s => String(s || '').split(/[;\s]+|,\s+/).map(x => parseFloat(x.replace(',', '.'))).filter(x => x > 0 && x < 500);
-    const wym = { kol: liczby(out.kol), rz: liczby(out.rz), d: +out.d || null, t: +out.t || null };
+    const wym = { kol: liczby(out.kol), rz: liczby(out.rz), d: +out.d || null, t: +out.t || null, kolor: out.kolor };
     await DB.put('shelves', Object.assign({}, sh, { wym }));
     await W().reload();
     return true;
