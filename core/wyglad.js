@@ -4,13 +4,13 @@
 (function () {
   const IKONY = [['wypelnione', 'A', 'Wypełnione'], ['kontur', 'B', 'Kontur'], ['kolor', 'C', 'Kolorowe']];
   const SPLASH = [['0', 'Wyłączony'], ['1', '1 s'], ['2', '2 s'], ['3', '3 s'], ['5', '5 s']];
-  const STYL = [['kadr', 'Komiksowy (Kadr)'], ['klasyczny', 'Klasyczny']];
+  const STYL = [['klasyczny', 'Klasyczny'], ['kadr', 'Komiksowy (Kadr)']];
   const MOTYW = [['auto', 'Automatyczny'], ['light', 'Jasny'], ['dark', 'Ciemny']];
-  function get() { try { return Object.assign({ ikony: 'kolor', motyw: 'auto', splash: '2', styl: 'kadr' }, JSON.parse(localStorage.getItem('wyglad') || '{}')); } catch (e) { return { ikony: 'kolor', motyw: 'auto', splash: '2', styl: 'kadr' }; } }
+  function get() { try { return Object.assign({ ikony: 'kolor', motyw: 'auto', splash: '2', styl: 'klasyczny' }, JSON.parse(localStorage.getItem('wyglad') || '{}')); } catch (e) { return { ikony: 'kolor', motyw: 'auto', splash: '2', styl: 'klasyczny' }; } }
   function apply(w) {
     const h = document.documentElement;
     h.dataset.ikony = w.ikony;
-    h.dataset.styl = w.styl === 'klasyczny' ? 'klasyczny' : 'kadr';
+    h.dataset.styl = w.styl === 'kadr' ? 'kadr' : 'klasyczny';
     if (w.motyw === 'light' || w.motyw === 'dark') h.dataset.theme = w.motyw; else delete h.dataset.theme;
     const dark = w.motyw === 'dark' || (w.motyw !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
     const meta = document.querySelector('meta[name="theme-color"]');

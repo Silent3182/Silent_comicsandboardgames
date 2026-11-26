@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="motyw-kadr.css">
 <script>/* Wygląd z Ustawień (core/wyglad.js): styl ikon i motyw, ustawiane przed narysowaniem strony */
-try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';h.dataset.styl=w.styl||'kadr';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;if(w.splash==='0')h.dataset.splash='0';}catch(e){document.documentElement.dataset.ikony='kolor';document.documentElement.dataset.styl='kadr';}</script>
+try{var w=JSON.parse(localStorage.getItem('wyglad')||'{}'),h=document.documentElement;h.dataset.ikony=w.ikony||'kolor';h.dataset.styl=w.styl==='kadr'?'kadr':'klasyczny';if(w.motyw==='light'||w.motyw==='dark')h.dataset.theme=w.motyw;if(w.splash==='0')h.dataset.splash='0';}catch(e){document.documentElement.dataset.ikony='kolor';document.documentElement.dataset.styl='klasyczny';}</script>
 </head>
 <body>
 <!-- Ekran startowy (core/splash.js): znika po 2 s -->

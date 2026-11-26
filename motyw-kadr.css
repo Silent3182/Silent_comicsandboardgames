@@ -1,5 +1,5 @@
 /* Motyw „Kadr” – komiksowy wygląd aplikacji (wybór Marcina, 2026-11-26, wariant C+).
- * Działa tylko gdy <html data-styl="kadr"> (domyślnie; w Ustawieniach › Wygląd można wrócić do „Klasyczny”).
+ * Działa tylko gdy <html data-styl="kadr"> – opcja w Ustawieniach › Wygląd; domyślny jest „Klasyczny” (decyzja Marcina 2026-11-26).
  * Zasady: papier z rastrem, grube kontury i twarde cienie na kartach i przyciskach, żółty dolny pasek,
  * komiksowe litery (Bangers) w tytułach i głównych przyciskach, spokojne wiersze list (cienka linia).
  * Zielony nadal znaczy „przeczytane / mam”. Czcionki są w folderze fonts/ (działają offline). */
