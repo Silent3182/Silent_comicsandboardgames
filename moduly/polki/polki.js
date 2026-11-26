@@ -323,7 +323,7 @@
       ${C.shelves.length ? '' : `<div class="empty">Nie masz jeszcze regałów. Dodaj swoje Kallaxy i inne regały, a potem kliknij przegródkę i wybierz, co w niej stoi.<br><br><button class="primary" id="pkNew2">+ Dodaj pierwszy regał</button></div>`}
       <div class="pk-shelves">${C.shelves.map(sh => {
         const n = [...Z.cell.entries()].filter(([k]) => k.startsWith(sh.id + '|')).reduce((a, [, x]) => a + Z.ile(x), 0);
-        return `<div class="card" data-sh="${esc(sh.id)}"><div class="pk-head"><h3>${esc(sh.name)}</h3><span class="spacer"></span>${App.has('polki.zdjecia') ? `<button class="ghost small" data-foto="${esc(sh.id)}" title="Zdjęcia regału – klikaj pudełka albo rozpoznaj tytuły">📷${(sh.zdjecia || []).length ? ' ' + sh.zdjecia.length : ''}</button>` : ''}<button class="ghost small" data-ed="${esc(sh.id)}" title="Edytuj">✏️</button></div>
+        return `<div class="card" data-sh="${esc(sh.id)}"><div class="pk-head"><h3>${esc(sh.name)}</h3><span class="spacer"></span>${App.has('polki.zdjecia') ? `<button class="ghost small" data-foto="${esc(sh.id)}" title="Zdjęcia regału – klikaj pudełka albo rozpoznaj tytuły">📷${(sh.zdjecia || []).length ? ' ' + sh.zdjecia.length : ''}</button>` : ''}${App.has('polki.regal') ? `<button class="small" data-rg="${esc(sh.id)}" title="Regał w prawdziwych wymiarach: przybliżanie, okładki, przemeblowanie">🔍 Regał</button>` : ''}<button class="ghost small" data-ed="${esc(sh.id)}" title="Edytuj">✏️</button></div>
           <div class="muted" style="font-size:13px">${[sh.place, sh.kind === 'kallax' ? `Kallax ${sh.cols}×${sh.rows}` : `${sh.rows} ${pl(sh.rows, 'półka', 'półki', 'półek')}${sh.cols > 1 ? ' × ' + sh.cols + ' kol.' : ''}`, n + ' ' + pl(n, 'pozycja', 'pozycje', 'pozycji')].filter(Boolean).join(' · ')}</div>
           ${siatka(sh, Z, { on: st.otw && st.otw.s === sh.id ? st.otw : null })}
           ${st.otw && st.otw.s === sh.id ? '<div id="pkCell"></div>' : ''}</div>`;
@@ -337,12 +337,14 @@
     const nowy = async () => { if (await editShelf()) render(el); };
     $('#pkNew').onclick = nowy;
     if ($('#pkRapZn')) $('#pkRapZn').onclick = async () => { if (!App.has('polki.uklad')) return; const przed = raport ? raport.ustawione : 0; const r = await App.call('polki.uklad', true); if (r) { const n = r.ustawione - przed; App.ui.toast(n ? `📍 Ustawiono ${n} ${pl(n, 'grę', 'gry', 'gier')}` : 'Wszystkie gry ze zdjęć mają już miejsce'); } render(el); }; if ($('#pkNew2')) $('#pkNew2').onclick = nowy;
+    el.querySelectorAll('[data-rg]').forEach(b => b.onclick = async () => { await App.call('polki.regal', b.dataset.rg); });
     el.querySelectorAll('[data-foto]').forEach(b => b.onclick = async () => { await App.call('polki.zdjecia', b.dataset.foto); render(el); });
     el.querySelectorAll('[data-ed]').forEach(b => b.onclick = async () => {
       const sh = C.byId.get(b.dataset.ed);
-      const co = await App.ui.form(sh.name, [{ name: 'co', label: 'Co zrobić?', type: 'select', value: 'edit', options: [['edit', 'Zmień nazwę / rozmiar'], ['up', 'Przesuń wyżej na liście'], ['del', 'Usuń regał']] }], { ok: 'Dalej' });
+      const co = await App.ui.form(sh.name, [{ name: 'co', label: 'Co zrobić?', type: 'select', value: 'edit', options: [['edit', 'Zmień nazwę / rozmiar'], ...(App.has('polki.wymiary') ? [['wym', 'Wymiary w cm (szerokość przegródek, wysokość półek)']] : []), ['up', 'Przesuń wyżej na liście'], ['del', 'Usuń regał']] }], { ok: 'Dalej' });
       if (!co) return;
       if (co.co === 'edit') await editShelf(sh);
+      if (co.co === 'wym') await App.call('polki.wymiary', sh);
       if (co.co === 'up') { const i = C.shelves.indexOf(sh); if (i > 0) { const a = C.shelves.slice(); a.splice(i, 1); a.splice(i - 1, 0, sh); await DB.putMany('shelves', a.map((s, k) => Object.assign({}, s, { order: k }))); } }
       if (co.co === 'del') await usunRegal(sh);
       render(el);
