@@ -4,15 +4,17 @@
 (function () {
   const IKONY = [['wypelnione', 'A', 'Wypełnione'], ['kontur', 'B', 'Kontur'], ['kolor', 'C', 'Kolorowe']];
   const SPLASH = [['0', 'Wyłączony'], ['1', '1 s'], ['2', '2 s'], ['3', '3 s'], ['5', '5 s']];
+  const STYL = [['kadr', 'Komiksowy (Kadr)'], ['klasyczny', 'Klasyczny']];
   const MOTYW = [['auto', 'Automatyczny'], ['light', 'Jasny'], ['dark', 'Ciemny']];
-  function get() { try { return Object.assign({ ikony: 'kolor', motyw: 'auto', splash: '2' }, JSON.parse(localStorage.getItem('wyglad') || '{}')); } catch (e) { return { ikony: 'kolor', motyw: 'auto', splash: '2' }; } }
+  function get() { try { return Object.assign({ ikony: 'kolor', motyw: 'auto', splash: '2', styl: 'kadr' }, JSON.parse(localStorage.getItem('wyglad') || '{}')); } catch (e) { return { ikony: 'kolor', motyw: 'auto', splash: '2', styl: 'kadr' }; } }
   function apply(w) {
     const h = document.documentElement;
     h.dataset.ikony = w.ikony;
+    h.dataset.styl = w.styl === 'klasyczny' ? 'klasyczny' : 'kadr';
     if (w.motyw === 'light' || w.motyw === 'dark') h.dataset.theme = w.motyw; else delete h.dataset.theme;
     const dark = w.motyw === 'dark' || (w.motyw !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = dark ? '#12161b' : '#1f3a5f';
+    if (meta) meta.content = h.dataset.styl === 'kadr' ? (dark ? '#1a1712' : '#fff6e0') : (dark ? '#12161b' : '#1f3a5f');
   }
   function set(k, v) { const w = get(); w[k] = v; try { localStorage.setItem('wyglad', JSON.stringify(w)); } catch (e) {} apply(w); }
   apply(get());
@@ -22,7 +24,9 @@
     const prev = id => window.ikona ? window.ikona(id) : '';
     return `<h2>Wygląd</h2>
       <div class="card wy-card">
-        <div class="wy-lab">Ikony w menu</div>
+        <div class="wy-lab">Styl aplikacji</div>
+        <div class="seg wy-seg">${STYL.map(([v, l]) => `<button class="${w.styl === v ? 'on' : ''}" data-k="styl" data-v="${v}">${l}</button>`).join('')}</div>
+        <div class="wy-lab" style="margin-top:16px">Ikony w menu</div>
         <div class="wy-opts">${IKONY.map(([v, lit, l]) => `<button class="wy-opt ${w.ikony === v ? 'on' : ''}" data-k="ikony" data-v="${v}"><span class="wy-prev" data-ikony="${v}">${['planszowki', 'komiksy', 'czytanie'].map(prev).join('')}</span><span class="wy-n"><b>${lit}</b> ${l}</span></button>`).join('')}</div>
         <div class="wy-lab">Motyw</div>
         <div class="seg wy-seg">${MOTYW.map(([v, l]) => `<button class="${w.motyw === v ? 'on' : ''}" data-k="motyw" data-v="${v}">${l}</button>`).join('')}</div>
