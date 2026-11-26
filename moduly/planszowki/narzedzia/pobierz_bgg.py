@@ -12,7 +12,9 @@ Wynik (bgg.json):
     "kolekcja": [ {"id", "exp", "t", "y", "own", "wish", "prev", "trade", "pre", "rating", "plays", "comment"} ],
     "gry": { "<bggId>": { "t", "y", "exp", "img", "th", "p": [min,max], "best": [od,do], "czas", "czasOd", "czasDo",
                           "wiek", "w" (ciężar), "r" (średnia ocen), "rank", "m" (mechaniki), "c" (kategorie),
-                          "d" (autorzy), "wyd" (wydawcy), "baza": [id gier bazowych], "dod": [[id, nazwa] dodatków] } } }
+                          "d" (autorzy), "wyd" (wydawcy), "baza": [id gier bazowych], "dod": [[id, nazwa] dodatków],
+                          "box": [szer, dł, wys] pudełka w cm (z wydań BGG: polskie, a bez niego najczęstszy rozmiar) } } }
+  W kolekcji "box" = wymiary wydania, które Silent82 zaznaczył na BGG jako swoje (jeśli zaznaczył).
 """
 import csv, html, io, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
 import xml.etree.ElementTree as ET
@@ -61,7 +63,7 @@ def val(el, tag, typ=int):
 def kolekcja(user, token):
     wynik = {}
     for sub in ('boardgame', 'boardgameexpansion'):
-        q = {'username': user, 'stats': '1', 'subtype': sub}
+        q = {'username': user, 'stats': '1', 'subtype': sub, 'version': '1'}
         if sub == 'boardgame':
             q['excludesubtype'] = 'boardgameexpansion'   # bez tego dodatki przychodzą też jako „boardgame”
         print('Kolekcja:', sub)
@@ -80,6 +82,9 @@ def kolekcja(user, token):
                 'rating': num(r.get('value'), float) if r is not None else None,
                 'plays': num(it.findtext('numplays')) or 0, 'comment': (it.findtext('comment') or '').strip(),
             }
+            box = wymiary(it.find('version/item'))
+            if box:
+                wynik[gid]['box'] = box
         time.sleep(PRZERWA)
     return list(wynik.values())
 
@@ -95,13 +100,44 @@ def najlepsza(it):
     return None
 
 
+CAL = 2.54
+
+
+def wymiary(v):
+    """Wymiary pudełka z jednego wydania BGG (cale) -> [szer, dł, wys] w cm albo None."""
+    if v is None:
+        return None
+    w, l, d = (val(v, t, float) for t in ('width', 'length', 'depth'))
+    if not (w and l and d) or max(w, l, d) > 40:   # brak danych albo bzdura (>1 m)
+        return None
+    return [round(w * CAL, 1), round(l * CAL, 1), round(d * CAL, 1)]
+
+
+def pudelko(it):
+    """Wymiary pudełka gry z listy wydań: najpierw polskie wydanie, potem najczęstszy rozmiar wśród wydań."""
+    wyd = it.findall('versions/item')
+    pl = [wymiary(v) for v in wyd if any(l.get('type') == 'language' and l.get('value') == 'Polish' for l in v.findall('link'))]
+    pl = [x for x in pl if x]
+    if pl:
+        return pl[0]
+    wszystkie = [x for x in (wymiary(v) for v in wyd) if x]
+    if not wszystkie:
+        return None
+    klucz = lambda x: tuple(round(a) for a in sorted(x))
+    ile = {}
+    for x in wszystkie:
+        ile[klucz(x)] = ile.get(klucz(x), 0) + 1
+    naj = max(ile, key=ile.get)
+    return next(x for x in wszystkie if klucz(x) == naj)
+
+
 def szczegoly(ids, token):
     gry = {}
     ids = sorted(set(ids))
     for i in range(0, len(ids), PACZKA):
         cz = ids[i:i + PACZKA]
         print(f'Szczegóły {i + 1}–{i + len(cz)} z {len(ids)}')
-        root = pobierz('thing?' + urllib.parse.urlencode({'id': ','.join(map(str, cz)), 'stats': '1'}), token)
+        root = pobierz('thing?' + urllib.parse.urlencode({'id': ','.join(map(str, cz)), 'stats': '1', 'versions': '1'}), token)
         for it in root.findall('item'):
             gid = int(it.get('id'))
             nazwa = next((n.get('value') for n in it.findall('name') if n.get('type') == 'primary'), '')
@@ -129,6 +165,7 @@ def szczegoly(ids, token):
                 # w dodatku link z inbound="true" wskazuje grę bazową; w grze bazowej – jej dodatki
                 'baza': [int(l.get('id')) for l in ex if l.get('inbound') == 'true'],
                 'dod': [[int(l.get('id')), l.get('value')] for l in ex if l.get('inbound') != 'true'][:MAX_DODATKOW],
+                'box': pudelko(it),
             }
             gry[str(gid)] = {k: v for k, v in g.items() if v not in (None, [], '', [None, None])}
         time.sleep(PRZERWA)

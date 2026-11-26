@@ -93,6 +93,8 @@
   function wymiary(g) {
     const p = g && g.pudelko;
     if (p && p.w && p.l && p.h) return { w: +p.w, l: +p.l, h: +p.h, szac: false };
+    const b = g && g.bggId && window.BGG_PUDELKA && window.BGG_PUDELKA[g.bggId]; // z wydań na BGG (bgg-dane.js)
+    if (b) return { w: b[0], l: b[1], h: b[2], szac: false, bgg: true };
     return Object.assign({ szac: true }, TYPOWE);
   }
   /* Czy pudełko zmieści się w przegródce: { pion, poziom } (pion = stoi grzbietem do przodu, poziom = leży) */

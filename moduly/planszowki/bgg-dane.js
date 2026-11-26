@@ -100,6 +100,10 @@
       if (!x.exp && x.dod && x.dod.length) G.dodatki[id] = x.dod.map(e => e[1]);
     }
     G.zrodloBgg = 'BoardGameGeek (API, ' + W.data + ')';
+    // wymiary pudełek z BGG (cm): najpierw Twoje wydanie zaznaczone w kolekcji BGG, potem polskie/najczęstsze wydanie
+    const P = window.BGG_PUDELKA = {};
+    for (const [id, x] of Object.entries(d.gry)) if (x.box) P[id] = x.box;
+    (d.kolekcja || []).forEach(k => { if (k.box) P[k.id] = k.box; });
   }
 
   /* Pobierz bgg.json (najwyżej co 6 h), zapamiętaj i zastosuj. Bez internetu – dane z pamięci urządzenia. */
